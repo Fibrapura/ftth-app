@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
   <meta name="theme-color" content="#0b1326" />
-  <title>FTTH Studio · Captura & Red</title>
+  <title>FTTH Studio · Captura & Registro Drive</title>
   <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
   <style>
     :root {
       --bg: #0b1326;
-      --surface: rgba(20, 31, 56, 0.88);
-      --border: rgba(148, 163, 184, 0.16);
+      --surface: rgba(20, 31, 56, 0.9);
+      --border: rgba(148, 163, 184, 0.18);
       --border-focus: rgba(56, 189, 248, 0.55);
       --accent: #38bdf8;
       --blue-btn: linear-gradient(145deg, #2563eb, #1d4ed8);
@@ -35,24 +35,36 @@
       letter-spacing: -0.01em;
     }
 
+    /* Barra superior de herramientas discreta (Conexión + Historial 5 estados + Reiniciar escondido) */
+    .top-utility-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 8px; margin-bottom: 10px;
+    }
+    .util-pill {
+      background: rgba(15, 23, 42, 0.78); border: 1px solid var(--border);
+      color: #cbd5e1; padding: 6px 11px; border-radius: 10px;
+      font-size: 11.5px; font-weight: 600; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .util-pill:active { transform: scale(0.97); }
+
     details.config-bar {
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.82);
       border: 1px solid var(--border);
-      padding: 9px 12px;
+      padding: 10px 12px;
       border-radius: 12px;
       margin-bottom: 12px;
-      backdrop-filter: blur(10px);
     }
     summary { font-weight: 600; cursor: pointer; font-size: 12px; color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; list-style: none; }
     summary::-webkit-details-marker { display: none; }
     select, input {
       width: 100%; padding: 8px 10px; border-radius: 9px;
-      border: 1px solid var(--border); background: rgba(11, 19, 38, 0.9);
+      border: 1px solid var(--border); background: rgba(11, 19, 38, 0.92);
       color: var(--text); font-size: 12.5px; font-weight: 600; outline: none;
     }
     select:focus, input:focus { border-color: var(--border-focus); }
 
-    /* Pestañas vivas */
+    /* Pestañas */
     .tabs {
       display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
       background: rgba(15, 23, 42, 0.85); padding: 5px;
@@ -78,9 +90,9 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     }
 
-    /* Banner grande cuando se viene del Mapa Mental a completar una CTO */
+    /* Banner grande de Completando Elemento */
     .completing-banner {
-      background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(15, 23, 42, 0.95));
+      background: linear-gradient(135deg, rgba(30, 58, 138, 0.92), rgba(15, 23, 42, 0.96));
       border: 1.5px solid #38bdf8;
       border-radius: 14px;
       padding: 12px 14px;
@@ -91,13 +103,23 @@
       box-shadow: 0 6px 18px rgba(56, 189, 248, 0.18);
     }
     .completing-sub { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #93c5fd; }
-    .completing-big { font-size: 20px; font-weight: 800; color: #fff; margin-top: 2px; }
+    .completing-big { font-size: 20px; font-weight: 800; color: #fff; margin-top: 2px; white-space: pre; }
     .completing-exit {
       background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
       color: #e2e8f0; border-radius: 8px; padding: 6px 10px; font-size: 11.5px; font-weight: 600; cursor: pointer;
     }
 
-    /* 4 Botones de Vista con color vivo por defecto y Verde Esmeralda al completarse */
+    /* Cola Anticaídas de Cobertura (Modo Arqueta / Sótano) */
+    .offline-queue-banner {
+      background: rgba(245, 158, 11, 0.16);
+      border: 1.5px solid #f59e0b;
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    }
+
+    /* 4 Botones de Vista con color vivo y Relleno Verde Dinámico */
     .cam-4-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 10px; }
     .btn-cam-direct {
       background: var(--blue-btn);
@@ -116,14 +138,13 @@
     }
     .btn-cam-direct:active { transform: scale(0.95); }
     .btn-cam-direct .cam-icon { font-size: 15px; }
-    .btn-cam-direct .cam-sub { font-size: 9.5px; font-weight: 600; opacity: 0.9; color: #fde68a; }
+    .btn-cam-direct .cam-sub { font-size: 9.5px; font-weight: 600; opacity: 0.92; color: #fde68a; }
 
-    /* Relleno Verde cuando la foto ya está cargada o ya existe en Drive */
     .btn-cam-direct.loaded {
       background: var(--green-btn);
       border-color: #6ee7b7;
       color: #ffffff;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.42);
     }
     .btn-cam-direct.loaded .cam-sub { color: #d1fae5; }
 
@@ -131,7 +152,7 @@
       background: linear-gradient(135deg, #6366f1, #4f46e5);
       border: 1px solid #818cf8;
       color: #ffffff;
-      padding: 11px 12px;
+      padding: 12px;
       border-radius: 12px;
       font-size: 13px;
       font-weight: 700;
@@ -156,9 +177,9 @@
       box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
     }
 
-    /* Tarjeta de Elemento */
+    /* Tarjeta de Elemento y Botón de Título con 3 espacios y doble color */
     .element-card {
-      background: rgba(11, 19, 38, 0.82);
+      background: rgba(11, 19, 38, 0.85);
       border: 1px solid rgba(96, 165, 250, 0.28);
       border-radius: 16px;
       padding: 12px;
@@ -170,22 +191,24 @@
       border-bottom: 1px solid var(--border);
     }
     .element-title-btn {
-      background: rgba(37, 99, 235, 0.2);
+      background: rgba(30, 41, 59, 0.75);
       border: 1px solid rgba(96, 165, 250, 0.45);
-      color: #f8fafc;
-      padding: 6px 13px;
+      padding: 7px 14px;
       border-radius: 20px;
       font-size: 14px;
-      font-weight: 700;
       cursor: pointer;
-      display: inline-flex; align-items: center; gap: 6px;
+      display: inline-flex; align-items: center;
       transition: all 0.18s;
+      white-space: pre;
     }
     .element-title-btn.open {
       border-color: var(--accent);
-      background: rgba(56, 189, 248, 0.25);
-      color: #fff;
+      background: rgba(56, 189, 248, 0.2);
     }
+    /* Doble color en el título: Tipo de elemento vs Numeración */
+    .title-type-part { color: #93c5fd; font-weight: 600; }
+    .title-code-part { color: #38bdf8; font-weight: 800; letter-spacing: 0.02em; }
+
     .pueblo-pill {
       background: rgba(30, 41, 59, 0.7);
       border: 1px solid var(--border);
@@ -285,118 +308,34 @@
     .dup-box { background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 6px; margin-top: 5px; font-size: 10.5px; }
     .small-btn { padding: 6px 10px; border-radius: 8px; font-size: 11.5px; font-weight: 600; text-decoration: none; border: 1px solid rgba(96, 165, 250, 0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; color: var(--text); background: rgba(37, 99, 235, 0.25); }
 
-    /* ==================== MAPA MENTAL CON NODOS PLEGADOS Y PANEL FLOTANTE A LA DERECHA ==================== */
-    .mindmap-canvas {
-      background: rgba(11, 19, 38, 0.85);
+    /* ==================== PESTAÑA 2: REGISTRO DE DRIVE LIMPIO POR NODOS ==================== */
+    .drive-registry-list { display: flex; flex-direction: column; gap: 8px; }
+    .drive-node-card {
+      background: rgba(15, 23, 42, 0.82);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px 14px 160px 14px; /* Espacio inferior para que el flotante nunca se corte abajo */
-      position: relative;
-      overflow-x: hidden;
+      border-radius: 14px;
+      overflow: hidden;
     }
-    .mm-olt {
-      font-size: 13.5px; font-weight: 700; color: #f8fafc;
-      letter-spacing: 0.02em; padding-bottom: 6px;
-      display: inline-flex; align-items: center; gap: 8px;
+    .drive-node-header {
+      padding: 12px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; user-select: none;
     }
-    .mm-olt-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-
-    .mm-branch-group {
-      margin-left: 11px; padding-left: 14px;
-      border-left: 1.5px solid rgba(148, 163, 184, 0.25);
-      margin-top: 6px; display: flex; flex-direction: column; gap: 9px;
+    .drive-node-header:hover { background: rgba(255, 255, 255, 0.03); }
+    .drive-node-body {
+      padding: 8px 12px 12px 12px;
+      border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 8px;
+      background: rgba(8, 13, 26, 0.6);
     }
-    .mm-node-row { position: relative; }
-    .mm-node-row::before {
-      content: ""; position: absolute; left: -14px; top: 12px;
-      width: 11px; height: 1.5px; background: rgba(148, 163, 184, 0.25);
+    .drive-el-item {
+      background: rgba(20, 31, 56, 0.75);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 10px 12px;
     }
-    .mm-node-header {
-      display: inline-flex; align-items: center; gap: 7px;
-      cursor: pointer; padding: 3px 6px; border-radius: 6px;
-      user-select: none; transition: background 0.15s;
-    }
-    .mm-node-header:hover { background: rgba(255, 255, 255, 0.05); }
-    .mm-node-title { font-size: 13.5px; font-weight: 600; color: #f1f5f9; }
-    .mm-plan-tag { font-size: 11.5px; font-weight: 500; }
-    .tag-terminado { color: var(--green-soft); }
-    .tag-falta { color: var(--orange-soft); }
-    .mm-arrow { font-size: 10px; color: var(--muted); transition: transform 0.2s; }
-    .mm-arrow.open { transform: rotate(90deg); color: var(--accent); }
-
-    .mm-sub-group {
-      margin-left: 12px; padding-left: 14px;
-      border-left: 1px solid rgba(148, 163, 184, 0.2);
-      margin-top: 5px; display: flex; flex-direction: column; gap: 5px;
-    }
-    .mm-leaf-row {
-      position: relative;
-      padding-block: 2px;
-      display: flex;
-      align-items: center;
-      min-height: 24px;
-    }
-    .mm-leaf-row::before {
-      content: ""; position: absolute; left: -14px; top: 12px;
-      width: 11px; height: 1px; background: rgba(148, 163, 184, 0.2);
-    }
-
-    .mm-label {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 12.5px; font-weight: 500; color: #e2e8f0;
-      cursor: pointer; padding: 2px 6px; border-radius: 6px;
-      transition: all 0.15s; user-select: none;
-    }
-    .mm-label.active-item {
-      background: rgba(56, 189, 248, 0.16);
-      outline: 1px solid rgba(56, 189, 248, 0.4);
-    }
-    .mm-dot { width: 6.5px; height: 6.5px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-    .dot-VERDE { background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.5); }
-    .dot-NARANJA { background: #f59e0b; }
-    .dot-MORADO { background: #c084fc; }
-    .dot-ROJO { background: #f87171; }
-
-    .text-VERDE { color: #a7f3d0; }
-    .text-NARANJA { color: #fde68a; }
-    .text-MORADO { color: #e9d5ff; }
-    .text-ROJO { color: #fca5a5; }
-
-    /* PANEL FLOTANTE A LA DERECHA (SUPERPUESTO CON FONDO SEMITRANSPARENTE, CERO DESPLAZAMIENTO VERTICAL) */
-    .mm-floating-right {
-      position: absolute;
-      left: min(115px, calc(100% - 210px));
-      top: -6px;
-      z-index: 250;
-      width: 205px;
-      background: rgba(11, 18, 35, 0.92);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(56, 189, 248, 0.42);
-      border-radius: 12px;
-      padding: 9px 11px;
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.75);
-      animation: fadeRight 0.15s ease-out;
-    }
-    @keyframes fadeRight {
-      from { opacity: 0; transform: translateX(-6px); }
-      to { opacity: 1; transform: translateX(0); }
-    }
-    .mm-view-list {
-      list-style: none; padding: 0; margin: 0;
-      font-size: 11.5px; line-height: 1.65; font-weight: 500;
-    }
-    .v-in-drive { color: #34d399; }
-    .v-missing-drive { color: #f87171; }
-    .mm-inline-actions {
-      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 7px; padding-top: 6px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      font-size: 11px;
-    }
-    .mm-action-link {
-      color: #60a5fa; cursor: pointer; text-decoration: none; font-weight: 600;
-      background: none; border: none; padding: 0; font-size: 11px;
-    }
+    .v-in-drive { color: #34d399; font-weight: 600; }
+    .v-missing-drive { color: #f87171; font-weight: 600; }
 
     .dots-btn { position: absolute; top: 8px; right: 8px; background: rgba(8,12,20,0.85); color: #fff; border: 1px solid var(--border); border-radius: 6px; width: 24px; height: 24px; font-size: 14px; cursor: pointer; }
     .dots-menu { position: absolute; top: 34px; right: 8px; background: #1e293b; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.75); z-index: 300; width: 165px; overflow: hidden; }
@@ -416,7 +355,38 @@
     <img id="zoomImg" class="zoom-img" src="" onclick="event.stopPropagation()" />
   </div>
 
-  <!-- 2. MODAL REGISTRO DE POTENCIA (CON "SUBIR DE GALERÍA" Y "DEJAR SIN FOTO DE POTENCIA") -->
+  <!-- 2. MODAL DE CONFIRMACIÓN PARA RESTAURAR/VACIAR PÁGINA ([Sí] - [No]) -->
+  <div id="confirmarRestaurarModal" class="modal-overlay" onclick="document.getElementById('confirmarRestaurarModal').style.display='none'">
+    <div class="modal-box" onclick="event.stopPropagation()" style="text-align:center;">
+      <div style="font-size:15.5px; font-weight:700; color:#f8fafc; margin-bottom:14px; line-height:1.4;">
+        ¿Quieres restaurar la página? Se perderán todas las fotos.
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+        <button class="btn-confirm" style="margin:0; padding:11px; background:linear-gradient(135deg, #ef4444, #dc2626); border-color:#fca5a5;" onclick="ejecutarRestauracionPaginaConfirmada()">
+          Sí
+        </button>
+        <button class="btn-gal-wide" style="margin:0; padding:11px; background:rgba(30,41,59,0.9); border-color:var(--border);" onclick="document.getElementById('confirmarRestaurarModal').style.display='none'">
+          No
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. MODAL DE HISTORIAL DE SEGURIDAD (ÚLTIMOS 5 ESTADOS ANTES DE SALIR O BORRAR) -->
+  <div id="historialModal" class="modal-overlay" onclick="document.getElementById('historialModal').style.display='none'">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <span style="font-size:15px; font-weight:700; color:var(--accent);">🕒 Historial de Seguridad (Últimos 5)</span>
+        <span style="cursor:pointer; color:var(--muted); font-weight:700;" onclick="document.getElementById('historialModal').style.display='none'">✕</span>
+      </div>
+      <div style="font-size:11.5px; color:var(--muted); margin-bottom:10px;">
+        Toca cualquiera de los estados guardados para recuperar sus cajas y fotografías:
+      </div>
+      <div id="listaSnapshotsHistorial" style="display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+  </div>
+
+  <!-- 4. MODAL REGISTRO DE POTENCIA -->
   <div id="potenciaModal" class="modal-overlay" onclick="document.getElementById('potenciaModal').style.display='none'">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div style="font-size:15px; font-weight:700; color:var(--text); margin-bottom:12px;">⚡ Registro de Potencia</div>
@@ -440,7 +410,7 @@
     </div>
   </div>
 
-  <!-- 3. VISOR DE FOTO YA EXISTENTE EN DRIVE -->
+  <!-- 5. VISOR DE FOTO YA EXISTENTE EN DRIVE -->
   <div id="verDriveModal" class="modal-overlay" onclick="document.getElementById('verDriveModal').style.display='none'">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div style="font-size:14px; font-weight:700; color:var(--accent); margin-bottom:8px;">Fotografía actual en Drive</div>
@@ -452,7 +422,7 @@
     </div>
   </div>
 
-  <!-- 4. MODAL MOVER DE CARPETA -->
+  <!-- 6. MODAL MOVER DE CARPETA EN DRIVE -->
   <div id="moverFotoModal" class="modal-overlay">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div style="font-size:14px; font-weight:700; margin-bottom:10px; color:var(--accent);">Mover fotografía en Drive</div>
@@ -508,12 +478,23 @@
     </div>
   </div>
 
-  <!-- CONFIGURACIÓN DISCRETA -->
+  <!-- BARRA SUPERIOR CON HISTORIAL DE 5 ESTADOS Y BOTÓN DE RESTAURAR ESCONDIDO -->
+  <div class="top-utility-bar">
+    <button type="button" class="util-pill" onclick="abrirModalHistorial()">
+      🕒 Historial (<span id="contadorHistorial">0</span>/5)
+    </button>
+    <div style="display:flex; gap:6px; align-items:center;">
+      <button type="button" id="btnRestaurarEscondido" class="util-pill" style="display:none; color:#fca5a5; border-color:rgba(248,113,113,0.28);" onclick="pedirConfirmacionRestaurarPagina()">
+        ↺ Restaurar página
+      </button>
+      <button type="button" class="util-pill" onclick="document.getElementById('configBox').open = !document.getElementById('configBox').open">
+        ⚙️ <span id="badgeEstadoConexion">Drive</span>
+      </button>
+    </div>
+  </div>
+
   <details class="config-bar" id="configBox">
-    <summary>
-      <span>⚙️ Ajustes de conexión</span>
-      <span id="badgeEstadoConexion" style="font-size:11px; color:var(--muted);">Verificar</span>
-    </summary>
+    <summary><span>Configuración de Enlace y Claves OCR</span></summary>
     <div style="margin-top: 8px; display:flex; flex-direction:column; gap:6px;">
       <input type="text" id="scriptUrlInput" placeholder="Enlace Google Apps Script (.../exec)" oninput="guardarYProbarConfiguracion()" />
       <input type="text" id="geminiKeyInput" placeholder="Claves API OCR" oninput="guardarConfiguracion()" />
@@ -522,23 +503,32 @@
 
   <div class="tabs">
     <div class="tab active" id="tabRafaga" onclick="cambiarTab('rafaga')">📸 Captura de Campo</div>
-    <div class="tab" id="tabEstado" onclick="cambiarTab('estado')">🧠 Mapa Mental de Red</div>
+    <div class="tab" id="tabEstado" onclick="cambiarTab('estado')">📂 Registro Drive</div>
   </div>
 
   <!-- ==================== PESTAÑA 1: CAPTURA DE CAMPO ==================== -->
   <div id="vistaRafaga" class="box">
+    <!-- Cola Anticaídas de Cobertura (Modo Arqueta / Sótano) -->
+    <div id="bannerColaOffline" style="display:none;" class="offline-queue-banner">
+      <div style="font-size:12px; font-weight:600; color:#fde68a;">
+        📡 Subida pendiente guardada sin cobertura (<span id="numFotosOffline">0</span> fotos)
+      </div>
+      <button type="button" class="small-btn" style="background:#f59e0b; color:#080c14; border:none; font-weight:800;" onclick="reintentarSubidaPendienteOffline()">
+        🔄 Reintentar ahora
+      </button>
+    </div>
+
     <!-- Banner grande de Completando Elemento -->
     <div id="bannerCompletandoCaja" style="display:none;" class="completing-banner">
       <div>
         <div class="completing-sub">Subiendo imágenes pendientes</div>
-        <div id="tituloGrandeCompletando" class="completing-big">Completando CTO 17-36</div>
+        <div id="tituloGrandeCompletando" class="completing-big">Completando CTO   17-36</div>
       </div>
       <button type="button" class="completing-exit" onclick="salirModoCompletar()">✕ Salir</button>
     </div>
 
     <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="archivosSeleccionados(event, 'CAMARA')" />
     <input type="file" id="galInput" accept="image/*" multiple style="display:none" onchange="archivosSeleccionados(event, 'GALERIA')" />
-    <!-- Input exclusivo para "Subir de galería" dentro de Registro de Potencia -->
     <input type="file" id="potGalInput" accept="image/*" style="display:none" onchange="archivoPotenciaDesdeGaleria(event)" />
 
     <!-- 4 BOTONES CON COLOR VIVO Y RELLENO VERDE AUTOMÁTICO -->
@@ -565,12 +555,10 @@
       </button>
     </div>
 
-    <div style="display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center;">
-      <button class="btn-gal-wide" onclick="document.getElementById('galInput').click()">
-        🖼️ Añadir lote desde Galería o PC
-      </button>
-      <button onclick="limpiarSesionActual()" title="Limpiar lote" style="background:rgba(30,41,59,0.7); border:1px solid var(--border); color:#e2e8f0; border-radius:12px; padding:11px 13px; font-size:13px; cursor:pointer;">🗑️</button>
-    </div>
+    <!-- Botón ancho de Galería (SIN el botón peligroso de papelera al lado) -->
+    <button class="btn-gal-wide" onclick="document.getElementById('galInput').click()">
+      🖼️ Añadir lote desde Galería o PC
+    </button>
 
     <div id="contenedorTarjetas"></div>
 
@@ -581,35 +569,25 @@
     </button>
   </div>
 
-  <!-- ==================== PESTAÑA 2: MAPA MENTAL DE RED ==================== -->
+  <!-- ==================== PESTAÑA 2: REGISTRO DE DRIVE LIMPIO POR NODOS ==================== -->
   <div id="vistaEstado" style="display:none;">
     <div class="box" style="padding:12px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-        <div style="position:relative; flex:1; min-width:170px;">
-          <button type="button" class="pueblo-pill" style="width:100%; text-align:left; padding:8px 12px; border-radius:10px; color:var(--text);" onclick="abrirMenuPueblo(event, 'menuEstadoPueblo', 'ESTADO_RED')">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <div style="position:relative; flex:1;">
+          <button type="button" class="pueblo-pill" style="width:100%; text-align:left; padding:9px 12px; border-radius:10px; color:var(--text);" onclick="abrirMenuPueblo(event, 'menuEstadoPueblo', 'ESTADO_RED')">
             <span id="txtEstadoPueblo">📍 Águilas (Murcia)</span> <span style="float:right; opacity:0.7;">▾</span>
           </button>
           <div id="menuEstadoPueblo" class="custom-dd-menu" style="left:0; width:100%;" onclick="event.stopPropagation()"></div>
         </div>
-
-        <div style="display:flex; gap:6px;">
-          <input type="file" id="dwgInput" accept=".dwg,.dxf" style="display:none" onchange="subirPlanoDwgManual(event)" />
-          <button class="small-btn" onclick="document.getElementById('dwgInput').click()">
-            📐 Plano .DWG
-          </button>
-          <button class="small-btn" onclick="cargarMapaMentalPueblo(true)">
-            🔄 Actualizar
-          </button>
-        </div>
+        <button class="small-btn" style="padding:9px 12px;" onclick="cargarRegistroDrivePueblo(true)">
+          🔄 Actualizar Drive
+        </button>
       </div>
-
       <div id="bannerProgresoDwg" style="display:none; margin-top:8px; font-size:11.5px; color:var(--accent); font-weight:600;"></div>
       <div id="resumenGlobalPueblo" style="font-size:11.5px; color:var(--muted); margin-top:8px;"></div>
     </div>
 
-    <div id="contenedorMapaMental" class="mindmap-canvas">
-      <div style="color:var(--muted); text-align:center; padding:20px; font-size:12.5px;">Cargando red...</div>
-    </div>
+    <div id="contenedorRegistroDrive" class="drive-registry-list"></div>
   </div>
 
 <script>
@@ -671,24 +649,26 @@
   let indiceTurnoClave = 0;
   let bloquesCajas = [];
   let ruletaAbiertaId = null;
-  let elementoDesplegadoMapa = null; // Flotante derecho en Mapa Mental
-  let nodosDesplegadosMapa = new Set(); // Todos los nodos plegados de inicio
-  let modoCompletando = null; // { codigo, titulo, tipo, vistasEnDrive: {} }
+  let nodosAbiertosRegistro = new Set();
+  let modoCompletando = null;
   let vistaCamaraPendiente = "Abierta";
   let gpsDispositivo = { lat: null, lng: null, provincia: "Murcia", pueblo: "Águilas" };
   let ultimoNodoFijo = Number(localStorage.getItem("ftth_last_nodo_num") || 1);
   let seleccionPuebloEstado = { provincia: "Murcia", pueblo: "Águilas" };
-  let datosMapaMentalActual = null;
-  let cacheMapaMentalPorPueblo = {}; // Caché persistente en RAM + localStorage
+  let datosRegistroActual = null;
+  let cacheRegistroPorPueblo = {};
   let cacheCoordenadasPorPueblo = {};
   let contextoMover = null;
   let libreDwgInstance = null;
 
+  // ==================== INICIALIZACIÓN, BLOQUEO DEL BOTÓN ATRÁS E HISTORIAL INDEXEDDB ====================
   window.onload = async () => {
+    activarTrampaBotonAtrasMovil();
+
     localStorage.setItem("ftth_gemini_key", CLAVES_OFICIALES.join(", "));
     document.getElementById("geminiKeyInput").value = CLAVES_OFICIALES.join(", ");
 
-    let savedUrl = localStorage.getItem("ftth_script_url") || "https://script.google.com/macros/s/AKfycby0LaOX4M3C6gn0HlKUQwYi4yAJKuBCh_hZfiJjLZDQplyRHy430c3F70hoeGHtudCI/exec";
+    let savedUrl = localStorage.getItem("ftth_script_url") || "";
     if (savedUrl.includes(URL_ANTIGUA_ELIMINADA)) {
       localStorage.removeItem("ftth_script_url");
       savedUrl = "";
@@ -698,12 +678,188 @@
       document.getElementById("configBox").open = true;
     } else {
       verificarConexionScript();
-      precargarMapaMentalSilencioso("Murcia", "Águilas");
     }
 
-    obtenerGpsVivoSilencioso();
+    await inicializarSesionEHistorial();
+    await verificarColaSubidaOffline();
+    obtenerGpsYCargarDwgAutomatico();
     actualizarBotonesSuperioresVerde();
   };
+
+  // Bloquea el botón "Atrás" del móvil para que cierre modales/ruletas pero NUNCA salga de la página
+  function activarTrampaBotonAtrasMovil() {
+    try {
+      window.history.pushState({ ftthStay: true }, "", window.location.href);
+      window.addEventListener("popstate", () => {
+        window.history.pushState({ ftthStay: true }, "", window.location.href);
+
+        const modales = ["zoomModal", "confirmarRestaurarModal", "historialModal", "potenciaModal", "verDriveModal", "moverFotoModal"];
+        for (const mId of modales) {
+          const el = document.getElementById(mId);
+          if (el && el.style.display === "flex") {
+            el.style.display = "none";
+            return;
+          }
+        }
+        if (ruletaAbiertaId !== null) {
+          ruletaAbiertaId = null;
+          renderTarjetas();
+          return;
+        }
+        if (document.getElementById("vistaEstado").style.display !== "none") {
+          cambiarTab("rafaga");
+          return;
+        }
+      });
+    } catch (e) {}
+
+    // Guardar instantánea justo antes de que el navegador se cierre o recargue
+    window.addEventListener("pagehide", () => {
+      if (bloquesCajas.some(b => b.fotos.length > 0)) {
+        guardarEstadoEnHistorialDB("Cierre de navegador / pestaña");
+      }
+    });
+  }
+
+  // Base de datos IndexedDB para sesión activa, Historial de los últimos 5 estados y Cola Offline
+  function abrirDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open("FTTH_Studio_Pro_DB", 2);
+      req.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains("kv")) db.createObjectStore("kv", { keyPath: "k" });
+      };
+      req.onsuccess = e => resolve(e.target.result);
+      req.onerror = e => reject(e);
+    });
+  }
+
+  async function dbGet(key) {
+    try {
+      const db = await abrirDB();
+      return new Promise(res => {
+        const req = db.transaction("kv", "readonly").objectStore("kv").get(key);
+        req.onsuccess = () => res(req.result ? req.result.v : null);
+        req.onerror = () => res(null);
+      });
+    } catch (e) { return null; }
+  }
+
+  async function dbSet(key, val) {
+    try {
+      const db = await abrirDB();
+      return new Promise(res => {
+        const tx = db.transaction("kv", "readwrite");
+        tx.objectStore("kv").put({ k: key, v: val });
+        tx.oncomplete = () => res(true);
+        tx.onerror = () => res(false);
+      });
+    } catch (e) { return false; }
+  }
+
+  async function inicializarSesionEHistorial() {
+    const sesionActiva = await dbGet("sesion_activa");
+    if (sesionActiva && Array.isArray(sesionActiva) && sesionActiva.some(b => b.fotos && b.fotos.length > 0)) {
+      bloquesCajas = sesionActiva;
+      renderTarjetas();
+    }
+    await actualizarContadorHistorialUI();
+  }
+
+  async function persistirSesionActiva() {
+    await dbSet("sesion_activa", bloquesCajas);
+  }
+
+  // Guarda una copia de seguridad en el Historial (máximo los últimos 5 estados con fotos)
+  async function guardarEstadoEnHistorialDB(motivo) {
+    const cajasConFotos = bloquesCajas.filter(b => b.fotos && b.fotos.length > 0);
+    if (cajasConFotos.length === 0) return;
+
+    const totalFotos = cajasConFotos.reduce((acc, b) => acc + b.fotos.length, 0);
+    const resumenCodigos = cajasConFotos.map(b => construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo).codigo).join(", ");
+    const clon = JSON.parse(JSON.stringify(cajasConFotos));
+
+    let hist = (await dbGet("historial_5")) || [];
+    // Si el último snapshot tiene exactamente las mismas fotos y códigos, lo actualiza; si cambió, añade nueva entrada
+    const firmaNueva = `${totalFotos}_${resumenCodigos}`;
+    if (hist.length > 0 && hist[0].firma === firmaNueva && motivo === "Auto-guardado") {
+      hist[0].fecha = Date.now();
+      hist[0].bloques = clon;
+    } else {
+      hist.unshift({
+        id: "h_" + Date.now(),
+        fecha: Date.now(),
+        motivo: motivo || "Estado guardado",
+        resumen: `${cajasConFotos.length} caja(s): ${resumenCodigos} (${totalFotos} fotos)`,
+        firma: firmaNueva,
+        bloques: clon
+      });
+    }
+
+    hist = hist.slice(0, 5); // Mantener los últimos 5 estados
+    await dbSet("historial_5", hist);
+    await actualizarContadorHistorialUI();
+  }
+
+  async function actualizarContadorHistorialUI() {
+    const hist = (await dbGet("historial_5")) || [];
+    document.getElementById("contadorHistorial").innerText = String(hist.length);
+  }
+
+  async function abrirModalHistorial() {
+    const hist = (await dbGet("historial_5")) || [];
+    const cont = document.getElementById("listaSnapshotsHistorial");
+    if (hist.length === 0) {
+      cont.innerHTML = `<div style="text-align:center; padding:14px; color:var(--muted); font-size:12px;">Aún no hay estados guardados en el historial.</div>`;
+    } else {
+      cont.innerHTML = hist.map((item, idx) => {
+        const hora = new Date(item.fecha).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        return `
+          <div style="background:rgba(15,23,42,0.9); border:1px solid var(--border); border-radius:11px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <div>
+              <div style="font-size:12.5px; font-weight:700; color:#e2e8f0;">#${idx + 1} · ${hora} <span style="font-size:11px; color:var(--accent);">(${item.motivo})</span></div>
+              <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">${item.resumen}</div>
+            </div>
+            <button type="button" class="small-btn" style="background:var(--green-btn); border:none; padding:7px 11px;" onclick="restaurarSnapshotDeHistorial('${item.id}')">
+              Restaurar
+            </button>
+          </div>`;
+      }).join("");
+    }
+    document.getElementById("historialModal").style.display = "flex";
+  }
+
+  async function restaurarSnapshotDeHistorial(snapId) {
+    const hist = (await dbGet("historial_5")) || [];
+    const found = hist.find(x => x.id === snapId);
+    if (!found) return;
+    if (bloquesCajas.some(b => b.fotos && b.fotos.length > 0)) {
+      await guardarEstadoEnHistorialDB("Antes de restaurar historial");
+    }
+    bloquesCajas = JSON.parse(JSON.stringify(found.bloques));
+    ruletaAbiertaId = null;
+    document.getElementById("historialModal").style.display = "none";
+    vibrarTick(20);
+    renderTarjetas();
+    await persistirSesionActiva();
+  }
+
+  // Confirmación obligatoria antes de restaurar/vaciar la página ([Sí] - [No])
+  function pedirConfirmacionRestaurarPagina() {
+    document.getElementById("confirmarRestaurarModal").style.display = "flex";
+  }
+
+  async function ejecutarRestauracionPaginaConfirmada() {
+    document.getElementById("confirmarRestaurarModal").style.display = "none";
+    await guardarEstadoEnHistorialDB("Antes de restaurar página");
+    bloquesCajas = [];
+    ruletaAbiertaId = null;
+    modoCompletando = null;
+    document.getElementById("bannerCompletandoCaja").style.display = "none";
+    document.getElementById("msgEstado").innerHTML = "";
+    renderTarjetas();
+    await persistirSesionActiva();
+  }
 
   function vibrarTick(ms = 10) {
     try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
@@ -715,49 +871,89 @@
     return String(pueblo || "AGUI").replace(/[^a-zA-Z]/g, "").slice(0, 4).toUpperCase() || "AGUI";
   }
 
+  // Construcción del Código y del Título con 3 espacios y doble color
   function construirCodigoYTitulo(tipo, numNodo, numCaja, pueblo) {
     const nPad = String(Math.max(1, numNodo || 1)).padStart(2, "0");
     const cPad = String(Math.max(1, numCaja || 1)).padStart(2, "0");
-    if (tipo === "NODO") return { codigo: `N-${nPad}`, nodo: `N-${nPad}`, titulo: `Nodo N-${nPad}` };
-    if (tipo === "EMPALME_RD") return { codigo: `E-${nPad}-${cPad}`, nodo: `N-${nPad}`, titulo: `Empalme RD E-${nPad}-${cPad}` };
+    if (tipo === "NODO") {
+      return {
+        codigo: `N-${nPad}`,
+        nodo: `N-${nPad}`,
+        tipoTexto: "Nodo",
+        tituloPlano: `Nodo   N-${nPad}`,
+        tituloHtml: `<span class="title-type-part">Nodo</span>   <span class="title-code-part">N-${nPad}</span>`
+      };
+    }
+    if (tipo === "EMPALME_RD") {
+      return {
+        codigo: `E-${nPad}-${cPad}`,
+        nodo: `N-${nPad}`,
+        tipoTexto: "Empalme RD",
+        tituloPlano: `Empalme RD   E-${nPad}-${cPad}`,
+        tituloHtml: `<span class="title-type-part">Empalme RD</span>   <span class="title-code-part">E-${nPad}-${cPad}</span>`
+      };
+    }
     if (tipo === "EMPALME_RA") {
       const pref = obtenerPrefijoPueblo(pueblo);
-      return { codigo: `E-${pref}-${cPad}`, nodo: "Empalmes RA", titulo: `Empalme RA E-${pref}-${cPad}` };
+      return {
+        codigo: `E-${pref}-${cPad}`,
+        nodo: "Empalmes RA",
+        tipoTexto: "Empalme RA",
+        tituloPlano: `Empalme RA   E-${pref}-${cPad}`,
+        tituloHtml: `<span class="title-type-part">Empalme RA</span>   <span class="title-code-part">E-${pref}-${cPad}</span>`
+      };
     }
-    return { codigo: `${nPad}-${cPad}`, nodo: `N-${nPad}`, titulo: `CTO ${nPad}-${cPad}` };
+    return {
+      codigo: `${nPad}-${cPad}`,
+      nodo: `N-${nPad}`,
+      tipoTexto: "CTO",
+      tituloPlano: `CTO   ${nPad}-${cPad}`,
+      tituloHtml: `<span class="title-type-part">CTO</span>   <span class="title-code-part">${nPad}-${cPad}</span>`
+    };
   }
 
-  // PROHIBIDO NODO 00: Filtra estrictamente cualquier número < 1 en Nodos, Empalmes y CTOs
+  // Extractor flexible de códigos (Ignora texto extra de la IA y prohíbe Nodo 00)
   function descomponerCodigoEnRuleta(codigoRaw) {
     if (!codigoRaw) return null;
-    const c = String(codigoRaw).trim().toUpperCase().replace(/\s+/g, "");
-    let m = c.match(/^(?:NODO-|N-)(\d{1,3})$/);
-    if (m) {
-      const n1 = Number(m[1]);
-      if (n1 < 1 || n1 > 99) return null;
-      const nPad = String(n1).padStart(2, "0");
-      return { tipo: "NODO", numNodo: n1, numCaja: 1, nodo: `N-${nPad}`, codigo: `N-${nPad}` };
-    }
-    m = c.match(/^E-(\d{1,3})-(\d{1,3})$/);
+    const clean = String(codigoRaw).trim().toUpperCase();
+
+    let m = clean.match(/\bE[\s-]*(\d{1,2})[\s-/]+(\d{1,2})\b/);
     if (m) {
       const n1 = Number(m[1]), n2 = Number(m[2]);
-      if (n1 < 1 || n1 > 99 || n2 < 1 || n2 > 64) return null;
-      const nPad = String(n1).padStart(2, "0"), cPad = String(n2).padStart(2, "0");
-      return { tipo: "EMPALME_RD", numNodo: n1, numCaja: n2, nodo: `N-${nPad}`, codigo: `E-${nPad}-${cPad}` };
+      if (n1 >= 1 && n1 <= 99 && n2 >= 1 && n2 <= 64) {
+        const nPad = String(n1).padStart(2, "0"), cPad = String(n2).padStart(2, "0");
+        return { tipo: "EMPALME_RD", numNodo: n1, numCaja: n2, nodo: `N-${nPad}`, codigo: `E-${nPad}-${cPad}` };
+      }
     }
-    m = c.match(/^E-(?:([A-Z]{2,6})-)?(\d{1,3})$/);
+    m = clean.match(/\bE[\s-]*([A-Z]{2,6})[\s-/]+(\d{1,2})\b/);
     if (m) {
       const n2 = Number(m[2]);
-      if (n2 < 1 || n2 > 64) return null;
-      const pref = m[1] ? `${m[1]}-` : "";
-      return { tipo: "EMPALME_RA", numNodo: Math.max(1, ultimoNodoFijo), numCaja: n2, nodo: "Empalmes RA", codigo: `E-${pref}${String(n2).padStart(2, "0")}` };
+      if (n2 >= 1 && n2 <= 64) {
+        return { tipo: "EMPALME_RA", numNodo: Math.max(1, ultimoNodoFijo), numCaja: n2, nodo: "Empalmes RA", codigo: `E-${m[1]}-${String(n2).padStart(2, "0")}` };
+      }
     }
-    m = c.match(/^(\d{1,3})-(\d{1,3})$/);
+    m = clean.match(/\bE[\s-]+(\d{1,2})\b/);
+    if (m) {
+      const n2 = Number(m[1]);
+      if (n2 >= 1 && n2 <= 64) {
+        return { tipo: "EMPALME_RA", numNodo: Math.max(1, ultimoNodoFijo), numCaja: n2, nodo: "Empalmes RA", codigo: `E-${String(n2).padStart(2, "0")}` };
+      }
+    }
+    m = clean.match(/\b(\d{1,2})[\s-/]+(\d{1,2})\b/);
     if (m) {
       const n1 = Number(m[1]), n2 = Number(m[2]);
-      if (n1 < 1 || n1 > 99 || n2 < 1 || n2 > 64) return null;
-      const nPad = String(n1).padStart(2, "0"), cPad = String(n2).padStart(2, "0");
-      return { tipo: "CTO", numNodo: n1, numCaja: n2, nodo: `N-${nPad}`, codigo: `${nPad}-${cPad}` };
+      if (n1 >= 1 && n1 <= 99 && n2 >= 1 && n2 <= 64) {
+        const nPad = String(n1).padStart(2, "0"), cPad = String(n2).padStart(2, "0");
+        return { tipo: "CTO", numNodo: n1, numCaja: n2, nodo: `N-${nPad}`, codigo: `${nPad}-${cPad}` };
+      }
+    }
+    m = clean.match(/\b(?:NODO|N)[\s-]*(\d{1,2})\b/);
+    if (m) {
+      const n1 = Number(m[1]);
+      if (n1 >= 1 && n1 <= 99) {
+        const nPad = String(n1).padStart(2, "0");
+        return { tipo: "NODO", numNodo: n1, numCaja: 1, nodo: `N-${nPad}`, codigo: `N-${nPad}` };
+      }
     }
     return null;
   }
@@ -796,24 +992,39 @@
       const d = await r.json();
       if (d && (d.pueblos || d.status === "OK")) {
         badge.style.color = "#34d399";
-        badge.innerText = "● Conectado";
+        badge.innerText = "● Drive OK";
         document.getElementById("configBox").open = false;
         return true;
       }
     } catch (e) {}
     badge.style.color = "#f87171";
-    badge.innerText = "Error de enlace";
+    badge.innerText = "Error";
     return false;
   }
 
-  function obtenerGpsVivoSilencioso() {
-    if (!navigator.geolocation) return;
+  // Detecta la ubicación al abrir la app y carga automáticamente el .DWG y el Registro de ese pueblo
+  function obtenerGpsYCargarDwgAutomatico() {
+    const iniciarCargaPueblo = (prov, pue) => {
+      seleccionPuebloEstado = { provincia: prov, pueblo: pue };
+      document.getElementById("txtEstadoPueblo").innerText = `📍 ${pue} (${prov})`;
+      precargarRegistroYDwgSilencioso(prov, pue);
+    };
+
+    if (!navigator.geolocation) {
+      iniciarCargaPueblo(gpsDispositivo.provincia, gpsDispositivo.pueblo);
+      return;
+    }
     navigator.geolocation.getCurrentPosition(pos => {
       const loc = resolverPuebloPorCoordenadas(pos.coords.latitude, pos.coords.longitude);
       if (loc) {
         gpsDispositivo = { lat: pos.coords.latitude, lng: pos.coords.longitude, provincia: loc.provincia, pueblo: loc.pueblo };
+        iniciarCargaPueblo(loc.provincia, loc.pueblo);
+      } else {
+        iniciarCargaPueblo(gpsDispositivo.provincia, gpsDispositivo.pueblo);
       }
-    }, () => {}, { enableHighAccuracy: true, timeout: 5000 });
+    }, () => {
+      iniciarCargaPueblo(gpsDispositivo.provincia, gpsDispositivo.pueblo);
+    }, { enableHighAccuracy: true, timeout: 4500 });
   }
 
   function resolverPuebloPorCoordenadas(lat, lng) {
@@ -841,7 +1052,6 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  // Cambio de pestaña INSTANTÁNEO: no recarga el Mapa Mental si ya está en memoria
   function cambiarTab(tab) {
     document.getElementById("vistaRafaga").style.display = tab === "rafaga" ? "block" : "none";
     document.getElementById("vistaEstado").style.display = tab === "estado" ? "block" : "none";
@@ -850,11 +1060,11 @@
 
     if (tab === "estado") {
       const key = `${seleccionPuebloEstado.provincia}|${seleccionPuebloEstado.pueblo}`;
-      if (cacheMapaMentalPorPueblo[key]) {
-        datosMapaMentalActual = cacheMapaMentalPorPueblo[key];
-        dibujarArbolMapaMental();
+      if (cacheRegistroPorPueblo[key]) {
+        datosRegistroActual = cacheRegistroPorPueblo[key];
+        dibujarRegistroDrive();
       } else {
-        cargarMapaMentalPueblo(false);
+        cargarRegistroDrivePueblo(false);
       }
     }
   }
@@ -869,12 +1079,6 @@
   }
   function cerrarFlotantes() {
     document.querySelectorAll(".dots-menu, .custom-dd-menu").forEach(m => m.style.display = "none");
-    if (elementoDesplegadoMapa !== null) {
-      elementoDesplegadoMapa = null;
-      if (document.getElementById("vistaEstado").style.display !== "none") {
-        dibujarArbolMapaMental();
-      }
-    }
   }
 
   // --- SELECTOR PROVINCIA ➔ PUEBLO ---
@@ -882,7 +1086,7 @@
     ev.stopPropagation();
     const menu = document.getElementById(menuId);
     const abierto = menu.style.display === "block";
-    document.querySelectorAll(".dots-menu, .custom-dd-menu").forEach(m => m.style.display = "none");
+    cerrarFlotantes();
     if (abierto) return;
     mostrarProvinciasEnMenu(menuId, modo, bloqueId);
     menu.style.display = "block";
@@ -924,15 +1128,15 @@
         b.pueblo = pueblo;
         gpsDispositivo.provincia = provincia;
         gpsDispositivo.pueblo = pueblo;
+        precargarRegistroYDwgSilencioso(provincia, pueblo);
         renderTarjetas();
         verificarDuplicadosEnSegundoPlano();
       }
     } else if (modo === "ESTADO_RED") {
       seleccionPuebloEstado = { provincia, pueblo };
-      nodosDesplegadosMapa = new Set(); // Todos los nodos plegados al abrir pueblo
-      elementoDesplegadoMapa = null;
+      nodosAbiertosRegistro = new Set();
       document.getElementById("txtEstadoPueblo").innerText = `📍 ${pueblo} (${provincia})`;
-      await cargarMapaMentalPueblo(false);
+      await cargarRegistroDrivePueblo(false);
     } else if (modo === "MODAL_MOVER") {
       contextoMover.provinciaSel = provincia;
       contextoMover.puebloSel = pueblo;
@@ -940,7 +1144,7 @@
     }
   }
 
-  // --- BOTONES SUPERIORES EN VERDE (COMBINANDO FOTOS CARGADAS + FOTOS YA SUBIDAS EN DRIVE) ---
+  // --- BOTONES SUPERIORES EN VERDE ---
   function actualizarBotonesSuperioresVerde() {
     const ultimo = bloquesCajas[bloquesCajas.length - 1];
     const vistasLocales = new Set();
@@ -963,7 +1167,6 @@
       const sub = document.getElementById(`subTop_${v}`);
       if (!btn || !ico || !sub) return;
 
-      // En Nodos y Empalmes no aplica Potencia
       if (tipoActivo !== "CTO" && v === "Potencia") {
         btn.style.opacity = "0.35";
         btn.classList.remove("loaded");
@@ -980,15 +1183,10 @@
       btn.classList.toggle("loaded", completada);
       ico.innerText = completada ? "✓" : (v === "Potencia" ? "⚡" : "📷");
 
-      if (enLocal) {
-        sub.innerText = "Cargada";
-      } else if (enDrive) {
-        sub.innerText = "En Drive";
-      } else if (modoCompletando || (ultimo && ultimo.fotos.length > 0)) {
-        sub.innerText = "Falta foto";
-      } else {
-        sub.innerText = "";
-      }
+      if (enLocal) sub.innerText = "Cargada";
+      else if (enDrive) sub.innerText = "En Drive";
+      else if (modoCompletando || (ultimo && ultimo.fotos.length > 0)) sub.innerText = "Falta foto";
+      else sub.innerText = "";
     });
   }
 
@@ -998,10 +1196,9 @@
     actualizarBotonesSuperioresVerde();
   }
 
-  // --- 1. CAPTURA DE CAMPO Y OPCIONES DE POTENCIA ---
+  // --- 1. CAPTURA DE CAMPO + OCR REPARADO A 800PX CON DOBLE VÍA ---
   function dispararCamaraConVista(vista) {
     vistaCamaraPendiente = vista;
-    obtenerGpsVivoSilencioso();
     document.getElementById("camInput").click();
   }
 
@@ -1036,6 +1233,7 @@
       fAb.usarParaPotencia = true;
       vibrarTick(15);
       renderTarjetas();
+      guardarEstadoEnHistorialDB("Auto-guardado");
     } else if (opcion === "USAR_CERRADA") {
       const fCe = ultimoBloque.fotos.find(f => f.vista === "Cerrada");
       if (!fCe) return alert("Aún no está cargada la foto Cerrada.");
@@ -1043,6 +1241,7 @@
       fCe.usarParaPotencia = true;
       vibrarTick(15);
       renderTarjetas();
+      guardarEstadoEnHistorialDB("Auto-guardado");
     } else if (opcion === "SIN_POTENCIA") {
       ultimoBloque.fotos.forEach(f => f.usarParaPotencia = false);
       vibrarTick(15);
@@ -1050,7 +1249,6 @@
     }
   }
 
-  // Subir foto de potencia directamente desde la galería
   async function archivoPotenciaDesdeGaleria(e) {
     vistaCamaraPendiente = "Potencia";
     await archivosSeleccionados(e, "CAMARA");
@@ -1105,10 +1303,11 @@
       let pueblo = gpsDispositivo.pueblo || "Águilas";
       let timestamp = file.lastModified || Date.now();
 
+      // Copia de 800px (calidad 0.76) para que el OCR en móvil lea etiquetas de CTO con total nitidez
       const [exifData, imgDrive, imgOcr] = await Promise.all([
         extraerExifRapido(file),
         comprimirRapidoPorUrl(file, 1600, 0.82),
-        comprimirRapidoPorUrl(file, 320, 0.55)
+        comprimirRapidoPorUrl(file, 800, 0.76)
       ]);
 
       if (exifData.timestamp) timestamp = exifData.timestamp;
@@ -1169,7 +1368,8 @@
           tipo: modoCompletando ? modoCompletando.tipo : "CTO",
           numNodo: modoCompletando ? modoCompletando.numNodo : Math.max(1, ultimoNodoFijo),
           numCaja: modoCompletando ? modoCompletando.numCaja : 1,
-          fijadoManualmente: Boolean(modoCompletando),
+          bloqueadoPorCompletar: Boolean(modoCompletando),
+          codigoYaDetectadoPorOcr: false,
           fotos: []
         };
         bloquesCajas.push(bloqueDestino);
@@ -1178,7 +1378,6 @@
       if (origen === "GALERIA") {
         const vistasDrive = (modoCompletando && modoCompletando.vistasEnDrive) ? modoCompletando.vistasEnDrive : {};
         const ocupadas = bloqueDestino.fotos.map(x => x.vista);
-        // Prioriza asignar las vistas que faltan en Drive
         const libre = ORDEN_VISTAS_CTO.find(v => !ocupadas.includes(v) && !vistasDrive[v])
           || ORDEN_VISTAS_CTO.find(v => !ocupadas.includes(v))
           || "Panorámica";
@@ -1192,38 +1391,48 @@
     });
 
     renderTarjetas();
+    await persistirSesionActiva();
+    await guardarEstadoEnHistorialDB("Auto-guardado");
     dispararOcrYCoordenadasEnParalelo();
   }
 
+  // Ejecuta OCR en todas las fotos nuevas (sin bloquearse aunque hayas tocado la ruleta antes)
   function dispararOcrYCoordenadasEnParalelo() {
     bloquesCajas.forEach(bloque => {
-      if (bloque.fijadoManualmente) {
+      if (bloque.bloqueadoPorCompletar) {
         bloque.fotos.forEach(f => f.ocrEstado = "listo");
         renderTarjetas();
         return;
       }
 
-      if (bloque.fotos[0] && bloque.fotos[0].lat) {
+      if (!bloque.codigoYaDetectadoPorOcr && bloque.fotos[0] && bloque.fotos[0].lat) {
         sugerirCajaPorGpsEnSegundoPlano(bloque);
       }
 
-      const candidatas = bloque.fotos.filter(f => f.ocrEstado === "pendiente" && (f.vista === "Cerrada" || f.vista === "Abierta"));
-      const aLeer = candidatas.length > 0 ? candidatas : bloque.fotos.filter(f => f.ocrEstado === "pendiente");
+      // Priorizar Cerrada y Abierta, pero permitir que cualquier foto del lote aporte la etiqueta
+      const pendientes = bloque.fotos.filter(f => f.ocrEstado === "pendiente");
+      pendientes.sort((a, b) => {
+        const peso = v => (v === "Cerrada" ? 1 : v === "Abierta" ? 2 : 3);
+        return peso(a.vista) - peso(b.vista);
+      });
 
-      aLeer.forEach(async foto => {
+      pendientes.forEach(async foto => {
         foto.ocrEstado = "leyendo";
         renderTarjetas();
-        const infoLeida = await leerCodigoOcrFlashLite(foto.base64Ocr);
+
+        const infoLeida = await leerCodigoOcrDobleVia(foto.base64Ocr);
         foto.ocrEstado = "listo";
 
-        if (infoLeida && !bloque.fijadoManualmente) {
+        if (infoLeida && !bloque.bloqueadoPorCompletar) {
           bloque.tipo = infoLeida.tipo;
           bloque.numNodo = infoLeida.numNodo;
           bloque.numCaja = infoLeida.numCaja;
+          bloque.codigoYaDetectadoPorOcr = true;
           ultimoNodoFijo = infoLeida.numNodo;
           localStorage.setItem("ftth_last_nodo_num", String(ultimoNodoFijo));
-          vibrarTick(20);
-          bloque.fotos.forEach(fr => fr.ocrEstado = "listo");
+          vibrarTick(25);
+          await persistirSesionActiva();
+          await guardarEstadoEnHistorialDB("Auto-guardado");
           verificarDuplicadosEnSegundoPlano();
         }
         renderTarjetas();
@@ -1251,7 +1460,7 @@
       }
     });
 
-    if (mejorCod && !bloque.fijadoManualmente) {
+    if (mejorCod && !bloque.codigoYaDetectadoPorOcr) {
       const desc = descomponerCodigoEnRuleta(mejorCod);
       if (desc) {
         bloque.tipo = desc.tipo;
@@ -1263,36 +1472,57 @@
     }
   }
 
-  async function leerCodigoOcrFlashLite(base64Ocr) {
-    const prompt = `OCR FTTH: Devuelve solo el código de etiqueta (ej. "17-37", "E-17-01", "N-17"). JSON: {"codigo":""}`;
+  // DOBLE VÍA OCR: 1º Directo navegador (gemini-2.5-flash / 3.8-flash con thinkingBudget: 0) -> 2º Respaldo Código.gs
+  async function leerCodigoOcrDobleVia(base64Ocr) {
+    const prompt = `Lee la etiqueta o rotulación FTTH de esta caja (ejemplos: "17-37", "01-08", "E-17-01", "N-17"). Responde únicamente en JSON con el código leído: {"codigo":"17-37"}`;
     const parts = [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64Ocr } }];
     const claves = obtenerClavesActivas();
     const modelos = [
-      "models/gemini-2.0-flash-lite",
-      "models/gemini-2.5-flash-lite",
-      "models/gemini-2.0-flash"
+      "models/gemini-2.5-flash",
+      "models/gemini-3.8-flash",
+      "models/gemini-2.0-flash",
+      "models/gemini-1.5-flash"
     ];
 
+    // VÍA 1: Directa desde el navegador
     for (let i = 0; i < claves.length; i++) {
       const apiKey = claves[(indiceTurnoClave + i) % claves.length];
       for (const mod of modelos) {
         const skipTag = `skip_${apiKey.slice(-6)}_${mod}`;
         if (Date.now() < Number(sessionStorage.getItem(skipTag) || 0)) continue;
         try {
-          const genConfig = { temperature: 0.0, maxOutputTokens: 22, responseMimeType: "application/json" };
-          if (mod.includes("2.5")) genConfig.thinkingConfig = { thinkingBudget: 0 };
+          const genConfig = { temperature: 0.0, responseMimeType: "application/json" };
+          if (mod.includes("2.5") || mod.includes("3.8")) {
+            genConfig.thinkingConfig = { thinkingBudget: 0 };
+          }
 
-          const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${mod}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          let r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${mod}:generateContent?key=${encodeURIComponent(apiKey)}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents: [{ parts }], generationConfig: genConfig })
           });
+
+          if (r.status === 400 && genConfig.thinkingConfig) {
+            delete genConfig.thinkingConfig;
+            r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${mod}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ contents: [{ parts }], generationConfig: genConfig })
+            });
+          }
+
           if (r.ok) {
             indiceTurnoClave = (indiceTurnoClave + i + 1) % claves.length;
             const d = await r.json();
             const raw = d.candidates[0].content.parts[0].text.replace(/```json|```/g, "").trim();
-            const parsed = JSON.parse(raw);
-            return descomponerCodigoEnRuleta(parsed.codigo || "");
+            let textoCod = raw;
+            try {
+              const parsed = JSON.parse(raw);
+              textoCod = parsed.codigo || raw;
+            } catch (eJ) {}
+            const resDesc = descomponerCodigoEnRuleta(textoCod);
+            if (resDesc) return resDesc;
+            return null;
           }
           if (r.status === 429 || r.status === 404) {
             sessionStorage.setItem(skipTag, String(Date.now() + 600000));
@@ -1300,14 +1530,35 @@
         } catch (e) {}
       }
     }
+
+    // VÍA 2: Respaldo automático en Google Apps Script (Código.gs) si el navegador móvil bloqueó la llamada
+    const ep = obtenerEndpoint();
+    if (ep.startsWith("http")) {
+      try {
+        const resp = await fetch(ep, {
+          method: "POST",
+          redirect: "follow",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "ocrDigitos", base64: base64Ocr })
+        });
+        const d = await resp.json();
+        if (d && d.info) {
+          return descomponerCodigoEnRuleta(d.info.codigo);
+        }
+      } catch (e) {}
+    }
     return null;
   }
 
+  // ==================== RENDERIZADO DE TARJETAS Y MOVIMIENTO ENTRE CAJAS ====================
   function renderTarjetas() {
     const cont = document.getElementById("contenedorTarjetas");
-    bloquesCajas = bloquesCajas.filter(b => b.fotos.length > 0 || modoCompletando);
+    // Eliminar automáticamente cualquier caja que haya quedado vacía (salvo la vacía recién creada al venir de "Completar")
+    bloquesCajas = bloquesCajas.filter(b => b.fotos.length > 0 || (modoCompletando && bloquesCajas.length === 1));
     const totalFotosCargadas = bloquesCajas.reduce((acc, b) => acc + b.fotos.length, 0);
+
     document.getElementById("btnSubirTodas").style.display = totalFotosCargadas > 0 ? "block" : "none";
+    document.getElementById("btnRestaurarEscondido").style.display = totalFotosCargadas > 0 ? "inline-flex" : "none";
     actualizarBotonesSuperioresVerde();
 
     cont.innerHTML = "";
@@ -1337,6 +1588,13 @@
       const alertaResumenHtml = generarAlertaCortaBloque(b, infoNombre.codigo);
       const vistasPermitidas = b.tipo === "CTO" ? ORDEN_VISTAS_CTO : ORDEN_VISTAS_NODO_EMP;
 
+      // Opciones en el desplegable para mover la foto a otra caja ya creada en pantalla
+      const otrasCajasActivas = bloquesCajas.filter(otra => otra.id !== b.id && otra.fotos.length > 0);
+      const optsMoverAOtraCaja = otrasCajasActivas.map(otra => {
+        const infoOtra = construirCodigoYTitulo(otra.tipo, otra.numNodo, otra.numCaja, otra.pueblo);
+        return `<option value="__MOVER_A__${otra.id}">↪ Mover a ${infoOtra.tituloPlano}</option>`;
+      }).join("");
+
       const fotosHtml = b.fotos.map(f => {
         if (!vistasPermitidas.includes(f.vista)) f.vista = "Cerrada";
 
@@ -1346,18 +1604,21 @@
             textoOpcion = `${v} con potencia`;
           }
           return `<option value="${v}" ${f.vista === v ? 'selected' : ''}>${textoOpcion}</option>`;
-        }).join("") + (b.fotos.length > 1 ? `<option value="__SEPARAR__">↪ Separar en otra caja</option>` : "");
+        }).join("") +
+        optsMoverAOtraCaja +
+        (b.fotos.length > 1 ? `<option value="__SEPARAR__">➕ Separar en caja nueva</option>` : "");
 
+        // Botón renombrado a "⚡ Usar de foto con potencia"
         let btnUsarPotenciaHtml = "";
         if (b.tipo === "CTO" && (f.vista === "Abierta" || f.vista === "Cerrada")) {
           const activo = Boolean(f.usarParaPotencia);
           btnUsarPotenciaHtml = `
             <button type="button" class="btn-potencia-toggle ${activo ? 'active' : ''}" onclick="toggleUsarFotoParaPotencia('${b.id}', '${f.id}')">
-              ${activo ? `✓ ${f.vista} con potencia` : `⚡ Usar para potencia`}
+              ${activo ? `✓ ${f.vista} con potencia` : `⚡ Usar de foto con potencia`}
             </button>`;
         }
 
-        let badgeOcr = f.ocrEstado === "leyendo" ? `<span class="ocr-badge">Leyendo...</span>` : "";
+        let badgeOcr = f.ocrEstado === "leyendo" ? `<span class="ocr-badge">🔍 Leyendo...</span>` : "";
 
         let dupHtml = "";
         if (f.duplicadoInfo && f.duplicadoInfo.existe) {
@@ -1377,7 +1638,7 @@
             ${badgeOcr}
             <button class="del-btn" onclick="borrarFotoDeBloque('${b.id}', '${f.id}')">✕</button>
             <img src="${f.preview}" onclick="abrirZoom('${f.preview}')" />
-            <select onchange="cambiarVistaConAutoIntercambio('${b.id}', '${f.id}', this.value)" style="margin-top:6px;">
+            <select onchange="cambiarVistaOMoverEntreCajas('${b.id}', '${f.id}', this.value)" style="margin-top:6px;">
               ${optsVista}
             </select>
             ${btnUsarPotenciaHtml}
@@ -1388,9 +1649,10 @@
       cont.innerHTML += `
         <div class="element-card">
           <div class="element-header">
+            <!-- TÍTULO CON 3 ESPACIOS Y DOBLE COLOR -->
             <button type="button" class="element-title-btn ${estaRuletaAbierta ? 'open' : ''}" onclick="toggleRuletaBloque('${b.id}')">
-              <span id="lblTitulo_${b.id}">${infoNombre.titulo}</span>
-              <span style="font-size:11px; opacity:0.8;">${estaRuletaAbierta ? '▴' : '▾'}</span>
+              <span id="lblTitulo_${b.id}">${infoNombre.tituloHtml}</span>
+              <span style="font-size:11px; color:var(--muted); margin-left:6px;">${estaRuletaAbierta ? '▴' : '▾'}</span>
             </button>
 
             <div style="position:relative;">
@@ -1510,10 +1772,10 @@
       }
 
       if (cambio) {
-        b.fijadoManualmente = true;
         vibrarTick(10);
         actualizarCabeceraYEstilosRuletaSinReconstruir(b);
         actualizarBotonesSuperioresVerde();
+        persistirSesionActiva();
         verificarDuplicadosEnSegundoPlano();
       }
     }, 55);
@@ -1522,7 +1784,6 @@
   function seleccionarEnRuletaClick(bloqueId, campo, valor) {
     const b = bloquesCajas.find(x => x.id === bloqueId);
     if (!b) return;
-    b.fijadoManualmente = true;
     if (campo === "tipo") b.tipo = valor;
     if (campo === "nodo") {
       b.numNodo = Math.max(1, Number(valor));
@@ -1532,13 +1793,14 @@
     if (campo === "caja") b.numCaja = Math.max(1, Number(valor));
     vibrarTick(12);
     renderTarjetas();
+    persistirSesionActiva();
     verificarDuplicadosEnSegundoPlano();
   }
 
   function actualizarCabeceraYEstilosRuletaSinReconstruir(b) {
     const infoNombre = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
     const lbl = document.getElementById(`lblTitulo_${b.id}`);
-    if (lbl) lbl.innerText = infoNombre.titulo;
+    if (lbl) lbl.innerHTML = infoNombre.tituloHtml;
     const al = document.getElementById(`alertas_${b.id}`);
     if (al) al.innerHTML = generarAlertaCortaBloque(b, infoNombre.codigo);
 
@@ -1552,13 +1814,36 @@
     });
   }
 
-  function cambiarVistaConAutoIntercambio(bloqueId, fotoId, nuevaVista) {
+  // Cambiar vista con auto-intercambio O mover la foto a otra caja existente (eliminando la caja origen si queda vacía)
+  async function cambiarVistaOMoverEntreCajas(bloqueId, fotoId, valorSeleccionado) {
     const b = bloquesCajas.find(x => x.id === bloqueId);
     if (!b) return;
     const fotoActual = b.fotos.find(f => f.id === fotoId);
     if (!fotoActual) return;
 
-    if (nuevaVista === "__SEPARAR__") {
+    // CASO 1: Mover foto a otra caja ya creada en pantalla
+    if (valorSeleccionado.startsWith("__MOVER_A__")) {
+      const idDestino = valorSeleccionado.replace("__MOVER_A__", "");
+      const cajaDestino = bloquesCajas.find(x => x.id === idDestino);
+      if (cajaDestino) {
+        b.fotos = b.fotos.filter(f => f.id !== fotoId);
+        const ocupadasDest = cajaDestino.fotos.map(x => x.vista);
+        if (ocupadasDest.includes(fotoActual.vista)) {
+          fotoActual.vista = ORDEN_VISTAS_CTO.find(v => !ocupadasDest.includes(v)) || "Panorámica";
+        }
+        cajaDestino.fotos.push(fotoActual);
+        // Si la caja origen quedó vacía, renderTarjetas la elimina automáticamente
+        vibrarTick(18);
+        renderTarjetas();
+        await persistirSesionActiva();
+        await guardarEstadoEnHistorialDB("Auto-guardado");
+        verificarDuplicadosEnSegundoPlano();
+      }
+      return;
+    }
+
+    // CASO 2: Separar en una caja nueva
+    if (valorSeleccionado === "__SEPARAR__") {
       b.fotos = b.fotos.filter(f => f.id !== fotoId);
       const nuevoId = "b_" + Date.now();
       bloquesCajas.push({
@@ -1567,30 +1852,35 @@
         pueblo: b.pueblo,
         tipo: b.tipo,
         numNodo: b.numNodo,
-        numCaja: Math.min(64, b.numCaja + 1),
-        fijadoManualmente: true,
+        numCaja: b.numCaja,
+        bloqueadoPorCompletar: false,
+        codigoYaDetectadoPorOcr: false,
         fotos: [fotoActual]
       });
+      vibrarTick(18);
       renderTarjetas();
+      await persistirSesionActiva();
       return;
     }
 
+    // CASO 3: Auto-intercambio de vista dentro de la misma caja
     const vistaAnterior = fotoActual.vista;
-    const otraFoto = b.fotos.find(f => f.id !== fotoId && f.vista === nuevaVista);
+    const otraFoto = b.fotos.find(f => f.id !== fotoId && f.vista === valorSeleccionado);
     if (otraFoto) {
       otraFoto.vista = vistaAnterior;
       if (otraFoto.vista !== "Abierta" && otraFoto.vista !== "Cerrada") otraFoto.usarParaPotencia = false;
     }
 
-    fotoActual.vista = nuevaVista;
-    if (nuevaVista !== "Abierta" && nuevaVista !== "Cerrada") fotoActual.usarParaPotencia = false;
+    fotoActual.vista = valorSeleccionado;
+    if (valorSeleccionado !== "Abierta" && valorSeleccionado !== "Cerrada") fotoActual.usarParaPotencia = false;
 
     vibrarTick(10);
     renderTarjetas();
+    await persistirSesionActiva();
     verificarDuplicadosEnSegundoPlano();
   }
 
-  function toggleUsarFotoParaPotencia(bloqueId, fotoId) {
+  async function toggleUsarFotoParaPotencia(bloqueId, fotoId) {
     const b = bloquesCajas.find(x => x.id === bloqueId);
     if (!b) return;
     const foto = b.fotos.find(f => f.id === fotoId);
@@ -1601,14 +1891,17 @@
     foto.usarParaPotencia = nuevoEstado;
     vibrarTick(15);
     renderTarjetas();
+    await persistirSesionActiva();
     verificarDuplicadosEnSegundoPlano();
   }
 
-  function borrarFotoDeBloque(bloqueId, fotoId) {
+  async function borrarFotoDeBloque(bloqueId, fotoId) {
+    await guardarEstadoEnHistorialDB("Antes de borrar miniatura");
     const b = bloquesCajas.find(x => x.id === bloqueId);
     if (!b) return;
     b.fotos = b.fotos.filter(f => f.id !== fotoId);
     renderTarjetas();
+    await persistirSesionActiva();
   }
 
   function descartarFotoDeBloque(bloqueId, fotoId) {
@@ -1621,15 +1914,6 @@
     if (!b) return;
     const f = b.fotos.find(x => x.id === fotoId);
     if (f) f.modoDuplicado = modo;
-    renderTarjetas();
-  }
-
-  function limpiarSesionActual() {
-    bloquesCajas = [];
-    ruletaAbiertaId = null;
-    modoCompletando = null;
-    document.getElementById("bannerCompletandoCaja").style.display = "none";
-    document.getElementById("msgEstado").innerHTML = "";
     renderTarjetas();
   }
 
@@ -1693,6 +1977,24 @@
     } catch (e) {}
   }
 
+  // ==================== SUBIDA A DRIVE + COLA ANTICAÍDAS DE COBERTURA ====================
+  async function verificarColaSubidaOffline() {
+    const cola = await dbGet("cola_offline");
+    const banner = document.getElementById("bannerColaOffline");
+    if (cola && Array.isArray(cola) && cola.length > 0) {
+      banner.style.display = "flex";
+      document.getElementById("numFotosOffline").innerText = String(cola.length);
+    } else {
+      banner.style.display = "none";
+    }
+  }
+
+  async function reintentarSubidaPendienteOffline() {
+    const cola = await dbGet("cola_offline");
+    if (!cola || cola.length === 0) return;
+    await enviarItemsADriveConRespaldoOffline(cola, true);
+  }
+
   async function subirTodoADrive() {
     const ep = obtenerEndpoint();
     if (!ep.startsWith("http") || ep.includes(URL_ANTIGUA_ELIMINADA)) {
@@ -1720,13 +2022,17 @@
     });
 
     if (itemsSubida.length === 0) return;
+    await guardarEstadoEnHistorialDB("Subida a Drive");
+    await enviarItemsADriveConRespaldoOffline(itemsSubida, false);
+  }
 
+  async function enviarItemsADriveConRespaldoOffline(itemsSubida, vieneDeColaOffline) {
     const msg = document.getElementById("msgEstado");
     msg.style.color = "var(--accent)";
-    msg.innerText = "Subiendo a Google Drive...";
+    msg.innerText = "🚀 Subiendo a Google Drive...";
 
     try {
-      const resp = await fetch(ep, {
+      const resp = await fetch(obtenerEndpoint(), {
         method: "POST",
         redirect: "follow",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -1737,91 +2043,96 @@
 
       vibrarTick(180);
 
+      if (vieneDeColaOffline) {
+        await dbSet("cola_offline", []);
+        await verificarColaSubidaOffline();
+      } else {
+        bloquesCajas = [];
+        ruletaAbiertaId = null;
+        modoCompletando = null;
+        document.getElementById("bannerCompletandoCaja").style.display = "none";
+        renderTarjetas();
+        await persistirSesionActiva();
+      }
+
       const linksHtml = (res.resultados || []).map(r =>
         `<div style="margin-top:8px; background:rgba(16,185,129,0.12); padding:10px; border-radius:12px; border:1px solid rgba(16,185,129,0.35); font-size:12px;">` +
         `✓ Guardado en <b>${r.pueblo} · ${r.codigo}</b> (${r.archivos.join(", ")}) ` +
         `<a href="${r.folderUrl}" target="_blank" style="color:var(--accent); margin-left:6px; text-decoration:none;">Abrir Drive ↗</a></div>`
       ).join("");
 
-      // Refrescar caché del Mapa Mental en segundo plano para que esté al día al cambiar de pestaña
-      precargarMapaMentalSilencioso(itemsSubida[0].provincia, itemsSubida[0].pueblo);
-
-      limpiarSesionActual();
+      precargarRegistroYDwgSilencioso(itemsSubida[0].provincia, itemsSubida[0].pueblo);
       msg.innerHTML = linksHtml;
     } catch (err) {
-      msg.style.color = "var(--red)";
-      msg.innerText = "Error: " + err.message;
+      // Guardar en la cola offline para no perder las fotos si falló la cobertura
+      await dbSet("cola_offline", itemsSubida);
+      await verificarColaSubidaOffline();
+      msg.style.color = "#fbbf24";
+      msg.innerText = "⚠️ Sin cobertura: el lote se ha guardado en la cola segura de arriba para reintentar.";
     }
   }
 
-  // ==================== 2. MAPA MENTAL CON CACHÉ PERMANENTE, NODOS PLEGADOS Y PANEL FLOTANTE DERECHO ====================
-  async function precargarMapaMentalSilencioso(provincia, pueblo) {
+  // ==================== 2. PESTAÑA "REGISTRO DRIVE" LIMPIO POR NODOS ====================
+  async function precargarRegistroYDwgSilencioso(provincia, pueblo) {
     const ep = obtenerEndpoint();
     if (!ep.startsWith("http")) return;
     const key = `${provincia}|${pueblo}`;
 
-    // 1. Restaurar primero de localStorage para disponibilidad en 0 ms
-    const guardadoLocal = localStorage.getItem(`ftth_mm_${key}`);
-    if (guardadoLocal && !cacheMapaMentalPorPueblo[key]) {
+    const guardadoLocal = localStorage.getItem(`ftth_reg_${key}`);
+    if (guardadoLocal && !cacheRegistroPorPueblo[key]) {
       try {
-        cacheMapaMentalPorPueblo[key] = JSON.parse(guardadoLocal);
-        cacheCoordenadasPorPueblo[key] = cacheMapaMentalPorPueblo[key].coordenadas || {};
+        cacheRegistroPorPueblo[key] = JSON.parse(guardadoLocal);
+        cacheCoordenadasPorPueblo[key] = cacheRegistroPorPueblo[key].coordenadas || {};
       } catch (e) {}
     }
 
-    // 2. Actualizar silenciosamente desde Drive
     try {
-      const r = await fetch(`${ep}?action=getMapaMental&provincia=${encodeURIComponent(provincia)}&pueblo=${encodeURIComponent(pueblo)}&forzar=0`, { redirect: "follow" });
+      const r = await fetch(`${ep}?action=getRegistroDrive&provincia=${encodeURIComponent(provincia)}&pueblo=${encodeURIComponent(pueblo)}&forzar=0`, { redirect: "follow" });
       const d = await r.json();
       if (d && !d.error) {
-        cacheMapaMentalPorPueblo[key] = d;
+        cacheRegistroPorPueblo[key] = d;
         cacheCoordenadasPorPueblo[key] = d.coordenadas || {};
-        localStorage.setItem(`ftth_mm_${key}`, JSON.stringify(d));
+        localStorage.setItem(`ftth_reg_${key}`, JSON.stringify(d));
         if (seleccionPuebloEstado.provincia === provincia && seleccionPuebloEstado.pueblo === pueblo) {
-          datosMapaMentalActual = d;
+          datosRegistroActual = d;
           if (document.getElementById("vistaEstado").style.display !== "none") {
-            dibujarArbolMapaMental();
+            dibujarRegistroDrive();
           }
+        }
+        // Si hay un .DWG en la carpeta de Drive del pueblo que aún no tiene extraídas las coordenadas GPS, lo procesa solo
+        if (d.hayDwgSinProcesar) {
+          verificarYProcesarDwgDeDrive(provincia, pueblo, false);
         }
       }
     } catch (e) {}
   }
 
-  async function cargarMapaMentalPueblo(forzar) {
+  async function cargarRegistroDrivePueblo(forzar) {
     const ep = obtenerEndpoint();
     if (!ep.startsWith("http")) return;
 
     const { provincia, pueblo } = seleccionPuebloEstado;
     const key = `${provincia}|${pueblo}`;
-    const cont = document.getElementById("contenedorMapaMental");
+    const cont = document.getElementById("contenedorRegistroDrive");
 
-    // Si no es forzado y ya existe en caché (RAM o localStorage), mostrar en 0 ms sin recargar
-    if (!forzar) {
-      if (!cacheMapaMentalPorPueblo[key]) {
-        const local = localStorage.getItem(`ftth_mm_${key}`);
-        if (local) {
-          try { cacheMapaMentalPorPueblo[key] = JSON.parse(local); } catch (e) {}
-        }
-      }
-      if (cacheMapaMentalPorPueblo[key]) {
-        datosMapaMentalActual = cacheMapaMentalPorPueblo[key];
-        dibujarArbolMapaMental();
-        precargarMapaMentalSilencioso(provincia, pueblo);
-        return;
-      }
+    if (!forzar && cacheRegistroPorPueblo[key]) {
+      datosRegistroActual = cacheRegistroPorPueblo[key];
+      dibujarRegistroDrive();
+      precargarRegistroYDwgSilencioso(provincia, pueblo);
+      return;
     }
 
-    cont.innerHTML = `<div style="color:var(--muted); text-align:center; padding:18px; font-size:12px;">Sincronizando red de ${pueblo}...</div>`;
+    cont.innerHTML = `<div style="color:var(--muted); text-align:center; padding:18px; font-size:12.5px;">Sincronizando carpetas de Drive en ${pueblo}...</div>`;
 
     try {
-      const r = await fetch(`${ep}?action=getMapaMental&provincia=${encodeURIComponent(provincia)}&pueblo=${encodeURIComponent(pueblo)}&forzar=${forzar ? '1' : '0'}`, { redirect: "follow" });
+      const r = await fetch(`${ep}?action=getRegistroDrive&provincia=${encodeURIComponent(provincia)}&pueblo=${encodeURIComponent(pueblo)}&forzar=${forzar ? '1' : '0'}`, { redirect: "follow" });
       const d = await r.json();
       if (d.error) throw new Error(d.error);
-      datosMapaMentalActual = d;
-      cacheMapaMentalPorPueblo[key] = d;
+      datosRegistroActual = d;
+      cacheRegistroPorPueblo[key] = d;
       cacheCoordenadasPorPueblo[key] = d.coordenadas || {};
-      localStorage.setItem(`ftth_mm_${key}`, JSON.stringify(d));
-      dibujarArbolMapaMental();
+      localStorage.setItem(`ftth_reg_${key}`, JSON.stringify(d));
+      dibujarRegistroDrive();
 
       if (d.hayDwgSinProcesar) {
         verificarYProcesarDwgDeDrive(provincia, pueblo, false);
@@ -1831,237 +2142,95 @@
     }
   }
 
-  function toggleNodoMapaMental(ev, nName) {
-    ev.stopPropagation();
-    if (nodosDesplegadosMapa.has(nName)) {
-      nodosDesplegadosMapa.delete(nName);
-    } else {
-      nodosDesplegadosMapa.add(nName);
-    }
-    elementoDesplegadoMapa = null;
+  function toggleNodoRegistro(nName) {
+    if (nodosAbiertosRegistro.has(nName)) nodosAbiertosRegistro.delete(nName);
+    else nodosAbiertosRegistro.add(nName);
     vibrarTick(10);
-    dibujarArbolMapaMental();
+    dibujarRegistroDrive();
   }
 
-  function toggleFlotanteElementoMapaMental(ev, codigo) {
-    ev.stopPropagation();
-    elementoDesplegadoMapa = (elementoDesplegadoMapa === codigo) ? null : codigo;
-    vibrarTick(8);
-    dibujarArbolMapaMental();
-  }
-
-  function dibujarArbolMapaMental() {
-    const cont = document.getElementById("contenedorMapaMental");
+  function dibujarRegistroDrive() {
+    const cont = document.getElementById("contenedorRegistroDrive");
     const { pueblo } = seleccionPuebloEstado;
-    const rawEls = (datosMapaMentalActual && datosMapaMentalActual.elementos) || {};
-    const topologia = (datosMapaMentalActual && datosMapaMentalActual.topologia) || { enlacesCtoEmpalme: {} };
-    const enlacesCtoEmp = topologia.enlacesCtoEmpalme || {};
+    const rawEls = (datosRegistroActual && datosRegistroActual.elementos) || {};
 
-    // Filtrar estrictamente cualquier código N-00 / 00-xx inválido
-    const mapaEls = {};
-    let maxNumNodoDetectado = 0;
+    const gruposPorNodo = {};
+    let totalVerdes = 0, totalNaranjas = 0;
 
-    Object.keys(rawEls).forEach(cod => {
+    Object.keys(rawEls).sort().forEach(cod => {
       const desc = descomponerCodigoEnRuleta(cod);
-      if (!desc) return; // Ignora N-00, E-00-xx, 00-xx
-      mapaEls[desc.codigo] = { ...rawEls[cod], codigo: desc.codigo, tipo: desc.tipo };
-      if (desc.tipo !== "EMPALME_RA" && desc.numNodo > maxNumNodoDetectado) {
-        maxNumNodoDetectado = desc.numNodo;
-      }
+      if (!desc) return; // Ignora cualquier N-00
+      const el = rawEls[cod];
+      // Solo mostrar elementos que tienen fotos subidas en Drive
+      if (!el.archivos || el.archivos.length === 0) return;
+
+      if (el.completo) totalVerdes++;
+      else totalNaranjas++;
+
+      const nKey = desc.nodo;
+      if (!gruposPorNodo[nKey]) gruposPorNodo[nKey] = [];
+      gruposPorNodo[nKey].push({ ...el, desc });
     });
 
-    const codigosTodos = Object.keys(mapaEls).sort();
-    if (codigosTodos.length === 0) {
-      document.getElementById("resumenGlobalPueblo").innerText = "Sin elementos registrados";
+    const listaNodos = Object.keys(gruposPorNodo).sort();
+    const totalGps = Object.keys((datosRegistroActual && datosRegistroActual.coordenadas) || {}).length;
+    document.getElementById("resumenGlobalPueblo").innerText =
+      `Carpetas en Drive: ${totalVerdes + totalNaranjas}  ·  🟢 Completas: ${totalVerdes}  ·  🟠 Incompletas: ${totalNaranjas}  ·  📍 ${totalGps} GPS del plano`;
+
+    if (listaNodos.length === 0) {
       cont.innerHTML = `
-        <div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">
-          No hay elementos registrados en <b>${pueblo}</b>.<br>
-          Sube una foto o carga el archivo <b>📐 Plano .DWG</b> arriba.
+        <div class="box" style="text-align:center; padding:22px; color:var(--muted); font-size:12.5px;">
+          Aún no hay carpetas de fotos subidas en el Drive de <b>${pueblo}</b>.
         </div>`;
       return;
     }
 
-    let nVerdes = 0, nNaranjas = 0, nRojos = 0;
-    codigosTodos.forEach(c => {
-      const ec = mapaEls[c].estadoColor;
-      if (ec === "VERDE") nVerdes++;
-      else if (ec === "ROJO") nRojos++;
-      else nNaranjas++;
-    });
-    const totalGps = Object.keys((datosMapaMentalActual && datosMapaMentalActual.coordenadas) || {}).length;
-    document.getElementById("resumenGlobalPueblo").innerText =
-      `${codigosTodos.length} elementos (${totalGps} con GPS)  ·  ${nVerdes} completos  ·  ${nNaranjas} incompletos  ·  ${nRojos} pendientes`;
+    cont.innerHTML = listaNodos.map(nName => {
+      const cajas = gruposPorNodo[nName];
+      const incompletasNodo = cajas.filter(x => !x.completo).length;
+      const abierto = nodosAbiertosRegistro.has(nName);
+      const badgeNodo = incompletasNodo === 0
+        ? `<span style="color:var(--green-soft); font-size:11.5px; font-weight:600;">🟢 ${cajas.length} completas</span>`
+        : `<span style="color:var(--orange-soft); font-size:11.5px; font-weight:600;">🟠 ${incompletasNodo} incompleta(s) de ${cajas.length}</span>`;
 
-    const empalmesRA = [];
-    const arbolNodos = {};
+      const cuerpoHtml = cajas.map(el => {
+        const infoTit = construirCodigoYTitulo(el.desc.tipo, el.desc.numNodo, el.desc.numCaja, pueblo);
+        const vistasReq = el.tipo === "CTO"
+          ? ["Abierta", "Cerrada", "Potencia", "Panorámica"]
+          : ["Abierta", "Cerrada", "Panorámica"];
+        const vMap = el.vistas || {};
 
-    const asegurarNodoEnArbol = (nodoName) => {
-      if (!nodoName || nodoName === "N-00") return;
-      if (!arbolNodos[nodoName]) {
-        arbolNodos[nodoName] = { propioNodo: null, empalmesRD: {}, ctosDirectas: [] };
-      }
-    };
+        const lineaVistasHtml = vistasReq.map(v => {
+          const ok = Boolean(vMap[v]);
+          return `<span class="${ok ? 'v-in-drive' : 'v-missing-drive'}">${v} (${ok ? 'está en drive' : 'falta en drive'})</span>`;
+        }).join(" &nbsp;·&nbsp; ");
 
-    // Asegurar todos los nodos desde N-01 hasta el máximo nodo del plano para ver también los vacíos
-    for (let i = 1; i <= maxNumNodoDetectado; i++) {
-      asegurarNodoEnArbol(`N-${String(i).padStart(2, "0")}`);
-    }
+        const safeId = el.codigo.replace(/[^a-zA-Z0-9_-]/g, "_");
 
-    codigosTodos.forEach(cod => {
-      const el = mapaEls[cod];
-      const desc = descomponerCodigoEnRuleta(cod);
-      if (!desc) return;
-
-      if (desc.tipo === "EMPALME_RA") {
-        empalmesRA.push(el);
-      } else {
-        const nName = desc.nodo;
-        asegurarNodoEnArbol(nName);
-        if (desc.tipo === "NODO") {
-          arbolNodos[nName].propioNodo = el;
-        } else if (desc.tipo === "EMPALME_RD") {
-          if (!arbolNodos[nName].empalmesRD[cod]) arbolNodos[nName].empalmesRD[cod] = { info: el, ctosHijas: [] };
-          else arbolNodos[nName].empalmesRD[cod].info = el;
-        }
-      }
-    });
-
-    codigosTodos.forEach(cod => {
-      const el = mapaEls[cod];
-      const desc = descomponerCodigoEnRuleta(cod);
-      if (!desc || desc.tipo !== "CTO") return;
-      const nName = desc.nodo;
-      asegurarNodoEnArbol(nName);
-
-      const empPadre = enlacesCtoEmp[cod];
-      if (empPadre && arbolNodos[nName].empalmesRD[empPadre]) {
-        arbolNodos[nName].empalmesRD[empPadre].ctosHijas.push(el);
-      } else {
-        arbolNodos[nName].ctosDirectas.push(el);
-      }
-    });
-
-    // Renderiza un elemento (CTO / Empalme / Fotos Nodo) con su panel flotante a la derecha sin desplazar el mapa
-    const renderizarElementoConFlotanteDerecho = (el, etiquetaMostrada) => {
-      const activo = (elementoDesplegadoMapa === el.codigo);
-      const vistasReq = el.tipo === "CTO"
-        ? ["Abierta", "Cerrada", "Potencia", "Panorámica"]
-        : ["Abierta", "Cerrada", "Panorámica"];
-      const vMap = el.vistas || {};
-
-      const itemsListaHtml = vistasReq.map(v => {
-        const ok = Boolean(vMap[v]);
-        return `<li class="${ok ? 'v-in-drive' : 'v-missing-drive'}">${v} (${ok ? 'está en drive' : 'falta en drive'})</li>`;
+        return `
+          <div class="drive-el-item">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <span style="font-size:13.5px; white-space:pre;">${el.completo ? '🟢' : '🟠'} ${infoTit.tituloHtml}</span>
+              <div style="display:flex; gap:6px;">
+                ${!el.completo ? `<button type="button" class="small-btn" style="background:var(--green-btn); border:none;" onclick="irACompletarCaja('${el.codigo}')">+ Subir</button>` : ""}
+                <button type="button" class="small-btn" onclick="cargarMiniaturasInline('${el.folderId}', '${el.codigo}', 'gal_${safeId}')">🖼️ Fotos</button>
+                <a href="${el.folderUrl || '#'}" target="_blank" class="small-btn">Drive ↗</a>
+              </div>
+            </div>
+            <div style="font-size:11.5px; margin-top:6px; line-height:1.5;">${lineaVistasHtml}</div>
+            <div id="gal_${safeId}" class="thumbs" style="display:none; margin-top:8px;"></div>
+          </div>`;
       }).join("");
 
-      const urlDrv = el.folderUrl || (datosMapaMentalActual && datosMapaMentalActual.puebloUrl) || "#";
-      const safeId = el.codigo.replace(/[^a-zA-Z0-9_-]/g, "_");
-
       return `
-        <div class="mm-leaf-row">
-          <span class="mm-label text-${el.estadoColor} ${activo ? 'active-item' : ''}" onclick="toggleFlotanteElementoMapaMental(event, '${el.codigo}')">
-            <span class="mm-dot dot-${el.estadoColor}"></span>
-            <span>${etiquetaMostrada}</span>
-          </span>
-          ${activo ? `
-            <div class="mm-floating-right" onclick="event.stopPropagation()">
-              <div style="font-size:12px; font-weight:700; color:#fff; margin-bottom:4px; display:flex; justify-content:space-between;">
-                <span>${etiquetaMostrada}</span>
-                <span style="cursor:pointer; color:var(--muted);" onclick="toggleFlotanteElementoMapaMental(event, '${el.codigo}')">✕</span>
-              </div>
-              <ul class="mm-view-list">${itemsListaHtml}</ul>
-              <div class="mm-inline-actions">
-                <button type="button" class="mm-action-link" onclick="irACompletarCaja('${el.codigo}')">+ Subir fotos</button>
-                ${el.folderId ? `<button type="button" class="mm-action-link" onclick="cargarMiniaturasInline('${el.folderId}', '${el.codigo}', 'gal_${safeId}')">Imágenes</button>` : ""}
-                <a href="${urlDrv}" target="_blank" class="mm-action-link">Drive ↗</a>
-              </div>
-              <div id="gal_${safeId}" class="thumbs" style="display:none; margin-top:6px;"></div>
-            </div>` : ""}
-        </div>`;
-    };
-
-    let html = `<div class="mm-olt"><span class="mm-olt-dot"></span> OLT ${pueblo}</div><div class="mm-branch-group">`;
-
-    if (empalmesRA.length > 0) {
-      const raAbierto = nodosDesplegadosMapa.has("RA");
-      html += `
-        <div class="mm-node-row">
-          <div class="mm-node-header" onclick="toggleNodoMapaMental(event, 'RA')">
-            <span class="mm-arrow ${raAbierto ? 'open' : ''}">▶</span>
-            <span class="mm-node-title">Red Alimentación (RA)</span>
-            <span class="mm-plan-tag tag-terminado">(Terminado)</span>
+        <div class="drive-node-card">
+          <div class="drive-node-header" onclick="toggleNodoRegistro('${nName}')">
+            <span style="font-size:14px; font-weight:700; color:#f8fafc;">${abierto ? '▾' : '▸'} &nbsp;${nName === 'Empalmes RA' ? 'Empalmes RA' : `Nodo   ${nName}`}</span>
+            ${badgeNodo}
           </div>
-          ${raAbierto ? `
-            <div class="mm-sub-group">
-              ${empalmesRA.map(e => renderizarElementoConFlotanteDerecho(e, e.codigo)).join("")}
-            </div>` : ""}
+          ${abierto ? `<div class="drive-node-body">${cuerpoHtml}</div>` : ""}
         </div>`;
-    }
-
-    Object.keys(arbolNodos).sort().forEach(nName => {
-      if (nName === "N-00") return;
-      const nData = arbolNodos[nName];
-      const elNodo = nData.propioNodo || {
-        codigo: nName,
-        tipo: "NODO",
-        vistas: { Abierta: false, Cerrada: false, Panorámica: false },
-        faltan: ["Abierta", "Cerrada"],
-        estadoColor: "ROJO"
-      };
-      if (!mapaEls[nName]) mapaEls[nName] = elNodo;
-
-      // Determinar si el Nodo tiene ramificaciones/CTOs en el plano o está vacío
-      const totalCtosDelNodo = nData.ctosDirectas.length +
-        Object.values(nData.empalmesRD).reduce((acc, e) => acc + (e.ctosHijas ? e.ctosHijas.length : 0), 0);
-      const tieneRamificaciones = totalCtosDelNodo > 0 || Object.keys(nData.empalmesRD).length > 0;
-
-      const etiquetaPlan = tieneRamificaciones
-        ? `<span class="mm-plan-tag tag-terminado">(Terminado)</span>`
-        : `<span class="mm-plan-tag tag-falta">(Falta por hacer)</span>`;
-
-      const estaNodoDesplegado = nodosDesplegadosMapa.has(nName);
-
-      let hijosHtml = "";
-      if (estaNodoDesplegado) {
-        hijosHtml = `<div class="mm-sub-group">`;
-        // Propio armario/caja del Nodo para sus fotos
-        hijosHtml += renderizarElementoConFlotanteDerecho(elNodo, `Fotos ${nName}`);
-
-        // 1º CTOs directas de Nodo
-        nData.ctosDirectas.forEach(c => {
-          hijosHtml += renderizarElementoConFlotanteDerecho(c, `CTO ${c.codigo}`);
-        });
-
-        // 2º Empalmes RD y sus CTOs hijas
-        Object.keys(nData.empalmesRD).sort().forEach(eCod => {
-          const empObj = nData.empalmesRD[eCod];
-          const ctosHijas = empObj.ctosHijas || [];
-          hijosHtml += `
-            <div class="mm-node-row">
-              ${renderizarElementoConFlotanteDerecho(empObj.info, `Empalme ${eCod}`)}
-              ${ctosHijas.length > 0 ? `
-                <div class="mm-sub-group">
-                  ${ctosHijas.map(ch => renderizarElementoConFlotanteDerecho(ch, `CTO ${ch.codigo}`)).join("")}
-                </div>` : ""}
-            </div>`;
-        });
-        hijosHtml += `</div>`;
-      }
-
-      html += `
-        <div class="mm-node-row">
-          <div class="mm-node-header" onclick="toggleNodoMapaMental(event, '${nName}')">
-            <span class="mm-arrow ${estaNodoDesplegado ? 'open' : ''}">▶</span>
-            <span class="mm-dot dot-${elNodo.estadoColor}"></span>
-            <span class="mm-node-title">Nodo ${nName}</span>
-            ${etiquetaPlan}
-          </div>
-          ${hijosHtml}
-        </div>`;
-    });
-
-    html += `</div>`;
-    cont.innerHTML = html;
+    }).join("");
   }
 
   async function cargarMiniaturasInline(folderId, codigoActual, contenedorId) {
@@ -2069,7 +2238,7 @@
     if (!box) return;
     if (box.style.display === "grid") { box.style.display = "none"; return; }
     box.style.display = "grid";
-    box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--muted);">Cargando...</div>`;
+    box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--muted);">Cargando miniaturas...</div>`;
     try {
       const r = await fetch(`${obtenerEndpoint()}?action=getFotosElemento&folderId=${encodeURIComponent(folderId)}`, { redirect: "follow" });
       const d = await r.json();
@@ -2079,15 +2248,16 @@
       }
       box.innerHTML = d.fotos.map(f => `
         <div class="thumb-card">
-          <img src="${f.base64}" style="height:75px;" onclick="abrirZoom('${f.base64}')" />
+          <img src="${f.base64}" style="height:95px;" onclick="abrirZoom('${f.base64}')" />
           <button class="dots-btn" onclick="abrirMenuTresPuntos(event, '${f.fileId}')">⋮</button>
           <div id="menuDots_${f.fileId}" class="dots-menu" style="display:none;" onclick="event.stopPropagation()">
-            <div onclick="abrirModalMoverDesdeEstadoRed('${f.fileId}', '${codigoActual}', '${f.vista}')">📂 Mover</div>
+            <div onclick="abrirModalMoverDesdeEstadoRed('${f.fileId}', '${codigoActual}', '${f.vista}')">📂 Mover de carpeta</div>
             <div style="color:#f87171;" onclick="eliminarFotoDeDrive('${f.fileId}')">🗑️ Eliminar</div>
           </div>
+          <div style="font-size:10.5px; margin-top:4px; color:var(--muted); word-break:break-all;">${f.nombre}</div>
         </div>`).join("");
     } catch (e) {
-      box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--red);">Error.</div>`;
+      box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--red);">Error al cargar.</div>`;
     }
   }
 
@@ -2098,7 +2268,7 @@
     if (m) m.style.display = "block";
   }
 
-  // ==================== 3. MOTOR LECTOR DE PLANOS .DWG (COORDENADAS + RAMIFICACIONES) ====================
+  // ==================== 3. LECTOR SILENCIOSO DE COORDENADAS .DWG EN DRIVE ====================
   function convertirUtm30AGps(x, y) {
     if (!x || !y || isNaN(x) || isNaN(y) || x < 100000 || x > 900000 || y < 3500000 || y > 4800000) return null;
     const a = 6378137.0;
@@ -2149,15 +2319,11 @@
     return null;
   }
 
-  async function extraerDatosDeArrayBufferPlano(arrayBuffer) {
+  async function extraerCoordenadasDePlanoBuffer(arrayBuffer) {
     const uint8 = new Uint8Array(arrayBuffer);
     const headerAscii = new TextDecoder("iso-8859-1").decode(uint8.slice(0, 12));
     const regexCod = /\b(?:NODO[\s-]*\d{1,2}|N-\d{1,2}|E-\d{1,2}-\d{1,2}|E-[A-Z]{2,6}-\d{1,2}|\d{2}-\d{2})\b/gi;
-
-    const elementosSet = new Set();
     const coordenadasExtraidas = {};
-    const puntosUtmPorCodigo = {};
-    const polilineasCables = [];
 
     if (headerAscii.startsWith("AC10")) {
       const dwgEngine = await cargarMotorLibreDwgWasm();
@@ -2167,147 +2333,35 @@
           const db = dwgEngine.convert(ptr);
           dwgEngine.dwg_free(ptr);
 
-          const procesarListaEntidades = (lista) => {
+          const procesarEntidades = (lista) => {
             (lista || []).forEach(ent => {
               const texto = [ent.text, ent.string, ent.value, ent.tag, ent.name, ent.block, ent.contents].filter(Boolean).join(" ").replace(/NODO\s*/gi, "N-");
               const pos = ent.insertionPoint || ent.startPoint || ent.position || ent.center || ent.alignmentPoint || (ent.vertices && ent.vertices[0]);
               const x = pos ? (pos.x !== undefined ? pos.x : pos[0]) : null;
               const y = pos ? (pos.y !== undefined ? pos.y : pos[1]) : null;
-
-              if (texto) {
+              if (texto && x && y) {
                 const matches = String(texto).match(regexCod) || [];
                 matches.forEach(m => {
-                  const normStr = m.toUpperCase().replace(/NODO[\s-]*/, "N-");
-                  const desc = descomponerCodigoEnRuleta(normStr);
-                  if (desc) {
-                    elementosSet.add(desc.codigo);
-                    if (desc.nodo && desc.nodo.startsWith("N-")) elementosSet.add(desc.nodo);
-                    const gps = convertirUtm30AGps(x, y);
-                    if (gps) {
-                      coordenadasExtraidas[desc.codigo] = { lat: gps.lat, lng: gps.lng, nodo: desc.nodo, tipo: desc.tipo };
-                      puntosUtmPorCodigo[desc.codigo] = { x, y, tipo: desc.tipo, nodo: desc.nodo };
-                    }
+                  const desc = descomponerCodigoEnRuleta(m);
+                  const gps = convertirUtm30AGps(x, y);
+                  if (desc && gps) {
+                    coordenadasExtraidas[desc.codigo] = { lat: gps.lat, lng: gps.lng, nodo: desc.nodo, tipo: desc.tipo };
                   }
                 });
-              }
-
-              if (ent.vertices && ent.vertices.length >= 2) {
-                const pts = ent.vertices.map(v => ({ x: v.x !== undefined ? v.x : v[0], y: v.y !== undefined ? v.y : v[1] })).filter(p => p.x && p.y);
-                if (pts.length >= 2) polilineasCables.push(pts);
-              } else if (ent.startPoint && ent.endPoint) {
-                polilineasCables.push([
-                  { x: ent.startPoint.x, y: ent.startPoint.y },
-                  { x: ent.endPoint.x, y: ent.endPoint.y }
-                ]);
               }
             });
           };
 
           if (db) {
-            procesarListaEntidades(db.entities);
+            procesarEntidades(db.entities);
             if (db.tables && db.tables.BLOCK_RECORD && db.tables.BLOCK_RECORD.entries) {
-              db.tables.BLOCK_RECORD.entries.forEach(blk => procesarListaEntidades(blk.entities));
+              db.tables.BLOCK_RECORD.entries.forEach(blk => procesarEntidades(blk.entities));
             }
           }
-        } catch (errWasm) {}
-      }
-
-      const textoIso = new TextDecoder("iso-8859-1").decode(uint8).replace(/NODO\s*/gi, "N-");
-      const textoUtf16 = new TextDecoder("utf-16le").decode(uint8).replace(/NODO\s*/gi, "N-");
-      [...(textoIso.match(regexCod) || []), ...(textoUtf16.match(regexCod) || [])].forEach(m => {
-        const desc = descomponerCodigoEnRuleta(m.toUpperCase().replace(/NODO[\s-]*/, "N-"));
-        if (desc) {
-          elementosSet.add(desc.codigo);
-          if (desc.nodo && desc.nodo.startsWith("N-")) elementosSet.add(desc.nodo);
-        }
-      });
-    } else {
-      const rawText = new TextDecoder("iso-8859-1").decode(uint8);
-      const lineas = rawText.split(/\r?\n/);
-      let xActual = null, yActual = null, textoActual = "";
-
-      for (let i = 0; i < lineas.length - 1; i += 2) {
-        const code = lineas[i].trim();
-        const val = lineas[i + 1].trim();
-        if (code === "0") {
-          if (textoActual) {
-            const cleanT = textoActual.replace(/NODO\s*/gi, "N-");
-            const matches = cleanT.match(regexCod) || [];
-            matches.forEach(m => {
-              const desc = descomponerCodigoEnRuleta(m);
-              if (desc) {
-                elementosSet.add(desc.codigo);
-                if (desc.nodo && desc.nodo.startsWith("N-")) elementosSet.add(desc.nodo);
-                const gps = convertirUtm30AGps(xActual, yActual);
-                if (gps) {
-                  coordenadasExtraidas[desc.codigo] = { lat: gps.lat, lng: gps.lng, nodo: desc.nodo, tipo: desc.tipo };
-                  puntosUtmPorCodigo[desc.codigo] = { x: xActual, y: yActual, tipo: desc.tipo, nodo: desc.nodo };
-                }
-              }
-            });
-          }
-          xActual = null; yActual = null; textoActual = "";
-        } else if (code === "10") xActual = parseFloat(val);
-        else if (code === "20") yActual = parseFloat(val);
-        else if (code === "1" || code === "3" || code === "2") textoActual += " " + val;
+        } catch (e) {}
       }
     }
-
-    // Calcular si cada CTO sale directa del Nodo o cuelga de un Empalme RD
-    const enlacesCtoEmpalme = {};
-    const codigosConUtm = Object.keys(puntosUtmPorCodigo);
-    const ctosUtm = codigosConUtm.filter(c => puntosUtmPorCodigo[c].tipo === "CTO");
-    const empalmesUtm = codigosConUtm.filter(c => puntosUtmPorCodigo[c].tipo === "EMPALME_RD");
-
-    ctosUtm.forEach(cCod => {
-      const pCto = puntosUtmPorCodigo[cCod];
-      const pNodo = puntosUtmPorCodigo[pCto.nodo];
-      const empsMismoNodo = empalmesUtm.filter(eCod => puntosUtmPorCodigo[eCod].nodo === pCto.nodo);
-      if (empsMismoNodo.length === 0) return;
-
-      let empPorCable = null;
-      let menorErrorCable = 40;
-      empsMismoNodo.forEach(eCod => {
-        const pEmp = puntosUtmPorCodigo[eCod];
-        polilineasCables.forEach(pts => {
-          const pIni = pts[0], pFin = pts[pts.length - 1];
-          const dDirecta = Math.hypot(pIni.x - pEmp.x, pIni.y - pEmp.y) + Math.hypot(pFin.x - pCto.x, pFin.y - pCto.y);
-          const dInversa = Math.hypot(pFin.x - pEmp.x, pFin.y - pEmp.y) + Math.hypot(pIni.x - pCto.x, pIni.y - pCto.y);
-          const minD = Math.min(dDirecta, dInversa);
-          if (minD < menorErrorCable) {
-            menorErrorCable = minD;
-            empPorCable = eCod;
-          }
-        });
-      });
-
-      if (empPorCable) {
-        enlacesCtoEmpalme[cCod] = empPorCable;
-        return;
-      }
-
-      let empMasCercano = null;
-      let distEmpMin = Infinity;
-      empsMismoNodo.forEach(eCod => {
-        const pEmp = puntosUtmPorCodigo[eCod];
-        const d = Math.hypot(pCto.x - pEmp.x, pCto.y - pEmp.y);
-        if (d < distEmpMin) {
-          distEmpMin = d;
-          empMasCercano = eCod;
-        }
-      });
-
-      const distAlNodo = pNodo ? Math.hypot(pCto.x - pNodo.x, pCto.y - pNodo.y) : Infinity;
-      if (empMasCercano && distEmpMin < distAlNodo && distEmpMin < 240) {
-        enlacesCtoEmpalme[cCod] = empMasCercano;
-      }
-    });
-
-    return {
-      elementosPlano: Array.from(elementosSet).sort(),
-      coordenadas: coordenadasExtraidas,
-      enlacesCtoEmpalme: enlacesCtoEmpalme
-    };
+    return coordenadasExtraidas;
   }
 
   async function verificarYProcesarDwgDeDrive(provincia, pueblo, forzar) {
@@ -2321,83 +2375,35 @@
       if (!d || !d.tieneDwgPendiente || !d.base64) return;
 
       banner.style.display = "block";
-      banner.innerText = `Sincronizando plano de Drive (${d.nombreDwg})...`;
+      banner.innerText = `📐 Sincronizando coordenadas del plano ${d.nombreDwg}...`;
 
       const binStr = atob(d.base64);
       const bytes = new Uint8Array(binStr.length);
       for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
 
-      const extraido = await extraerDatosDeArrayBufferPlano(bytes.buffer);
+      const coords = await extraerCoordenadasDePlanoBuffer(bytes.buffer);
 
       await fetch(ep, {
         method: "POST",
         redirect: "follow",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({
-          action: "guardarTopologiaPlano",
+          action: "guardarCoordenadasPlano",
           provincia,
           pueblo,
           fechaDwg: d.fechaDwg,
-          elementosPlano: extraido.elementosPlano,
-          coordenadas: extraido.coordenadas,
-          enlacesCtoEmpalme: extraido.enlacesCtoEmpalme
+          coordenadas: coords
         })
       });
 
       banner.style.display = "none";
-      await cargarMapaMentalPueblo(true);
+      precargarRegistroYDwgSilencioso(provincia, pueblo);
     } catch (e) {
       banner.style.display = "none";
     }
   }
 
-  async function subirPlanoDwgManual(ev) {
-    const file = ev.target.files[0];
-    if (!file) return;
-    ev.target.value = "";
-
-    const { provincia, pueblo } = seleccionPuebloEstado;
-    const banner = document.getElementById("bannerProgresoDwg");
-    banner.style.display = "block";
-    banner.innerText = `Extrayendo nodos, coordenadas GPS y ramificaciones de ${file.name}...`;
-
-    try {
-      const buffer = await file.arrayBuffer();
-      const extraido = await extraerDatosDeArrayBufferPlano(buffer);
-
-      if (extraido.elementosPlano.length === 0) {
-        banner.style.display = "none";
-        return alert("No se detectaron códigos válidos en este archivo.");
-      }
-
-      banner.innerText = `Guardando ${extraido.elementosPlano.length} elementos y ${Object.keys(extraido.coordenadas).length} coordenadas GPS...`;
-
-      const resp = await fetch(obtenerEndpoint(), {
-        method: "POST",
-        redirect: "follow",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          action: "guardarTopologiaPlano",
-          provincia,
-          pueblo,
-          fechaDwg: Date.now(),
-          elementosPlano: extraido.elementosPlano,
-          coordenadas: extraido.coordenadas,
-          enlacesCtoEmpalme: extraido.enlacesCtoEmpalme
-        })
-      });
-      const res = await resp.json();
-      if (res.error) throw new Error(res.error);
-
-      banner.style.display = "none";
-      await cargarMapaMentalPueblo(true);
-    } catch (e) {
-      banner.style.display = "none";
-      alert("Aviso al leer el plano: " + (e && e.message ? e.message : String(e)));
-    }
-  }
-
-  // --- MOVER Y ELIMINAR DESDE EL MAPA MENTAL ---
+  // --- MOVER Y ELIMINAR DESDE EL REGISTRO DE DRIVE ---
   function abrirModalMoverDesdeEstadoRed(fileId, codigoOrigen, vistaOrigen) {
     cerrarFlotantes();
     const { provincia, pueblo } = seleccionPuebloEstado;
@@ -2466,7 +2472,7 @@
       }
 
       cerrarModalMover();
-      await cargarMapaMentalPueblo(true);
+      await cargarRegistroDrivePueblo(true);
     } catch (e) {
       alert("Error al mover: " + e.message);
     } finally {
@@ -2491,30 +2497,28 @@
           puebloOrigen: pueblo
         })
       });
-      await cargarMapaMentalPueblo(true);
+      await cargarRegistroDrivePueblo(true);
     } catch (e) {}
   }
 
-  // Ir a completar un elemento desde el Mapa Mental marcando en verde las vistas que ya están en Drive
   function irACompletarCaja(codigo) {
     const { provincia, pueblo } = seleccionPuebloEstado;
     const desc = descomponerCodigoEnRuleta(codigo);
     if (!desc) return;
 
     const infoTit = construirCodigoYTitulo(desc.tipo, desc.numNodo, desc.numCaja, pueblo);
-    const elEnMapa = (datosMapaMentalActual && datosMapaMentalActual.elementos && datosMapaMentalActual.elementos[codigo]) || {};
-    const vistasYaEnDrive = elEnMapa.vistas || {};
+    const elEnReg = (datosRegistroActual && datosRegistroActual.elementos && datosRegistroActual.elementos[codigo]) || {};
+    const vistasYaEnDrive = elEnReg.vistas || {};
 
     modoCompletando = {
       codigo: infoTit.codigo,
-      titulo: infoTit.titulo,
+      titulo: infoTit.tituloPlano,
       tipo: desc.tipo,
       numNodo: desc.numNodo,
       numCaja: desc.numCaja,
       vistasEnDrive: vistasYaEnDrive
     };
 
-    elementoDesplegadoMapa = null;
     cambiarTab("rafaga");
 
     const nuevoId = "b_" + Date.now();
@@ -2525,12 +2529,13 @@
       tipo: desc.tipo,
       numNodo: desc.numNodo,
       numCaja: desc.numCaja,
-      fijadoManualmente: true,
+      bloqueadoPorCompletar: true,
+      codigoYaDetectadoPorOcr: true,
       fotos: []
     }];
     ruletaAbiertaId = null;
 
-    document.getElementById("tituloGrandeCompletando").innerText = `Completando ${infoTit.titulo}`;
+    document.getElementById("tituloGrandeCompletando").innerText = `Completando ${infoTit.tituloPlano}`;
     document.getElementById("bannerCompletandoCaja").style.display = "flex";
     renderTarjetas();
   }
