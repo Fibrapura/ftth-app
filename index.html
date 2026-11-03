@@ -1,0 +1,2539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
+  <meta name="theme-color" content="#0b1326" />
+  <title>FTTH Studio · Captura & Red</title>
+  <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
+  <style>
+    :root {
+      --bg: #0b1326;
+      --surface: rgba(20, 31, 56, 0.88);
+      --border: rgba(148, 163, 184, 0.16);
+      --border-focus: rgba(56, 189, 248, 0.55);
+      --accent: #38bdf8;
+      --blue-btn: linear-gradient(145deg, #2563eb, #1d4ed8);
+      --green-btn: linear-gradient(145deg, #10b981, #059669);
+      --green-text: #34d399;
+      --orange-soft: #fdba74;
+      --green-soft: #6ee7b7;
+      --red: #f87171;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 50% 0%, #172a54 0%, var(--bg) 75%);
+      color: var(--text);
+      padding: 12px;
+      max-width: 650px;
+      margin-inline: auto;
+      padding-bottom: 100px;
+      min-height: 100vh;
+      letter-spacing: -0.01em;
+    }
+
+    details.config-bar {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid var(--border);
+      padding: 9px 12px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      backdrop-filter: blur(10px);
+    }
+    summary { font-weight: 600; cursor: pointer; font-size: 12px; color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    select, input {
+      width: 100%; padding: 8px 10px; border-radius: 9px;
+      border: 1px solid var(--border); background: rgba(11, 19, 38, 0.9);
+      color: var(--text); font-size: 12.5px; font-weight: 600; outline: none;
+    }
+    select:focus, input:focus { border-color: var(--border-focus); }
+
+    /* Pestañas vivas */
+    .tabs {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+      background: rgba(15, 23, 42, 0.85); padding: 5px;
+      border-radius: 14px; border: 1px solid var(--border); margin-bottom: 14px;
+    }
+    .tab {
+      padding: 10px; text-align: center; border-radius: 10px;
+      font-weight: 600; font-size: 13px; color: var(--muted);
+      cursor: pointer; transition: all 0.2s ease;
+    }
+    .tab.active {
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+
+    .box {
+      background: var(--surface);
+      padding: 14px;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Banner grande cuando se viene del Mapa Mental a completar una CTO */
+    .completing-banner {
+      background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(15, 23, 42, 0.95));
+      border: 1.5px solid #38bdf8;
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 6px 18px rgba(56, 189, 248, 0.18);
+    }
+    .completing-sub { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #93c5fd; }
+    .completing-big { font-size: 20px; font-weight: 800; color: #fff; margin-top: 2px; }
+    .completing-exit {
+      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #e2e8f0; border-radius: 8px; padding: 6px 10px; font-size: 11.5px; font-weight: 600; cursor: pointer;
+    }
+
+    /* 4 Botones de Vista con color vivo por defecto y Verde Esmeralda al completarse */
+    .cam-4-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 10px; }
+    .btn-cam-direct {
+      background: var(--blue-btn);
+      border: 1px solid #60a5fa;
+      color: #ffffff;
+      padding: 10px 4px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      min-height: 58px;
+    }
+    .btn-cam-direct:active { transform: scale(0.95); }
+    .btn-cam-direct .cam-icon { font-size: 15px; }
+    .btn-cam-direct .cam-sub { font-size: 9.5px; font-weight: 600; opacity: 0.9; color: #fde68a; }
+
+    /* Relleno Verde cuando la foto ya está cargada o ya existe en Drive */
+    .btn-cam-direct.loaded {
+      background: var(--green-btn);
+      border-color: #6ee7b7;
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+    }
+    .btn-cam-direct.loaded .cam-sub { color: #d1fae5; }
+
+    .btn-gal-wide {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      border: 1px solid #818cf8;
+      color: #ffffff;
+      padding: 11px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      width: 100%;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transition: transform 0.15s;
+    }
+    .btn-gal-wide:active { transform: scale(0.98); }
+
+    .btn-confirm {
+      background: var(--green-btn);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #6ee7b7;
+      width: 100%;
+      cursor: pointer;
+      margin-top: 14px;
+      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+    }
+
+    /* Tarjeta de Elemento */
+    .element-card {
+      background: rgba(11, 19, 38, 0.82);
+      border: 1px solid rgba(96, 165, 250, 0.28);
+      border-radius: 16px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+    .element-header {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 8px; padding-bottom: 8px; margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .element-title-btn {
+      background: rgba(37, 99, 235, 0.2);
+      border: 1px solid rgba(96, 165, 250, 0.45);
+      color: #f8fafc;
+      padding: 6px 13px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.18s;
+    }
+    .element-title-btn.open {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.25);
+      color: #fff;
+    }
+    .pueblo-pill {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--border);
+      color: #e2e8f0;
+      padding: 6px 11px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* DIALES DE RULETA PLEGADOS POR DEFECTO */
+    .wheel-drawer {
+      background: rgba(8, 13, 26, 0.95);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 14px;
+      padding: 10px 8px;
+      margin-bottom: 10px;
+      box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.65);
+    }
+    .wheel-grid {
+      display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 6px;
+      align-items: center; max-width: 340px; margin-inline: auto;
+    }
+    .wheel-col-label {
+      font-size: 9.5px; color: #94a3b8; text-align: center;
+      font-weight: 700; margin-bottom: 3px; letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .wheel-drum-wrap { position: relative; height: 96px; }
+    .wheel-drum-wrap::after {
+      content: ""; position: absolute; left: 4px; right: 4px; top: 32px; height: 32px;
+      background: rgba(56, 189, 248, 0.12);
+      border-top: 1px solid rgba(56, 189, 248, 0.38);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.38);
+      border-radius: 6px; pointer-events: none;
+    }
+    .wheel-drum {
+      height: 96px; overflow-y: scroll; scroll-snap-type: y mandatory;
+      scrollbar-width: none; -ms-overflow-style: none;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+    }
+    .wheel-drum::-webkit-scrollbar { display: none; }
+    .wheel-spacer { height: 32px; }
+    .wheel-item {
+      height: 32px; display: flex; align-items: center; justify-content: center;
+      scroll-snap-align: center; font-size: 12.5px; font-weight: 500;
+      color: #64748b; cursor: pointer; user-select: none; transition: all 0.12s;
+    }
+    .wheel-item.selected {
+      color: #fff; font-size: 14px; font-weight: 700;
+    }
+
+    .custom-dd-menu {
+      display: none; position: absolute; top: calc(100% + 4px); right: 0; width: 220px;
+      background: #0f172a; border: 1px solid rgba(255,255,255,0.18); border-radius: 12px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.8); z-index: 300; max-height: 250px; overflow-y: auto; text-align: left;
+    }
+    .dd-item { padding: 9px 12px; font-size: 12.5px; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; color: var(--text); }
+    .dd-item:hover { background: rgba(56, 189, 248, 0.18); }
+    .dd-back { background: rgba(30, 41, 59, 0.9); color: var(--accent); font-size: 12px; padding: 8px 12px; font-weight: 700; cursor: pointer; }
+
+    /* Miniaturas */
+    .thumbs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .thumb-card {
+      background: rgba(15, 23, 42, 0.8); padding: 6px;
+      border-radius: 12px; border: 1px solid var(--border); position: relative;
+    }
+    .thumb-card img { width: 100%; height: 114px; object-fit: cover; border-radius: 8px; cursor: zoom-in; display: block; }
+    .del-btn {
+      position: absolute; top: 10px; right: 10px;
+      background: rgba(239, 68, 68, 0.9); color: #fff;
+      border: none; border-radius: 50%;
+      width: 24px; height: 24px; font-size: 11px; font-weight: 700; cursor: pointer;
+    }
+    .ocr-badge {
+      position: absolute; top: 10px; left: 10px;
+      background: rgba(8, 12, 20, 0.88); color: var(--accent);
+      font-size: 10px; font-weight: 600; padding: 2px 7px;
+      border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+    .btn-potencia-toggle {
+      width: 100%; margin-top: 5px; padding: 6px; border-radius: 7px;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      border: 1px solid rgba(96, 165, 250, 0.35); background: rgba(37, 99, 235, 0.18); color: #bfdbfe;
+      transition: all 0.15s;
+    }
+    .btn-potencia-toggle.active {
+      background: rgba(16, 185, 129, 0.22); border-color: #34d399; color: #6ee7b7;
+    }
+
+    .status-line { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px; padding-left: 2px; }
+    .status-line.ok { color: var(--green-text); }
+    .status-line.warn { color: #fbbf24; }
+
+    .dup-box { background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 6px; margin-top: 5px; font-size: 10.5px; }
+    .small-btn { padding: 6px 10px; border-radius: 8px; font-size: 11.5px; font-weight: 600; text-decoration: none; border: 1px solid rgba(96, 165, 250, 0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; color: var(--text); background: rgba(37, 99, 235, 0.25); }
+
+    /* ==================== MAPA MENTAL CON NODOS PLEGADOS Y PANEL FLOTANTE A LA DERECHA ==================== */
+    .mindmap-canvas {
+      background: rgba(11, 19, 38, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 14px 160px 14px; /* Espacio inferior para que el flotante nunca se corte abajo */
+      position: relative;
+      overflow-x: hidden;
+    }
+    .mm-olt {
+      font-size: 13.5px; font-weight: 700; color: #f8fafc;
+      letter-spacing: 0.02em; padding-bottom: 6px;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .mm-olt-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+    .mm-branch-group {
+      margin-left: 11px; padding-left: 14px;
+      border-left: 1.5px solid rgba(148, 163, 184, 0.25);
+      margin-top: 6px; display: flex; flex-direction: column; gap: 9px;
+    }
+    .mm-node-row { position: relative; }
+    .mm-node-row::before {
+      content: ""; position: absolute; left: -14px; top: 12px;
+      width: 11px; height: 1.5px; background: rgba(148, 163, 184, 0.25);
+    }
+    .mm-node-header {
+      display: inline-flex; align-items: center; gap: 7px;
+      cursor: pointer; padding: 3px 6px; border-radius: 6px;
+      user-select: none; transition: background 0.15s;
+    }
+    .mm-node-header:hover { background: rgba(255, 255, 255, 0.05); }
+    .mm-node-title { font-size: 13.5px; font-weight: 600; color: #f1f5f9; }
+    .mm-plan-tag { font-size: 11.5px; font-weight: 500; }
+    .tag-terminado { color: var(--green-soft); }
+    .tag-falta { color: var(--orange-soft); }
+    .mm-arrow { font-size: 10px; color: var(--muted); transition: transform 0.2s; }
+    .mm-arrow.open { transform: rotate(90deg); color: var(--accent); }
+
+    .mm-sub-group {
+      margin-left: 12px; padding-left: 14px;
+      border-left: 1px solid rgba(148, 163, 184, 0.2);
+      margin-top: 5px; display: flex; flex-direction: column; gap: 5px;
+    }
+    .mm-leaf-row {
+      position: relative;
+      padding-block: 2px;
+      display: flex;
+      align-items: center;
+      min-height: 24px;
+    }
+    .mm-leaf-row::before {
+      content: ""; position: absolute; left: -14px; top: 12px;
+      width: 11px; height: 1px; background: rgba(148, 163, 184, 0.2);
+    }
+
+    .mm-label {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12.5px; font-weight: 500; color: #e2e8f0;
+      cursor: pointer; padding: 2px 6px; border-radius: 6px;
+      transition: all 0.15s; user-select: none;
+    }
+    .mm-label.active-item {
+      background: rgba(56, 189, 248, 0.16);
+      outline: 1px solid rgba(56, 189, 248, 0.4);
+    }
+    .mm-dot { width: 6.5px; height: 6.5px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+    .dot-VERDE { background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.5); }
+    .dot-NARANJA { background: #f59e0b; }
+    .dot-MORADO { background: #c084fc; }
+    .dot-ROJO { background: #f87171; }
+
+    .text-VERDE { color: #a7f3d0; }
+    .text-NARANJA { color: #fde68a; }
+    .text-MORADO { color: #e9d5ff; }
+    .text-ROJO { color: #fca5a5; }
+
+    /* PANEL FLOTANTE A LA DERECHA (SUPERPUESTO CON FONDO SEMITRANSPARENTE, CERO DESPLAZAMIENTO VERTICAL) */
+    .mm-floating-right {
+      position: absolute;
+      left: min(115px, calc(100% - 210px));
+      top: -6px;
+      z-index: 250;
+      width: 205px;
+      background: rgba(11, 18, 35, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(56, 189, 248, 0.42);
+      border-radius: 12px;
+      padding: 9px 11px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.75);
+      animation: fadeRight 0.15s ease-out;
+    }
+    @keyframes fadeRight {
+      from { opacity: 0; transform: translateX(-6px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    .mm-view-list {
+      list-style: none; padding: 0; margin: 0;
+      font-size: 11.5px; line-height: 1.65; font-weight: 500;
+    }
+    .v-in-drive { color: #34d399; }
+    .v-missing-drive { color: #f87171; }
+    .mm-inline-actions {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 7px; padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 11px;
+    }
+    .mm-action-link {
+      color: #60a5fa; cursor: pointer; text-decoration: none; font-weight: 600;
+      background: none; border: none; padding: 0; font-size: 11px;
+    }
+
+    .dots-btn { position: absolute; top: 8px; right: 8px; background: rgba(8,12,20,0.85); color: #fff; border: 1px solid var(--border); border-radius: 6px; width: 24px; height: 24px; font-size: 14px; cursor: pointer; }
+    .dots-menu { position: absolute; top: 34px; right: 8px; background: #1e293b; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.75); z-index: 300; width: 165px; overflow: hidden; }
+    .dots-menu div { padding: 8px 10px; font-size: 11.5px; cursor: pointer; border-bottom: 1px solid var(--border); }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(4, 7, 13, 0.85); backdrop-filter: blur(6px); z-index: 9999; justify-content: center; align-items: center; padding: 14px; }
+    .modal-box { background: #111c35; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 16px; padding: 16px; width: 100%; max-width: 390px; max-height: 90vh; overflow-y: auto; }
+    .zoom-img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 10px; }
+    .close-zoom { position: absolute; top: 16px; right: 16px; background: rgba(239,68,68,0.9); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 700; font-size: 12px; cursor: pointer; }
+  </style>
+</head>
+<body onclick="cerrarFlotantes()">
+
+  <!-- 1. VISOR DE FOTO EN GRANDE -->
+  <div id="zoomModal" class="modal-overlay" onclick="cerrarZoom()">
+    <button class="close-zoom" onclick="cerrarZoom()">✕ Cerrar</button>
+    <img id="zoomImg" class="zoom-img" src="" onclick="event.stopPropagation()" />
+  </div>
+
+  <!-- 2. MODAL REGISTRO DE POTENCIA (CON "SUBIR DE GALERÍA" Y "DEJAR SIN FOTO DE POTENCIA") -->
+  <div id="potenciaModal" class="modal-overlay" onclick="document.getElementById('potenciaModal').style.display='none'">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div style="font-size:15px; font-weight:700; color:var(--text); margin-bottom:12px;">⚡ Registro de Potencia</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button class="btn-cam-direct" style="min-height:46px; font-size:13px;" onclick="elegirOpcionPotencia('HACER_FOTO')">
+          📷 Hacer foto de Potencia
+        </button>
+        <button class="btn-gal-wide" style="padding:11px; font-size:13px;" onclick="elegirOpcionPotencia('SUBIR_GALERIA')">
+          🖼️ Subir de galería
+        </button>
+        <button id="btnPotUsarAbierta" class="btn-cam-direct" style="min-height:44px; font-size:12.5px; background:rgba(30,41,59,0.9); border-color:var(--border);" onclick="elegirOpcionPotencia('USAR_ABIERTA')">
+          🔗 Usar foto Abierta ("Abierta con potencia")
+        </button>
+        <button id="btnPotUsarCerrada" class="btn-cam-direct" style="min-height:44px; font-size:12.5px; background:rgba(30,41,59,0.9); border-color:var(--border);" onclick="elegirOpcionPotencia('USAR_CERRADA')">
+          🔗 Usar foto Cerrada ("Cerrada con potencia")
+        </button>
+        <button class="btn-cam-direct" style="min-height:40px; font-size:12px; background:transparent; border-color:var(--border); color:var(--muted); box-shadow:none;" onclick="elegirOpcionPotencia('SIN_POTENCIA')">
+          Dejar sin foto de potencia
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. VISOR DE FOTO YA EXISTENTE EN DRIVE -->
+  <div id="verDriveModal" class="modal-overlay" onclick="document.getElementById('verDriveModal').style.display='none'">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div style="font-size:14px; font-weight:700; color:var(--accent); margin-bottom:8px;">Fotografía actual en Drive</div>
+      <div style="background:#080c14; padding:8px; border-radius:12px; border:1px solid var(--border); text-align:center;">
+        <img id="imgDriveExistenteModal" src="" style="width:100%; max-height:300px; object-fit:contain; border-radius:8px; cursor:zoom-in;" onclick="abrirZoom(this.src)" />
+        <div id="txtNombreDriveModal" style="font-size:11.5px; color:var(--muted); margin-top:6px;">Cargando...</div>
+        <a id="btnIrDriveModal" href="#" target="_blank" class="small-btn" style="margin-top:8px;">📂 Abrir en Google Drive</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MODAL MOVER DE CARPETA -->
+  <div id="moverFotoModal" class="modal-overlay">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div style="font-size:14px; font-weight:700; margin-bottom:10px; color:var(--accent);">Mover fotografía en Drive</div>
+      <div style="margin-bottom:8px; position:relative;">
+        <label style="font-size:11px; color:var(--muted);">1º Pueblo:</label>
+        <button type="button" class="pueblo-pill" style="width:100%; text-align:left; padding:8px 10px; border-radius:8px; margin-top:3px;" onclick="abrirMenuPueblo(event, 'menuMoverPueblo', 'MODAL_MOVER')">
+          <span id="txtMoverPueblo">Seleccionar...</span> <span style="float:right;">▾</span>
+        </button>
+        <div id="menuMoverPueblo" class="custom-dd-menu" style="left:0; width:100%;" onclick="event.stopPropagation()"></div>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1.2fr 1fr; gap:6px; margin-bottom:8px;">
+        <div>
+          <label style="font-size:10.5px; color:var(--muted);">2º Nodo:</label>
+          <input type="number" id="inputNodoMover" min="1" max="99" value="1" />
+        </div>
+        <div>
+          <label style="font-size:10.5px; color:var(--muted);">3º Tipo:</label>
+          <select id="selTipoNuevoModal">
+            <option value="CTO">CTO</option>
+            <option value="EMPALME_RD">Empalme RD</option>
+            <option value="EMPALME_RA">Empalme RA</option>
+            <option value="NODO">Nodo</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10.5px; color:var(--muted);">4º Nº:</label>
+          <input type="number" id="inputNumElementoModal" min="1" max="64" value="1" />
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">
+        <label style="font-size:10.5px; color:var(--muted);">5º Vista:</label>
+        <select id="selMoverVista">
+          <option value="Abierta">Abierta</option>
+          <option value="Abierta con potencia">Abierta con potencia</option>
+          <option value="Cerrada">Cerrada</option>
+          <option value="Cerrada con potencia">Cerrada con potencia</option>
+          <option value="Potencia">Potencia</option>
+          <option value="Panorámica">Panorámica</option>
+        </select>
+      </div>
+      <div id="cajaColisionMover" style="display:none; background:#080c14; border:1px solid #f59e0b; border-radius:10px; padding:8px; margin-top:8px;">
+        <div id="textoColisionMover" style="font-size:11.5px; color:#fcd34d; margin-bottom:6px;"></div>
+        <img id="imgColisionMover" src="" style="width:100%; height:120px; object-fit:cover; border-radius:6px; cursor:zoom-in;" onclick="abrirZoom(this.src)" />
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+          <span style="font-size:10.5px; color:var(--muted);">Foto actual en Drive</span>
+          <a id="linkDriveColision" href="#" target="_blank" class="small-btn">📂 Drive</a>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button class="btn-gal-wide" style="background:transparent; border-color:var(--border); color:var(--muted); box-shadow:none;" onclick="cerrarModalMover()">Cancelar</button>
+        <button id="btnConfirmarMover" class="btn-confirm" style="margin:0; padding:10px;" onclick="confirmarAccionModalMover(false)">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIGURACIÓN DISCRETA -->
+  <details class="config-bar" id="configBox">
+    <summary>
+      <span>⚙️ Ajustes de conexión</span>
+      <span id="badgeEstadoConexion" style="font-size:11px; color:var(--muted);">Verificar</span>
+    </summary>
+    <div style="margin-top: 8px; display:flex; flex-direction:column; gap:6px;">
+      <input type="text" id="scriptUrlInput" placeholder="Enlace Google Apps Script (.../exec)" oninput="guardarYProbarConfiguracion()" />
+      <input type="text" id="geminiKeyInput" placeholder="Claves API OCR" oninput="guardarConfiguracion()" />
+    </div>
+  </details>
+
+  <div class="tabs">
+    <div class="tab active" id="tabRafaga" onclick="cambiarTab('rafaga')">📸 Captura de Campo</div>
+    <div class="tab" id="tabEstado" onclick="cambiarTab('estado')">🧠 Mapa Mental de Red</div>
+  </div>
+
+  <!-- ==================== PESTAÑA 1: CAPTURA DE CAMPO ==================== -->
+  <div id="vistaRafaga" class="box">
+    <!-- Banner grande de Completando Elemento -->
+    <div id="bannerCompletandoCaja" style="display:none;" class="completing-banner">
+      <div>
+        <div class="completing-sub">Subiendo imágenes pendientes</div>
+        <div id="tituloGrandeCompletando" class="completing-big">Completando CTO 17-36</div>
+      </div>
+      <button type="button" class="completing-exit" onclick="salirModoCompletar()">✕ Salir</button>
+    </div>
+
+    <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="archivosSeleccionados(event, 'CAMARA')" />
+    <input type="file" id="galInput" accept="image/*" multiple style="display:none" onchange="archivosSeleccionados(event, 'GALERIA')" />
+    <!-- Input exclusivo para "Subir de galería" dentro de Registro de Potencia -->
+    <input type="file" id="potGalInput" accept="image/*" style="display:none" onchange="archivoPotenciaDesdeGaleria(event)" />
+
+    <!-- 4 BOTONES CON COLOR VIVO Y RELLENO VERDE AUTOMÁTICO -->
+    <div class="cam-4-grid">
+      <button id="btnTop_Abierta" class="btn-cam-direct" onclick="dispararCamaraConVista('Abierta')">
+        <span class="cam-icon" id="icoTop_Abierta">📷</span>
+        <span>Abierta</span>
+        <span class="cam-sub" id="subTop_Abierta"></span>
+      </button>
+      <button id="btnTop_Cerrada" class="btn-cam-direct" onclick="dispararCamaraConVista('Cerrada')">
+        <span class="cam-icon" id="icoTop_Cerrada">📷</span>
+        <span>Cerrada</span>
+        <span class="cam-sub" id="subTop_Cerrada"></span>
+      </button>
+      <button id="btnTop_Potencia" class="btn-cam-direct" onclick="abrirMenuBotonPotencia()">
+        <span class="cam-icon" id="icoTop_Potencia">⚡</span>
+        <span>Potencia</span>
+        <span class="cam-sub" id="subTop_Potencia"></span>
+      </button>
+      <button id="btnTop_Panorámica" class="btn-cam-direct" onclick="dispararCamaraConVista('Panorámica')">
+        <span class="cam-icon" id="icoTop_Panorámica">📷</span>
+        <span>Panorámica</span>
+        <span class="cam-sub" id="subTop_Panorámica"></span>
+      </button>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center;">
+      <button class="btn-gal-wide" onclick="document.getElementById('galInput').click()">
+        🖼️ Añadir lote desde Galería o PC
+      </button>
+      <button onclick="limpiarSesionActual()" title="Limpiar lote" style="background:rgba(30,41,59,0.7); border:1px solid var(--border); color:#e2e8f0; border-radius:12px; padding:11px 13px; font-size:13px; cursor:pointer;">🗑️</button>
+    </div>
+
+    <div id="contenedorTarjetas"></div>
+
+    <div id="msgEstado" style="margin-top:10px; text-align:center; font-weight:600; font-size:13px;"></div>
+
+    <button id="btnSubirTodas" class="btn-confirm" style="display:none;" onclick="subirTodoADrive()">
+      ✅ Subir a Google Drive
+    </button>
+  </div>
+
+  <!-- ==================== PESTAÑA 2: MAPA MENTAL DE RED ==================== -->
+  <div id="vistaEstado" style="display:none;">
+    <div class="box" style="padding:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+        <div style="position:relative; flex:1; min-width:170px;">
+          <button type="button" class="pueblo-pill" style="width:100%; text-align:left; padding:8px 12px; border-radius:10px; color:var(--text);" onclick="abrirMenuPueblo(event, 'menuEstadoPueblo', 'ESTADO_RED')">
+            <span id="txtEstadoPueblo">📍 Águilas (Murcia)</span> <span style="float:right; opacity:0.7;">▾</span>
+          </button>
+          <div id="menuEstadoPueblo" class="custom-dd-menu" style="left:0; width:100%;" onclick="event.stopPropagation()"></div>
+        </div>
+
+        <div style="display:flex; gap:6px;">
+          <input type="file" id="dwgInput" accept=".dwg,.dxf" style="display:none" onchange="subirPlanoDwgManual(event)" />
+          <button class="small-btn" onclick="document.getElementById('dwgInput').click()">
+            📐 Plano .DWG
+          </button>
+          <button class="small-btn" onclick="cargarMapaMentalPueblo(true)">
+            🔄 Actualizar
+          </button>
+        </div>
+      </div>
+
+      <div id="bannerProgresoDwg" style="display:none; margin-top:8px; font-size:11.5px; color:var(--accent); font-weight:600;"></div>
+      <div id="resumenGlobalPueblo" style="font-size:11.5px; color:var(--muted); margin-top:8px;"></div>
+    </div>
+
+    <div id="contenedorMapaMental" class="mindmap-canvas">
+      <div style="color:var(--muted); text-align:center; padding:20px; font-size:12.5px;">Cargando red...</div>
+    </div>
+  </div>
+
+<script>
+  if (typeof URL !== "undefined" && !URL.prototype.startsWith) {
+    URL.prototype.startsWith = function(s) { return String(this.href || this).startsWith(s); };
+  }
+  if (!Object.prototype.startsWith) {
+    Object.defineProperty(Object.prototype, "startsWith", {
+      value: function(s) { return String(this).startsWith(s); },
+      configurable: true,
+      writable: true
+    });
+  }
+
+  const CLAVES_OFICIALES = [
+    "AQ.Ab8RN6JNotP201VBuOQxKWkMzuEWvZfuReneFzGCNb0Y_CRGow",
+    "AQ.Ab8RN6IKJ1LUAD1v11Dvv9-g6u5Nr71OVfCE3wnPpoSmR5sa-g",
+    "AQ.Ab8RN6JuE0jWB4EBZgX-56w01qbxjHeU0Yw6YrpmillocyIZzg"
+  ];
+  const URL_ANTIGUA_ELIMINADA = "AKfycbzI5iCR2IuqMqIYXOARESJgqvjq3i8eVO6v6PChnoESyk7s5YZOj0gC7OxOmQtxkptr";
+
+  const COORDENADAS_PUEBLOS_OFICIALES = [
+    { provincia: "Almería", pueblo: "Antas", prefijo: "ANTA", lat: 37.2453, lng: -1.9175 },
+    { provincia: "Almería", pueblo: "Campo Hermoso", prefijo: "CHER", lat: 36.9367, lng: -2.1331 },
+    { provincia: "Almería", pueblo: "Garrucha", prefijo: "GARR", lat: 37.1814, lng: -1.8225 },
+    { provincia: "Almería", pueblo: "Los Gallardos", prefijo: "GALL", lat: 37.1678, lng: -1.9392 },
+    { provincia: "Almería", pueblo: "Mojácar", prefijo: "MOJA", lat: 37.1403, lng: -1.8507 },
+    { provincia: "Almería", pueblo: "San Juan de los Terreros", prefijo: "TERR", lat: 37.3578, lng: -1.6622 },
+    { provincia: "Almería", pueblo: "Turre", prefijo: "TURR", lat: 37.1525, lng: -1.8947 },
+    { provincia: "Almería", pueblo: "Vera Playa", prefijo: "VPLA", lat: 37.2185, lng: -1.8090 },
+    { provincia: "Almería", pueblo: "Vera Pueblo", prefijo: "VERA", lat: 37.2475, lng: -1.8686 },
+    { provincia: "Murcia", pueblo: "Águilas", prefijo: "AGUI", lat: 37.4063, lng: -1.5829 },
+    { provincia: "Granada", pueblo: "Alfacar", prefijo: "ALFA", lat: 37.2367, lng: -3.5706 },
+    { provincia: "Granada", pueblo: "Beas de Granada", prefijo: "BEAS", lat: 37.2181, lng: -3.4811 },
+    { provincia: "Granada", pueblo: "Canales (Güejar Sierra)", prefijo: "CANA", lat: 37.1611, lng: -3.4736 },
+    { provincia: "Granada", pueblo: "El Florio", prefijo: "FLOR", lat: 37.2025, lng: -3.6331 },
+    { provincia: "Granada", pueblo: "Güejar Sierra", prefijo: "GUEJ", lat: 37.1592, lng: -3.4394 },
+    { provincia: "Granada", pueblo: "Huétor Santillán", prefijo: "HUET", lat: 37.2181, lng: -3.5169 },
+    { provincia: "Granada", pueblo: "Ronda", prefijo: "ROND", lat: 37.1722, lng: -3.6083 },
+    { provincia: "Granada", pueblo: "San Jerónimo", prefijo: "SJER", lat: 37.1825, lng: -3.6067 },
+    { provincia: "Granada", pueblo: "Zaidín", prefijo: "ZAID", lat: 37.1583, lng: -3.5972 }
+  ];
+
+  const MAPA_PUEBLOS_OFICIAL = {
+    "Almería": ["Antas", "Campo Hermoso", "Garrucha", "Los Gallardos", "Mojácar", "San Juan de los Terreros", "Turre", "Vera Playa", "Vera Pueblo"],
+    "Granada": ["Alfacar", "Beas de Granada", "Canales (Güejar Sierra)", "El Florio", "Güejar Sierra", "Huétor Santillán", "Ronda", "San Jerónimo", "Zaidín"],
+    "Murcia": ["Águilas"]
+  };
+
+  const ORDEN_VISTAS_CTO = ["Abierta", "Cerrada", "Potencia", "Panorámica"];
+  const ORDEN_VISTAS_NODO_EMP = ["Abierta", "Cerrada", "Panorámica"];
+  const TIPOS_RULETA = [
+    { id: "CTO", label: "CTO" },
+    { id: "EMPALME_RD", label: "Empalme RD" },
+    { id: "EMPALME_RA", label: "Empalme RA" },
+    { id: "NODO", label: "Nodo" }
+  ];
+
+  let indiceTurnoClave = 0;
+  let bloquesCajas = [];
+  let ruletaAbiertaId = null;
+  let elementoDesplegadoMapa = null; // Flotante derecho en Mapa Mental
+  let nodosDesplegadosMapa = new Set(); // Todos los nodos plegados de inicio
+  let modoCompletando = null; // { codigo, titulo, tipo, vistasEnDrive: {} }
+  let vistaCamaraPendiente = "Abierta";
+  let gpsDispositivo = { lat: null, lng: null, provincia: "Murcia", pueblo: "Águilas" };
+  let ultimoNodoFijo = Number(localStorage.getItem("ftth_last_nodo_num") || 1);
+  let seleccionPuebloEstado = { provincia: "Murcia", pueblo: "Águilas" };
+  let datosMapaMentalActual = null;
+  let cacheMapaMentalPorPueblo = {}; // Caché persistente en RAM + localStorage
+  let cacheCoordenadasPorPueblo = {};
+  let contextoMover = null;
+  let libreDwgInstance = null;
+
+  window.onload = async () => {
+    localStorage.setItem("ftth_gemini_key", CLAVES_OFICIALES.join(", "));
+    document.getElementById("geminiKeyInput").value = CLAVES_OFICIALES.join(", ");
+
+    let savedUrl = localStorage.getItem("ftth_script_url") || "https://script.google.com/macros/s/AKfycby0LaOX4M3C6gn0HlKUQwYi4yAJKuBCh_hZfiJjLZDQplyRHy430c3F70hoeGHtudCI/exec";
+    if (savedUrl.includes(URL_ANTIGUA_ELIMINADA)) {
+      localStorage.removeItem("ftth_script_url");
+      savedUrl = "";
+    }
+    document.getElementById("scriptUrlInput").value = savedUrl;
+    if (!savedUrl) {
+      document.getElementById("configBox").open = true;
+    } else {
+      verificarConexionScript();
+      precargarMapaMentalSilencioso("Murcia", "Águilas");
+    }
+
+    obtenerGpsVivoSilencioso();
+    actualizarBotonesSuperioresVerde();
+  };
+
+  function vibrarTick(ms = 10) {
+    try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
+  }
+
+  function obtenerPrefijoPueblo(pueblo) {
+    const found = COORDENADAS_PUEBLOS_OFICIALES.find(x => x.pueblo === pueblo);
+    if (found) return found.prefijo;
+    return String(pueblo || "AGUI").replace(/[^a-zA-Z]/g, "").slice(0, 4).toUpperCase() || "AGUI";
+  }
+
+  function construirCodigoYTitulo(tipo, numNodo, numCaja, pueblo) {
+    const nPad = String(Math.max(1, numNodo || 1)).padStart(2, "0");
+    const cPad = String(Math.max(1, numCaja || 1)).padStart(2, "0");
+    if (tipo === "NODO") return { codigo: `N-${nPad}`, nodo: `N-${nPad}`, titulo: `Nodo N-${nPad}` };
+    if (tipo === "EMPALME_RD") return { codigo: `E-${nPad}-${cPad}`, nodo: `N-${nPad}`, titulo: `Empalme RD E-${nPad}-${cPad}` };
+    if (tipo === "EMPALME_RA") {
+      const pref = obtenerPrefijoPueblo(pueblo);
+      return { codigo: `E-${pref}-${cPad}`, nodo: "Empalmes RA", titulo: `Empalme RA E-${pref}-${cPad}` };
+    }
+    return { codigo: `${nPad}-${cPad}`, nodo: `N-${nPad}`, titulo: `CTO ${nPad}-${cPad}` };
+  }
+
+  // PROHIBIDO NODO 00: Filtra estrictamente cualquier número < 1 en Nodos, Empalmes y CTOs
+  function descomponerCodigoEnRuleta(codigoRaw) {
+    if (!codigoRaw) return null;
+    const c = String(codigoRaw).trim().toUpperCase().replace(/\s+/g, "");
+    let m = c.match(/^(?:NODO-|N-)(\d{1,3})$/);
+    if (m) {
+      const n1 = Number(m[1]);
+      if (n1 < 1 || n1 > 99) return null;
+      const nPad = String(n1).padStart(2, "0");
+      return { tipo: "NODO", numNodo: n1, numCaja: 1, nodo: `N-${nPad}`, codigo: `N-${nPad}` };
+    }
+    m = c.match(/^E-(\d{1,3})-(\d{1,3})$/);
+    if (m) {
+      const n1 = Number(m[1]), n2 = Number(m[2]);
+      if (n1 < 1 || n1 > 99 || n2 < 1 || n2 > 64) return null;
+      const nPad = String(n1).padStart(2, "0"), cPad = String(n2).padStart(2, "0");
+      return { tipo: "EMPALME_RD", numNodo: n1, numCaja: n2, nodo: `N-${nPad}`, codigo: `E-${nPad}-${cPad}` };
+    }
+    m = c.match(/^E-(?:([A-Z]{2,6})-)?(\d{1,3})$/);
+    if (m) {
+      const n2 = Number(m[2]);
+      if (n2 < 1 || n2 > 64) return null;
+      const pref = m[1] ? `${m[1]}-` : "";
+      return { tipo: "EMPALME_RA", numNodo: Math.max(1, ultimoNodoFijo), numCaja: n2, nodo: "Empalmes RA", codigo: `E-${pref}${String(n2).padStart(2, "0")}` };
+    }
+    m = c.match(/^(\d{1,3})-(\d{1,3})$/);
+    if (m) {
+      const n1 = Number(m[1]), n2 = Number(m[2]);
+      if (n1 < 1 || n1 > 99 || n2 < 1 || n2 > 64) return null;
+      const nPad = String(n1).padStart(2, "0"), cPad = String(n2).padStart(2, "0");
+      return { tipo: "CTO", numNodo: n1, numCaja: n2, nodo: `N-${nPad}`, codigo: `${nPad}-${cPad}` };
+    }
+    return null;
+  }
+
+  function obtenerEndpoint() {
+    return document.getElementById("scriptUrlInput").value.trim();
+  }
+
+  function obtenerClavesActivas() {
+    const raw = document.getElementById("geminiKeyInput").value.trim();
+    const custom = raw.split(",").map(s => s.trim()).filter(Boolean);
+    return Array.from(new Set([...CLAVES_OFICIALES, ...custom]));
+  }
+
+  function guardarConfiguracion() {
+    localStorage.setItem("ftth_script_url", obtenerEndpoint());
+    localStorage.setItem("ftth_gemini_key", document.getElementById("geminiKeyInput").value.trim());
+  }
+
+  async function guardarYProbarConfiguracion() {
+    guardarConfiguracion();
+    await verificarConexionScript();
+  }
+
+  async function verificarConexionScript() {
+    const ep = obtenerEndpoint();
+    const badge = document.getElementById("badgeEstadoConexion");
+    if (!ep.startsWith("http") || ep.includes(URL_ANTIGUA_ELIMINADA)) {
+      badge.style.color = "#f87171";
+      badge.innerText = "Sin enlace";
+      document.getElementById("configBox").open = true;
+      return false;
+    }
+    try {
+      const r = await fetch(`${ep}?action=getPueblos`, { redirect: "follow" });
+      const d = await r.json();
+      if (d && (d.pueblos || d.status === "OK")) {
+        badge.style.color = "#34d399";
+        badge.innerText = "● Conectado";
+        document.getElementById("configBox").open = false;
+        return true;
+      }
+    } catch (e) {}
+    badge.style.color = "#f87171";
+    badge.innerText = "Error de enlace";
+    return false;
+  }
+
+  function obtenerGpsVivoSilencioso() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(pos => {
+      const loc = resolverPuebloPorCoordenadas(pos.coords.latitude, pos.coords.longitude);
+      if (loc) {
+        gpsDispositivo = { lat: pos.coords.latitude, lng: pos.coords.longitude, provincia: loc.provincia, pueblo: loc.pueblo };
+      }
+    }, () => {}, { enableHighAccuracy: true, timeout: 5000 });
+  }
+
+  function resolverPuebloPorCoordenadas(lat, lng) {
+    if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
+    let masCercano = null;
+    let menorDistancia = Infinity;
+    COORDENADAS_PUEBLOS_OFICIALES.forEach(item => {
+      const d = distanciaMetros(lat, lng, item.lat, item.lng);
+      if (d < menorDistancia) {
+        menorDistancia = d;
+        masCercano = item;
+      }
+    });
+    if (masCercano && menorDistancia <= 45000) {
+      return { provincia: masCercano.provincia, pueblo: masCercano.pueblo };
+    }
+    return null;
+  }
+
+  function distanciaMetros(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  // Cambio de pestaña INSTANTÁNEO: no recarga el Mapa Mental si ya está en memoria
+  function cambiarTab(tab) {
+    document.getElementById("vistaRafaga").style.display = tab === "rafaga" ? "block" : "none";
+    document.getElementById("vistaEstado").style.display = tab === "estado" ? "block" : "none";
+    document.getElementById("tabRafaga").classList.toggle("active", tab === "rafaga");
+    document.getElementById("tabEstado").classList.toggle("active", tab === "estado");
+
+    if (tab === "estado") {
+      const key = `${seleccionPuebloEstado.provincia}|${seleccionPuebloEstado.pueblo}`;
+      if (cacheMapaMentalPorPueblo[key]) {
+        datosMapaMentalActual = cacheMapaMentalPorPueblo[key];
+        dibujarArbolMapaMental();
+      } else {
+        cargarMapaMentalPueblo(false);
+      }
+    }
+  }
+
+  function abrirZoom(src) {
+    if (!src) return;
+    document.getElementById("zoomImg").src = src;
+    document.getElementById("zoomModal").style.display = "flex";
+  }
+  function cerrarZoom() {
+    document.getElementById("zoomModal").style.display = "none";
+  }
+  function cerrarFlotantes() {
+    document.querySelectorAll(".dots-menu, .custom-dd-menu").forEach(m => m.style.display = "none");
+    if (elementoDesplegadoMapa !== null) {
+      elementoDesplegadoMapa = null;
+      if (document.getElementById("vistaEstado").style.display !== "none") {
+        dibujarArbolMapaMental();
+      }
+    }
+  }
+
+  // --- SELECTOR PROVINCIA ➔ PUEBLO ---
+  function abrirMenuPueblo(ev, menuId, modo, bloqueId) {
+    ev.stopPropagation();
+    const menu = document.getElementById(menuId);
+    const abierto = menu.style.display === "block";
+    document.querySelectorAll(".dots-menu, .custom-dd-menu").forEach(m => m.style.display = "none");
+    if (abierto) return;
+    mostrarProvinciasEnMenu(menuId, modo, bloqueId);
+    menu.style.display = "block";
+  }
+
+  function mostrarProvinciasEnMenu(menuId, modo, bloqueId) {
+    const menu = document.getElementById(menuId);
+    menu.innerHTML = `<div style="padding:7px 12px; font-size:10.5px; color:var(--muted); background:#080c14;">Provincia</div>` +
+      ["Almería", "Granada", "Murcia"].map(prov => `
+        <div class="dd-item" onclick="mostrarPueblosDeProvinciaEnMenu(event, '${menuId}', '${prov}', '${modo}', '${bloqueId || ''}')">
+          <span>${prov}</span> <span style="color:var(--accent);">›</span>
+        </div>
+      `).join("");
+  }
+
+  function mostrarPueblosDeProvinciaEnMenu(ev, menuId, provincia, modo, bloqueId) {
+    ev.stopPropagation();
+    const menu = document.getElementById(menuId);
+    const pueblos = (MAPA_PUEBLOS_OFICIAL[provincia] || []).slice().sort((a, b) => a.localeCompare(b));
+    menu.innerHTML = `
+      <div class="dd-back" onclick="event.stopPropagation(); mostrarProvinciasEnMenu('${menuId}', '${modo}', '${bloqueId || ''}')">
+        ‹ ${provincia}
+      </div>` +
+      pueblos.map(pue => `
+        <div class="dd-item" onclick="seleccionarPuebloEnMenu(event, '${menuId}', '${provincia}', '${pue}', '${modo}', '${bloqueId || ''}')">
+          <span>${pue}</span>
+        </div>
+      `).join("");
+  }
+
+  async function seleccionarPuebloEnMenu(ev, menuId, provincia, pueblo, modo, bloqueId) {
+    ev.stopPropagation();
+    document.getElementById(menuId).style.display = "none";
+
+    if (modo === "BLOQUE_CAPTURA") {
+      const b = bloquesCajas.find(x => x.id === bloqueId);
+      if (b) {
+        b.provincia = provincia;
+        b.pueblo = pueblo;
+        gpsDispositivo.provincia = provincia;
+        gpsDispositivo.pueblo = pueblo;
+        renderTarjetas();
+        verificarDuplicadosEnSegundoPlano();
+      }
+    } else if (modo === "ESTADO_RED") {
+      seleccionPuebloEstado = { provincia, pueblo };
+      nodosDesplegadosMapa = new Set(); // Todos los nodos plegados al abrir pueblo
+      elementoDesplegadoMapa = null;
+      document.getElementById("txtEstadoPueblo").innerText = `📍 ${pueblo} (${provincia})`;
+      await cargarMapaMentalPueblo(false);
+    } else if (modo === "MODAL_MOVER") {
+      contextoMover.provinciaSel = provincia;
+      contextoMover.puebloSel = pueblo;
+      document.getElementById("txtMoverPueblo").innerText = `${pueblo} (${provincia})`;
+    }
+  }
+
+  // --- BOTONES SUPERIORES EN VERDE (COMBINANDO FOTOS CARGADAS + FOTOS YA SUBIDAS EN DRIVE) ---
+  function actualizarBotonesSuperioresVerde() {
+    const ultimo = bloquesCajas[bloquesCajas.length - 1];
+    const vistasLocales = new Set();
+
+    if (ultimo && ultimo.fotos) {
+      ultimo.fotos.forEach(f => {
+        vistasLocales.add(f.vista);
+        if (f.usarParaPotencia && (f.vista === "Abierta" || f.vista === "Cerrada")) {
+          vistasLocales.add("Potencia");
+        }
+      });
+    }
+
+    const vistasDrive = (modoCompletando && modoCompletando.vistasEnDrive) ? modoCompletando.vistasEnDrive : {};
+    const tipoActivo = (ultimo && ultimo.tipo) || (modoCompletando && modoCompletando.tipo) || "CTO";
+
+    ["Abierta", "Cerrada", "Potencia", "Panorámica"].forEach(v => {
+      const btn = document.getElementById(`btnTop_${v}`);
+      const ico = document.getElementById(`icoTop_${v}`);
+      const sub = document.getElementById(`subTop_${v}`);
+      if (!btn || !ico || !sub) return;
+
+      // En Nodos y Empalmes no aplica Potencia
+      if (tipoActivo !== "CTO" && v === "Potencia") {
+        btn.style.opacity = "0.35";
+        btn.classList.remove("loaded");
+        ico.innerText = "⚡";
+        sub.innerText = "No aplica";
+        return;
+      }
+      btn.style.opacity = "1";
+
+      const enLocal = vistasLocales.has(v);
+      const enDrive = Boolean(vistasDrive[v]);
+      const completada = enLocal || enDrive;
+
+      btn.classList.toggle("loaded", completada);
+      ico.innerText = completada ? "✓" : (v === "Potencia" ? "⚡" : "📷");
+
+      if (enLocal) {
+        sub.innerText = "Cargada";
+      } else if (enDrive) {
+        sub.innerText = "En Drive";
+      } else if (modoCompletando || (ultimo && ultimo.fotos.length > 0)) {
+        sub.innerText = "Falta foto";
+      } else {
+        sub.innerText = "";
+      }
+    });
+  }
+
+  function salirModoCompletar() {
+    modoCompletando = null;
+    document.getElementById("bannerCompletandoCaja").style.display = "none";
+    actualizarBotonesSuperioresVerde();
+  }
+
+  // --- 1. CAPTURA DE CAMPO Y OPCIONES DE POTENCIA ---
+  function dispararCamaraConVista(vista) {
+    vistaCamaraPendiente = vista;
+    obtenerGpsVivoSilencioso();
+    document.getElementById("camInput").click();
+  }
+
+  function abrirMenuBotonPotencia() {
+    const ultimoBloque = bloquesCajas[bloquesCajas.length - 1];
+    const tieneAbierta = ultimoBloque && ultimoBloque.fotos.some(f => f.vista === "Abierta");
+    const tieneCerrada = ultimoBloque && ultimoBloque.fotos.some(f => f.vista === "Cerrada");
+
+    document.getElementById("btnPotUsarAbierta").style.opacity = tieneAbierta ? "1" : "0.4";
+    document.getElementById("btnPotUsarCerrada").style.opacity = tieneCerrada ? "1" : "0.4";
+    document.getElementById("potenciaModal").style.display = "flex";
+  }
+
+  function elegirOpcionPotencia(opcion) {
+    document.getElementById("potenciaModal").style.display = "none";
+    const ultimoBloque = bloquesCajas[bloquesCajas.length - 1];
+
+    if (opcion === "HACER_FOTO") {
+      dispararCamaraConVista("Potencia");
+      return;
+    }
+    if (opcion === "SUBIR_GALERIA") {
+      document.getElementById("potGalInput").click();
+      return;
+    }
+    if (!ultimoBloque) return alert("Carga primero una foto en la caja.");
+
+    if (opcion === "USAR_ABIERTA") {
+      const fAb = ultimoBloque.fotos.find(f => f.vista === "Abierta");
+      if (!fAb) return alert("Aún no está cargada la foto Abierta.");
+      ultimoBloque.fotos.forEach(f => f.usarParaPotencia = false);
+      fAb.usarParaPotencia = true;
+      vibrarTick(15);
+      renderTarjetas();
+    } else if (opcion === "USAR_CERRADA") {
+      const fCe = ultimoBloque.fotos.find(f => f.vista === "Cerrada");
+      if (!fCe) return alert("Aún no está cargada la foto Cerrada.");
+      ultimoBloque.fotos.forEach(f => f.usarParaPotencia = false);
+      fCe.usarParaPotencia = true;
+      vibrarTick(15);
+      renderTarjetas();
+    } else if (opcion === "SIN_POTENCIA") {
+      ultimoBloque.fotos.forEach(f => f.usarParaPotencia = false);
+      vibrarTick(15);
+      renderTarjetas();
+    }
+  }
+
+  // Subir foto de potencia directamente desde la galería
+  async function archivoPotenciaDesdeGaleria(e) {
+    vistaCamaraPendiente = "Potencia";
+    await archivosSeleccionados(e, "CAMARA");
+  }
+
+  async function extraerExifRapido(file) {
+    if (!window.exifr) return { gps: null, timestamp: null };
+    return Promise.race([
+      (async () => {
+        let gps = null, timestamp = null;
+        try { gps = await exifr.gps(file); } catch (e) {}
+        try {
+          const meta = await exifr.parse(file, ["DateTimeOriginal", "CreateDate"]);
+          if (meta && (meta.DateTimeOriginal || meta.CreateDate)) {
+            timestamp = new Date(meta.DateTimeOriginal || meta.CreateDate).getTime();
+          }
+        } catch (e) {}
+        return { gps, timestamp };
+      })(),
+      new Promise(res => setTimeout(() => res({ gps: null, timestamp: null }), 450))
+    ]);
+  }
+
+  function comprimirRapidoPorUrl(file, maxW, quality) {
+    return new Promise(resolve => {
+      const objUrl = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const scale = img.width > maxW ? maxW / img.width : 1;
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(objUrl);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = () => { URL.revokeObjectURL(objUrl); resolve(""); };
+      img.src = objUrl;
+    });
+  }
+
+  async function archivosSeleccionados(e, origen) {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    e.target.value = "";
+    document.getElementById("msgEstado").innerHTML = "";
+
+    const nuevasFotos = await Promise.all(files.map(async file => {
+      let lat = gpsDispositivo.lat;
+      let lng = gpsDispositivo.lng;
+      let provincia = gpsDispositivo.provincia || "Murcia";
+      let pueblo = gpsDispositivo.pueblo || "Águilas";
+      let timestamp = file.lastModified || Date.now();
+
+      const [exifData, imgDrive, imgOcr] = await Promise.all([
+        extraerExifRapido(file),
+        comprimirRapidoPorUrl(file, 1600, 0.82),
+        comprimirRapidoPorUrl(file, 320, 0.55)
+      ]);
+
+      if (exifData.timestamp) timestamp = exifData.timestamp;
+      if (exifData.gps && exifData.gps.latitude && exifData.gps.longitude) {
+        lat = exifData.gps.latitude;
+        lng = exifData.gps.longitude;
+        const loc = resolverPuebloPorCoordenadas(lat, lng);
+        if (loc) {
+          provincia = loc.provincia;
+          pueblo = loc.pueblo;
+          gpsDispositivo = { lat, lng, provincia, pueblo };
+        }
+      }
+
+      return {
+        id: "f_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+        preview: imgDrive,
+        base64: imgDrive.split(",")[1],
+        base64Ocr: imgOcr.split(",")[1],
+        lat, lng, timestamp,
+        provincia, pueblo,
+        vista: origen === "CAMARA" ? vistaCamaraPendiente : "Abierta",
+        usarParaPotencia: false,
+        ocrEstado: "pendiente",
+        duplicadoInfo: null,
+        modoDuplicado: "sustituir"
+      };
+    }));
+
+    nuevasFotos.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+    nuevasFotos.forEach(foto => {
+      let bloqueDestino = bloquesCajas[bloquesCajas.length - 1];
+      let crearNuevoBloque = false;
+
+      if (!bloqueDestino) {
+        crearNuevoBloque = true;
+      } else if (origen === "GALERIA" && !modoCompletando) {
+        const ultimaFoto = bloqueDestino.fotos[bloqueDestino.fotos.length - 1];
+        if (ultimaFoto) {
+          const difMinutos = Math.abs((foto.timestamp || 0) - (ultimaFoto.timestamp || 0)) / 60000;
+          let lejosGps = false;
+          if (foto.lat && foto.lng && ultimaFoto.lat && ultimaFoto.lng) {
+            lejosGps = distanciaMetros(foto.lat, foto.lng, ultimaFoto.lat, ultimaFoto.lng) > 65;
+          }
+          if (difMinutos > 15 || lejosGps || bloqueDestino.fotos.length >= 4) {
+            crearNuevoBloque = true;
+          }
+        }
+      }
+
+      if (crearNuevoBloque) {
+        const nuevoId = "b_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
+        bloqueDestino = {
+          id: nuevoId,
+          provincia: foto.provincia || "Murcia",
+          pueblo: foto.pueblo || "Águilas",
+          tipo: modoCompletando ? modoCompletando.tipo : "CTO",
+          numNodo: modoCompletando ? modoCompletando.numNodo : Math.max(1, ultimoNodoFijo),
+          numCaja: modoCompletando ? modoCompletando.numCaja : 1,
+          fijadoManualmente: Boolean(modoCompletando),
+          fotos: []
+        };
+        bloquesCajas.push(bloqueDestino);
+      }
+
+      if (origen === "GALERIA") {
+        const vistasDrive = (modoCompletando && modoCompletando.vistasEnDrive) ? modoCompletando.vistasEnDrive : {};
+        const ocupadas = bloqueDestino.fotos.map(x => x.vista);
+        // Prioriza asignar las vistas que faltan en Drive
+        const libre = ORDEN_VISTAS_CTO.find(v => !ocupadas.includes(v) && !vistasDrive[v])
+          || ORDEN_VISTAS_CTO.find(v => !ocupadas.includes(v))
+          || "Panorámica";
+        foto.vista = libre;
+      } else {
+        const idxExistente = bloqueDestino.fotos.findIndex(x => x.vista === foto.vista);
+        if (idxExistente !== -1) bloqueDestino.fotos.splice(idxExistente, 1);
+      }
+
+      bloqueDestino.fotos.push(foto);
+    });
+
+    renderTarjetas();
+    dispararOcrYCoordenadasEnParalelo();
+  }
+
+  function dispararOcrYCoordenadasEnParalelo() {
+    bloquesCajas.forEach(bloque => {
+      if (bloque.fijadoManualmente) {
+        bloque.fotos.forEach(f => f.ocrEstado = "listo");
+        renderTarjetas();
+        return;
+      }
+
+      if (bloque.fotos[0] && bloque.fotos[0].lat) {
+        sugerirCajaPorGpsEnSegundoPlano(bloque);
+      }
+
+      const candidatas = bloque.fotos.filter(f => f.ocrEstado === "pendiente" && (f.vista === "Cerrada" || f.vista === "Abierta"));
+      const aLeer = candidatas.length > 0 ? candidatas : bloque.fotos.filter(f => f.ocrEstado === "pendiente");
+
+      aLeer.forEach(async foto => {
+        foto.ocrEstado = "leyendo";
+        renderTarjetas();
+        const infoLeida = await leerCodigoOcrFlashLite(foto.base64Ocr);
+        foto.ocrEstado = "listo";
+
+        if (infoLeida && !bloque.fijadoManualmente) {
+          bloque.tipo = infoLeida.tipo;
+          bloque.numNodo = infoLeida.numNodo;
+          bloque.numCaja = infoLeida.numCaja;
+          ultimoNodoFijo = infoLeida.numNodo;
+          localStorage.setItem("ftth_last_nodo_num", String(ultimoNodoFijo));
+          vibrarTick(20);
+          bloque.fotos.forEach(fr => fr.ocrEstado = "listo");
+          verificarDuplicadosEnSegundoPlano();
+        }
+        renderTarjetas();
+      });
+    });
+    verificarDuplicadosEnSegundoPlano();
+  }
+
+  async function sugerirCajaPorGpsEnSegundoPlano(bloque) {
+    const key = `${bloque.provincia}|${bloque.pueblo}`;
+    const mapaGps = cacheCoordenadasPorPueblo[key] || {};
+    const f0 = bloque.fotos[0];
+    if (!f0 || !f0.lat || !f0.lng) return;
+
+    let mejorCod = null;
+    let menorDist = 45;
+    Object.keys(mapaGps).forEach(cod => {
+      const item = mapaGps[cod];
+      if (item.lat && item.lng) {
+        const dist = distanciaMetros(f0.lat, f0.lng, item.lat, item.lng);
+        if (dist < menorDist) {
+          menorDist = dist;
+          mejorCod = cod;
+        }
+      }
+    });
+
+    if (mejorCod && !bloque.fijadoManualmente) {
+      const desc = descomponerCodigoEnRuleta(mejorCod);
+      if (desc) {
+        bloque.tipo = desc.tipo;
+        bloque.numNodo = desc.numNodo;
+        bloque.numCaja = desc.numCaja;
+        vibrarTick(15);
+        renderTarjetas();
+      }
+    }
+  }
+
+  async function leerCodigoOcrFlashLite(base64Ocr) {
+    const prompt = `OCR FTTH: Devuelve solo el código de etiqueta (ej. "17-37", "E-17-01", "N-17"). JSON: {"codigo":""}`;
+    const parts = [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64Ocr } }];
+    const claves = obtenerClavesActivas();
+    const modelos = [
+      "models/gemini-2.0-flash-lite",
+      "models/gemini-2.5-flash-lite",
+      "models/gemini-2.0-flash"
+    ];
+
+    for (let i = 0; i < claves.length; i++) {
+      const apiKey = claves[(indiceTurnoClave + i) % claves.length];
+      for (const mod of modelos) {
+        const skipTag = `skip_${apiKey.slice(-6)}_${mod}`;
+        if (Date.now() < Number(sessionStorage.getItem(skipTag) || 0)) continue;
+        try {
+          const genConfig = { temperature: 0.0, maxOutputTokens: 22, responseMimeType: "application/json" };
+          if (mod.includes("2.5")) genConfig.thinkingConfig = { thinkingBudget: 0 };
+
+          const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${mod}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contents: [{ parts }], generationConfig: genConfig })
+          });
+          if (r.ok) {
+            indiceTurnoClave = (indiceTurnoClave + i + 1) % claves.length;
+            const d = await r.json();
+            const raw = d.candidates[0].content.parts[0].text.replace(/```json|```/g, "").trim();
+            const parsed = JSON.parse(raw);
+            return descomponerCodigoEnRuleta(parsed.codigo || "");
+          }
+          if (r.status === 429 || r.status === 404) {
+            sessionStorage.setItem(skipTag, String(Date.now() + 600000));
+          }
+        } catch (e) {}
+      }
+    }
+    return null;
+  }
+
+  function renderTarjetas() {
+    const cont = document.getElementById("contenedorTarjetas");
+    bloquesCajas = bloquesCajas.filter(b => b.fotos.length > 0 || modoCompletando);
+    const totalFotosCargadas = bloquesCajas.reduce((acc, b) => acc + b.fotos.length, 0);
+    document.getElementById("btnSubirTodas").style.display = totalFotosCargadas > 0 ? "block" : "none";
+    actualizarBotonesSuperioresVerde();
+
+    cont.innerHTML = "";
+
+    bloquesCajas.forEach(b => {
+      if (b.fotos.length === 0) return;
+      const infoNombre = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
+      const menuPuebloId = `menuPueblo_${b.id}`;
+      const estaRuletaAbierta = (ruletaAbiertaId === b.id);
+
+      const itemsTipoHtml = TIPOS_RULETA.map(t =>
+        `<div class="wheel-item ${b.tipo === t.id ? 'selected' : ''}" data-val="${t.id}" onclick="seleccionarEnRuletaClick('${b.id}', 'tipo', '${t.id}')">${t.label}</div>`
+      ).join("");
+
+      let itemsNodoHtml = "";
+      for (let n = 1; n <= 99; n++) {
+        const nPad = String(n).padStart(2, "0");
+        itemsNodoHtml += `<div class="wheel-item ${b.numNodo === n ? 'selected' : ''}" data-val="${n}" onclick="seleccionarEnRuletaClick('${b.id}', 'nodo', ${n})">N-${nPad}</div>`;
+      }
+
+      let itemsCajaHtml = "";
+      for (let c = 1; c <= 64; c++) {
+        const cPad = String(c).padStart(2, "0");
+        itemsCajaHtml += `<div class="wheel-item ${b.numCaja === c ? 'selected' : ''}" data-val="${c}" onclick="seleccionarEnRuletaClick('${b.id}', 'caja', ${c})">${cPad}</div>`;
+      }
+
+      const alertaResumenHtml = generarAlertaCortaBloque(b, infoNombre.codigo);
+      const vistasPermitidas = b.tipo === "CTO" ? ORDEN_VISTAS_CTO : ORDEN_VISTAS_NODO_EMP;
+
+      const fotosHtml = b.fotos.map(f => {
+        if (!vistasPermitidas.includes(f.vista)) f.vista = "Cerrada";
+
+        const optsVista = vistasPermitidas.map(v => {
+          let textoOpcion = v;
+          if (b.tipo === "CTO" && f.usarParaPotencia && (v === "Abierta" || v === "Cerrada") && f.vista === v) {
+            textoOpcion = `${v} con potencia`;
+          }
+          return `<option value="${v}" ${f.vista === v ? 'selected' : ''}>${textoOpcion}</option>`;
+        }).join("") + (b.fotos.length > 1 ? `<option value="__SEPARAR__">↪ Separar en otra caja</option>` : "");
+
+        let btnUsarPotenciaHtml = "";
+        if (b.tipo === "CTO" && (f.vista === "Abierta" || f.vista === "Cerrada")) {
+          const activo = Boolean(f.usarParaPotencia);
+          btnUsarPotenciaHtml = `
+            <button type="button" class="btn-potencia-toggle ${activo ? 'active' : ''}" onclick="toggleUsarFotoParaPotencia('${b.id}', '${f.id}')">
+              ${activo ? `✓ ${f.vista} con potencia` : `⚡ Usar para potencia`}
+            </button>`;
+        }
+
+        let badgeOcr = f.ocrEstado === "leyendo" ? `<span class="ocr-badge">Leyendo...</span>` : "";
+
+        let dupHtml = "";
+        if (f.duplicadoInfo && f.duplicadoInfo.existe) {
+          dupHtml = `
+            <div class="dup-box">
+              <div style="color:#fca5a5; margin-bottom:4px;">Ya existe en Drive</div>
+              <div style="display:flex; gap:4px;">
+                <button class="small-btn" onclick="verFotoGuardadaEnDrive('${f.duplicadoInfo.fileId}')">👁️ Ver</button>
+                <button class="small-btn" style="border-color:${f.modoDuplicado === 'sustituir' ? '#f59e0b' : 'transparent'};" onclick="cambiarModoDuplicado('${b.id}', '${f.id}', 'sustituir')">Sustituir</button>
+                <button class="small-btn" style="color:#f87171;" onclick="descartarFotoDeBloque('${b.id}', '${f.id}')">✕</button>
+              </div>
+            </div>`;
+        }
+
+        return `
+          <div class="thumb-card">
+            ${badgeOcr}
+            <button class="del-btn" onclick="borrarFotoDeBloque('${b.id}', '${f.id}')">✕</button>
+            <img src="${f.preview}" onclick="abrirZoom('${f.preview}')" />
+            <select onchange="cambiarVistaConAutoIntercambio('${b.id}', '${f.id}', this.value)" style="margin-top:6px;">
+              ${optsVista}
+            </select>
+            ${btnUsarPotenciaHtml}
+            ${dupHtml}
+          </div>`;
+      }).join("");
+
+      cont.innerHTML += `
+        <div class="element-card">
+          <div class="element-header">
+            <button type="button" class="element-title-btn ${estaRuletaAbierta ? 'open' : ''}" onclick="toggleRuletaBloque('${b.id}')">
+              <span id="lblTitulo_${b.id}">${infoNombre.titulo}</span>
+              <span style="font-size:11px; opacity:0.8;">${estaRuletaAbierta ? '▴' : '▾'}</span>
+            </button>
+
+            <div style="position:relative;">
+              <button type="button" class="pueblo-pill" onclick="abrirMenuPueblo(event, '${menuPuebloId}', 'BLOQUE_CAPTURA', '${b.id}')">
+                📍 ${b.pueblo || 'Elegir'} ▾
+              </button>
+              <div id="${menuPuebloId}" class="custom-dd-menu" onclick="event.stopPropagation()"></div>
+            </div>
+          </div>
+
+          <div id="drawer_${b.id}" class="wheel-drawer" style="display:${estaRuletaAbierta ? 'block' : 'none'};">
+            <div class="wheel-grid">
+              <div>
+                <div class="wheel-col-label">Elemento</div>
+                <div class="wheel-drum-wrap">
+                  <div class="wheel-drum" id="drum_tipo_${b.id}" onscroll="alGirarTambor('${b.id}', 'tipo', this)">
+                    <div class="wheel-spacer"></div>
+                    ${itemsTipoHtml}
+                    <div class="wheel-spacer"></div>
+                  </div>
+                </div>
+              </div>
+              <div style="opacity:${b.tipo === 'EMPALME_RA' ? '0.25' : '1'}; pointer-events:${b.tipo === 'EMPALME_RA' ? 'none' : 'auto'};">
+                <div class="wheel-col-label">Nodo</div>
+                <div class="wheel-drum-wrap">
+                  <div class="wheel-drum" id="drum_nodo_${b.id}" onscroll="alGirarTambor('${b.id}', 'nodo', this)">
+                    <div class="wheel-spacer"></div>
+                    ${itemsNodoHtml}
+                    <div class="wheel-spacer"></div>
+                  </div>
+                </div>
+              </div>
+              <div style="opacity:${b.tipo === 'NODO' ? '0.25' : '1'}; pointer-events:${b.tipo === 'NODO' ? 'none' : 'auto'};">
+                <div class="wheel-col-label">Número</div>
+                <div class="wheel-drum-wrap">
+                  <div class="wheel-drum" id="drum_caja_${b.id}" onscroll="alGirarTambor('${b.id}', 'caja', this)">
+                    <div class="wheel-spacer"></div>
+                    ${itemsCajaHtml}
+                    <div class="wheel-spacer"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="alertas_${b.id}">${alertaResumenHtml}</div>
+          <div class="thumbs">${fotosHtml}</div>
+        </div>`;
+    });
+
+    if (ruletaAbiertaId) setTimeout(() => centrarTamboresDeBloque(ruletaAbiertaId), 15);
+  }
+
+  function generarAlertaCortaBloque(b, codigoMostrado) {
+    const vistasDrive = (modoCompletando && modoCompletando.codigo === codigoMostrado && modoCompletando.vistasEnDrive) ? modoCompletando.vistasEnDrive : {};
+    const vistas = b.fotos.map(f => f.vista);
+    const tieneAbierta = vistas.includes("Abierta") || Boolean(vistasDrive.Abierta);
+    const tieneCerrada = vistas.includes("Cerrada") || Boolean(vistasDrive.Cerrada);
+    const tienePotenciaCombinada = b.fotos.some(f => f.usarParaPotencia && (f.vista === "Abierta" || f.vista === "Cerrada"));
+    const tienePotencia = vistas.includes("Potencia") || tienePotenciaCombinada || Boolean(vistasDrive.Potencia);
+    const tienePanoramica = vistas.includes("Panorámica") || Boolean(vistasDrive.Panorámica);
+
+    const faltan = [];
+    if (!tieneAbierta) faltan.push("abierta");
+    if (!tieneCerrada) faltan.push("cerrada");
+    if (b.tipo === "CTO" && !tienePotencia) faltan.push("potencia");
+    if (b.tipo === "CTO" && !tienePanoramica) faltan.push("panorámica");
+
+    if (faltan.length === 0) return `<div class="status-line ok">● (${codigoMostrado}) Completo</div>`;
+    const listaTexto = faltan.length > 1 ? faltan.slice(0, -1).join(", ") + " y " + faltan[faltan.length - 1] : faltan[0];
+    return `<div class="status-line warn">● (${codigoMostrado}) Falta ${listaTexto}</div>`;
+  }
+
+  let timersScrollRuleta = {};
+
+  function toggleRuletaBloque(bloqueId) {
+    ruletaAbiertaId = (ruletaAbiertaId === bloqueId) ? null : bloqueId;
+    renderTarjetas();
+  }
+
+  function centrarTamboresDeBloque(bloqueId) {
+    const b = bloquesCajas.find(x => x.id === bloqueId);
+    if (!b) return;
+    const idxTipo = Math.max(0, TIPOS_RULETA.findIndex(t => t.id === b.tipo));
+    const drumT = document.getElementById(`drum_tipo_${bloqueId}`);
+    const drumN = document.getElementById(`drum_nodo_${bloqueId}`);
+    const drumC = document.getElementById(`drum_caja_${bloqueId}`);
+    if (drumT) drumT.scrollTop = idxTipo * 32;
+    if (drumN) drumN.scrollTop = (b.numNodo - 1) * 32;
+    if (drumC) drumC.scrollTop = (b.numCaja - 1) * 32;
+  }
+
+  function alGirarTambor(bloqueId, campo, drumEl) {
+    const keyTimer = `${bloqueId}_${campo}`;
+    if (timersScrollRuleta[keyTimer]) clearTimeout(timersScrollRuleta[keyTimer]);
+
+    timersScrollRuleta[keyTimer] = setTimeout(() => {
+      const idx = Math.round(drumEl.scrollTop / 32);
+      const b = bloquesCajas.find(x => x.id === bloqueId);
+      if (!b) return;
+
+      let cambio = false;
+      if (campo === "tipo") {
+        const nuevoTipo = (TIPOS_RULETA[idx] || TIPOS_RULETA[0]).id;
+        if (b.tipo !== nuevoTipo) { b.tipo = nuevoTipo; cambio = true; }
+      } else if (campo === "nodo") {
+        const nuevoNodo = Math.min(99, Math.max(1, idx + 1));
+        if (b.numNodo !== nuevoNodo) {
+          b.numNodo = nuevoNodo;
+          ultimoNodoFijo = nuevoNodo;
+          localStorage.setItem("ftth_last_nodo_num", String(nuevoNodo));
+          cambio = true;
+        }
+      } else if (campo === "caja") {
+        const nuevaCaja = Math.min(64, Math.max(1, idx + 1));
+        if (b.numCaja !== nuevaCaja) { b.numCaja = nuevaCaja; cambio = true; }
+      }
+
+      if (cambio) {
+        b.fijadoManualmente = true;
+        vibrarTick(10);
+        actualizarCabeceraYEstilosRuletaSinReconstruir(b);
+        actualizarBotonesSuperioresVerde();
+        verificarDuplicadosEnSegundoPlano();
+      }
+    }, 55);
+  }
+
+  function seleccionarEnRuletaClick(bloqueId, campo, valor) {
+    const b = bloquesCajas.find(x => x.id === bloqueId);
+    if (!b) return;
+    b.fijadoManualmente = true;
+    if (campo === "tipo") b.tipo = valor;
+    if (campo === "nodo") {
+      b.numNodo = Math.max(1, Number(valor));
+      ultimoNodoFijo = b.numNodo;
+      localStorage.setItem("ftth_last_nodo_num", String(ultimoNodoFijo));
+    }
+    if (campo === "caja") b.numCaja = Math.max(1, Number(valor));
+    vibrarTick(12);
+    renderTarjetas();
+    verificarDuplicadosEnSegundoPlano();
+  }
+
+  function actualizarCabeceraYEstilosRuletaSinReconstruir(b) {
+    const infoNombre = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
+    const lbl = document.getElementById(`lblTitulo_${b.id}`);
+    if (lbl) lbl.innerText = infoNombre.titulo;
+    const al = document.getElementById(`alertas_${b.id}`);
+    if (al) al.innerHTML = generarAlertaCortaBloque(b, infoNombre.codigo);
+
+    ["tipo", "nodo", "caja"].forEach(c => {
+      const drum = document.getElementById(`drum_${c}_${b.id}`);
+      if (!drum) return;
+      const valActual = c === "tipo" ? b.tipo : (c === "nodo" ? String(b.numNodo) : String(b.numCaja));
+      drum.querySelectorAll(".wheel-item").forEach(it => {
+        it.classList.toggle("selected", it.dataset.val === valActual);
+      });
+    });
+  }
+
+  function cambiarVistaConAutoIntercambio(bloqueId, fotoId, nuevaVista) {
+    const b = bloquesCajas.find(x => x.id === bloqueId);
+    if (!b) return;
+    const fotoActual = b.fotos.find(f => f.id === fotoId);
+    if (!fotoActual) return;
+
+    if (nuevaVista === "__SEPARAR__") {
+      b.fotos = b.fotos.filter(f => f.id !== fotoId);
+      const nuevoId = "b_" + Date.now();
+      bloquesCajas.push({
+        id: nuevoId,
+        provincia: b.provincia,
+        pueblo: b.pueblo,
+        tipo: b.tipo,
+        numNodo: b.numNodo,
+        numCaja: Math.min(64, b.numCaja + 1),
+        fijadoManualmente: true,
+        fotos: [fotoActual]
+      });
+      renderTarjetas();
+      return;
+    }
+
+    const vistaAnterior = fotoActual.vista;
+    const otraFoto = b.fotos.find(f => f.id !== fotoId && f.vista === nuevaVista);
+    if (otraFoto) {
+      otraFoto.vista = vistaAnterior;
+      if (otraFoto.vista !== "Abierta" && otraFoto.vista !== "Cerrada") otraFoto.usarParaPotencia = false;
+    }
+
+    fotoActual.vista = nuevaVista;
+    if (nuevaVista !== "Abierta" && nuevaVista !== "Cerrada") fotoActual.usarParaPotencia = false;
+
+    vibrarTick(10);
+    renderTarjetas();
+    verificarDuplicadosEnSegundoPlano();
+  }
+
+  function toggleUsarFotoParaPotencia(bloqueId, fotoId) {
+    const b = bloquesCajas.find(x => x.id === bloqueId);
+    if (!b) return;
+    const foto = b.fotos.find(f => f.id === fotoId);
+    if (!foto) return;
+
+    const nuevoEstado = !foto.usarParaPotencia;
+    b.fotos.forEach(f => f.usarParaPotencia = false);
+    foto.usarParaPotencia = nuevoEstado;
+    vibrarTick(15);
+    renderTarjetas();
+    verificarDuplicadosEnSegundoPlano();
+  }
+
+  function borrarFotoDeBloque(bloqueId, fotoId) {
+    const b = bloquesCajas.find(x => x.id === bloqueId);
+    if (!b) return;
+    b.fotos = b.fotos.filter(f => f.id !== fotoId);
+    renderTarjetas();
+  }
+
+  function descartarFotoDeBloque(bloqueId, fotoId) {
+    if (!confirm("¿Descartar esta imagen?")) return;
+    borrarFotoDeBloque(bloqueId, fotoId);
+  }
+
+  function cambiarModoDuplicado(bloqueId, fotoId, modo) {
+    const b = bloquesCajas.find(x => x.id === bloqueId);
+    if (!b) return;
+    const f = b.fotos.find(x => x.id === fotoId);
+    if (f) f.modoDuplicado = modo;
+    renderTarjetas();
+  }
+
+  function limpiarSesionActual() {
+    bloquesCajas = [];
+    ruletaAbiertaId = null;
+    modoCompletando = null;
+    document.getElementById("bannerCompletandoCaja").style.display = "none";
+    document.getElementById("msgEstado").innerHTML = "";
+    renderTarjetas();
+  }
+
+  async function verificarDuplicadosEnSegundoPlano() {
+    const ep = obtenerEndpoint();
+    if (!ep.startsWith("http") || ep.includes(URL_ANTIGUA_ELIMINADA)) return;
+
+    const consultas = [];
+    bloquesCajas.forEach(b => {
+      const info = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
+      b.fotos.forEach(f => {
+        const nombreVista = (b.tipo === "CTO" && f.usarParaPotencia && (f.vista === "Abierta" || f.vista === "Cerrada"))
+          ? `${f.vista} con potencia`
+          : f.vista;
+        consultas.push({
+          key: f.id,
+          provincia: b.provincia,
+          pueblo: b.pueblo,
+          codigo: info.codigo,
+          vista: nombreVista
+        });
+      });
+    });
+
+    if (consultas.length === 0) return;
+    try {
+      const resp = await fetch(ep, {
+        method: "POST",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "verificarDuplicados", consultas })
+      });
+      const d = await resp.json();
+      const dups = d.duplicados || {};
+      let huboCambio = false;
+      bloquesCajas.forEach(b => {
+        b.fotos.forEach(f => {
+          const nuevo = dups[f.id] || null;
+          if (JSON.stringify(f.duplicadoInfo) !== JSON.stringify(nuevo)) {
+            f.duplicadoInfo = nuevo;
+            huboCambio = true;
+          }
+        });
+      });
+      if (huboCambio) renderTarjetas();
+    } catch (e) {}
+  }
+
+  async function verFotoGuardadaEnDrive(fileIdDrive) {
+    document.getElementById("imgDriveExistenteModal").src = "";
+    document.getElementById("txtNombreDriveModal").innerText = "Cargando desde Drive...";
+    document.getElementById("verDriveModal").style.display = "flex";
+    try {
+      const r = await fetch(`${obtenerEndpoint()}?action=getFotoIndividual&fileId=${encodeURIComponent(fileIdDrive)}`, { redirect: "follow" });
+      const d = await r.json();
+      if (d.base64) {
+        document.getElementById("imgDriveExistenteModal").src = d.base64;
+        document.getElementById("txtNombreDriveModal").innerText = d.nombre || "";
+        document.getElementById("btnIrDriveModal").href = d.url || "#";
+      }
+    } catch (e) {}
+  }
+
+  async function subirTodoADrive() {
+    const ep = obtenerEndpoint();
+    if (!ep.startsWith("http") || ep.includes(URL_ANTIGUA_ELIMINADA)) {
+      document.getElementById("configBox").open = true;
+      return alert("Configura arriba el enlace (/exec) de Google Apps Script.");
+    }
+
+    const itemsSubida = [];
+    bloquesCajas.forEach(b => {
+      const info = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
+      b.fotos.forEach(f => {
+        itemsSubida.push({
+          provincia: b.provincia,
+          pueblo: b.pueblo,
+          nodo: info.nodo,
+          codigo: info.codigo,
+          vista: f.vista,
+          usarParaPotencia: Boolean(f.usarParaPotencia),
+          modoDuplicado: f.modoDuplicado || "sustituir",
+          lat: f.lat,
+          lng: f.lng,
+          base64: f.base64
+        });
+      });
+    });
+
+    if (itemsSubida.length === 0) return;
+
+    const msg = document.getElementById("msgEstado");
+    msg.style.color = "var(--accent)";
+    msg.innerText = "Subiendo a Google Drive...";
+
+    try {
+      const resp = await fetch(ep, {
+        method: "POST",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "confirmarSubidaLote", items: itemsSubida })
+      });
+      const res = await resp.json();
+      if (res.error) throw new Error(res.error);
+
+      vibrarTick(180);
+
+      const linksHtml = (res.resultados || []).map(r =>
+        `<div style="margin-top:8px; background:rgba(16,185,129,0.12); padding:10px; border-radius:12px; border:1px solid rgba(16,185,129,0.35); font-size:12px;">` +
+        `✓ Guardado en <b>${r.pueblo} · ${r.codigo}</b> (${r.archivos.join(", ")}) ` +
+        `<a href="${r.folderUrl}" target="_blank" style="color:var(--accent); margin-left:6px; text-decoration:none;">Abrir Drive ↗</a></div>`
+      ).join("");
+
+      // Refrescar caché del Mapa Mental en segundo plano para que esté al día al cambiar de pestaña
+      precargarMapaMentalSilencioso(itemsSubida[0].provincia, itemsSubida[0].pueblo);
+
+      limpiarSesionActual();
+      msg.innerHTML = linksHtml;
+    } catch (err) {
+      msg.style.color = "var(--red)";
+      msg.innerText = "Error: " + err.message;
+    }
+  }
+
+  // ==================== 2. MAPA MENTAL CON CACHÉ PERMANENTE, NODOS PLEGADOS Y PANEL FLOTANTE DERECHO ====================
+  async function precargarMapaMentalSilencioso(provincia, pueblo) {
+    const ep = obtenerEndpoint();
+    if (!ep.startsWith("http")) return;
+    const key = `${provincia}|${pueblo}`;
+
+    // 1. Restaurar primero de localStorage para disponibilidad en 0 ms
+    const guardadoLocal = localStorage.getItem(`ftth_mm_${key}`);
+    if (guardadoLocal && !cacheMapaMentalPorPueblo[key]) {
+      try {
+        cacheMapaMentalPorPueblo[key] = JSON.parse(guardadoLocal);
+        cacheCoordenadasPorPueblo[key] = cacheMapaMentalPorPueblo[key].coordenadas || {};
+      } catch (e) {}
+    }
+
+    // 2. Actualizar silenciosamente desde Drive
+    try {
+      const r = await fetch(`${ep}?action=getMapaMental&provincia=${encodeURIComponent(provincia)}&pueblo=${encodeURIComponent(pueblo)}&forzar=0`, { redirect: "follow" });
+      const d = await r.json();
+      if (d && !d.error) {
+        cacheMapaMentalPorPueblo[key] = d;
+        cacheCoordenadasPorPueblo[key] = d.coordenadas || {};
+        localStorage.setItem(`ftth_mm_${key}`, JSON.stringify(d));
+        if (seleccionPuebloEstado.provincia === provincia && seleccionPuebloEstado.pueblo === pueblo) {
+          datosMapaMentalActual = d;
+          if (document.getElementById("vistaEstado").style.display !== "none") {
+            dibujarArbolMapaMental();
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  async function cargarMapaMentalPueblo(forzar) {
+    const ep = obtenerEndpoint();
+    if (!ep.startsWith("http")) return;
+
+    const { provincia, pueblo } = seleccionPuebloEstado;
+    const key = `${provincia}|${pueblo}`;
+    const cont = document.getElementById("contenedorMapaMental");
+
+    // Si no es forzado y ya existe en caché (RAM o localStorage), mostrar en 0 ms sin recargar
+    if (!forzar) {
+      if (!cacheMapaMentalPorPueblo[key]) {
+        const local = localStorage.getItem(`ftth_mm_${key}`);
+        if (local) {
+          try { cacheMapaMentalPorPueblo[key] = JSON.parse(local); } catch (e) {}
+        }
+      }
+      if (cacheMapaMentalPorPueblo[key]) {
+        datosMapaMentalActual = cacheMapaMentalPorPueblo[key];
+        dibujarArbolMapaMental();
+        precargarMapaMentalSilencioso(provincia, pueblo);
+        return;
+      }
+    }
+
+    cont.innerHTML = `<div style="color:var(--muted); text-align:center; padding:18px; font-size:12px;">Sincronizando red de ${pueblo}...</div>`;
+
+    try {
+      const r = await fetch(`${ep}?action=getMapaMental&provincia=${encodeURIComponent(provincia)}&pueblo=${encodeURIComponent(pueblo)}&forzar=${forzar ? '1' : '0'}`, { redirect: "follow" });
+      const d = await r.json();
+      if (d.error) throw new Error(d.error);
+      datosMapaMentalActual = d;
+      cacheMapaMentalPorPueblo[key] = d;
+      cacheCoordenadasPorPueblo[key] = d.coordenadas || {};
+      localStorage.setItem(`ftth_mm_${key}`, JSON.stringify(d));
+      dibujarArbolMapaMental();
+
+      if (d.hayDwgSinProcesar) {
+        verificarYProcesarDwgDeDrive(provincia, pueblo, false);
+      }
+    } catch (e) {
+      cont.innerHTML = `<div style="color:var(--red); text-align:center; padding:18px; font-size:12px;">Error: ${e.message}</div>`;
+    }
+  }
+
+  function toggleNodoMapaMental(ev, nName) {
+    ev.stopPropagation();
+    if (nodosDesplegadosMapa.has(nName)) {
+      nodosDesplegadosMapa.delete(nName);
+    } else {
+      nodosDesplegadosMapa.add(nName);
+    }
+    elementoDesplegadoMapa = null;
+    vibrarTick(10);
+    dibujarArbolMapaMental();
+  }
+
+  function toggleFlotanteElementoMapaMental(ev, codigo) {
+    ev.stopPropagation();
+    elementoDesplegadoMapa = (elementoDesplegadoMapa === codigo) ? null : codigo;
+    vibrarTick(8);
+    dibujarArbolMapaMental();
+  }
+
+  function dibujarArbolMapaMental() {
+    const cont = document.getElementById("contenedorMapaMental");
+    const { pueblo } = seleccionPuebloEstado;
+    const rawEls = (datosMapaMentalActual && datosMapaMentalActual.elementos) || {};
+    const topologia = (datosMapaMentalActual && datosMapaMentalActual.topologia) || { enlacesCtoEmpalme: {} };
+    const enlacesCtoEmp = topologia.enlacesCtoEmpalme || {};
+
+    // Filtrar estrictamente cualquier código N-00 / 00-xx inválido
+    const mapaEls = {};
+    let maxNumNodoDetectado = 0;
+
+    Object.keys(rawEls).forEach(cod => {
+      const desc = descomponerCodigoEnRuleta(cod);
+      if (!desc) return; // Ignora N-00, E-00-xx, 00-xx
+      mapaEls[desc.codigo] = { ...rawEls[cod], codigo: desc.codigo, tipo: desc.tipo };
+      if (desc.tipo !== "EMPALME_RA" && desc.numNodo > maxNumNodoDetectado) {
+        maxNumNodoDetectado = desc.numNodo;
+      }
+    });
+
+    const codigosTodos = Object.keys(mapaEls).sort();
+    if (codigosTodos.length === 0) {
+      document.getElementById("resumenGlobalPueblo").innerText = "Sin elementos registrados";
+      cont.innerHTML = `
+        <div style="text-align:center; padding:20px; color:var(--muted); font-size:12.5px;">
+          No hay elementos registrados en <b>${pueblo}</b>.<br>
+          Sube una foto o carga el archivo <b>📐 Plano .DWG</b> arriba.
+        </div>`;
+      return;
+    }
+
+    let nVerdes = 0, nNaranjas = 0, nRojos = 0;
+    codigosTodos.forEach(c => {
+      const ec = mapaEls[c].estadoColor;
+      if (ec === "VERDE") nVerdes++;
+      else if (ec === "ROJO") nRojos++;
+      else nNaranjas++;
+    });
+    const totalGps = Object.keys((datosMapaMentalActual && datosMapaMentalActual.coordenadas) || {}).length;
+    document.getElementById("resumenGlobalPueblo").innerText =
+      `${codigosTodos.length} elementos (${totalGps} con GPS)  ·  ${nVerdes} completos  ·  ${nNaranjas} incompletos  ·  ${nRojos} pendientes`;
+
+    const empalmesRA = [];
+    const arbolNodos = {};
+
+    const asegurarNodoEnArbol = (nodoName) => {
+      if (!nodoName || nodoName === "N-00") return;
+      if (!arbolNodos[nodoName]) {
+        arbolNodos[nodoName] = { propioNodo: null, empalmesRD: {}, ctosDirectas: [] };
+      }
+    };
+
+    // Asegurar todos los nodos desde N-01 hasta el máximo nodo del plano para ver también los vacíos
+    for (let i = 1; i <= maxNumNodoDetectado; i++) {
+      asegurarNodoEnArbol(`N-${String(i).padStart(2, "0")}`);
+    }
+
+    codigosTodos.forEach(cod => {
+      const el = mapaEls[cod];
+      const desc = descomponerCodigoEnRuleta(cod);
+      if (!desc) return;
+
+      if (desc.tipo === "EMPALME_RA") {
+        empalmesRA.push(el);
+      } else {
+        const nName = desc.nodo;
+        asegurarNodoEnArbol(nName);
+        if (desc.tipo === "NODO") {
+          arbolNodos[nName].propioNodo = el;
+        } else if (desc.tipo === "EMPALME_RD") {
+          if (!arbolNodos[nName].empalmesRD[cod]) arbolNodos[nName].empalmesRD[cod] = { info: el, ctosHijas: [] };
+          else arbolNodos[nName].empalmesRD[cod].info = el;
+        }
+      }
+    });
+
+    codigosTodos.forEach(cod => {
+      const el = mapaEls[cod];
+      const desc = descomponerCodigoEnRuleta(cod);
+      if (!desc || desc.tipo !== "CTO") return;
+      const nName = desc.nodo;
+      asegurarNodoEnArbol(nName);
+
+      const empPadre = enlacesCtoEmp[cod];
+      if (empPadre && arbolNodos[nName].empalmesRD[empPadre]) {
+        arbolNodos[nName].empalmesRD[empPadre].ctosHijas.push(el);
+      } else {
+        arbolNodos[nName].ctosDirectas.push(el);
+      }
+    });
+
+    // Renderiza un elemento (CTO / Empalme / Fotos Nodo) con su panel flotante a la derecha sin desplazar el mapa
+    const renderizarElementoConFlotanteDerecho = (el, etiquetaMostrada) => {
+      const activo = (elementoDesplegadoMapa === el.codigo);
+      const vistasReq = el.tipo === "CTO"
+        ? ["Abierta", "Cerrada", "Potencia", "Panorámica"]
+        : ["Abierta", "Cerrada", "Panorámica"];
+      const vMap = el.vistas || {};
+
+      const itemsListaHtml = vistasReq.map(v => {
+        const ok = Boolean(vMap[v]);
+        return `<li class="${ok ? 'v-in-drive' : 'v-missing-drive'}">${v} (${ok ? 'está en drive' : 'falta en drive'})</li>`;
+      }).join("");
+
+      const urlDrv = el.folderUrl || (datosMapaMentalActual && datosMapaMentalActual.puebloUrl) || "#";
+      const safeId = el.codigo.replace(/[^a-zA-Z0-9_-]/g, "_");
+
+      return `
+        <div class="mm-leaf-row">
+          <span class="mm-label text-${el.estadoColor} ${activo ? 'active-item' : ''}" onclick="toggleFlotanteElementoMapaMental(event, '${el.codigo}')">
+            <span class="mm-dot dot-${el.estadoColor}"></span>
+            <span>${etiquetaMostrada}</span>
+          </span>
+          ${activo ? `
+            <div class="mm-floating-right" onclick="event.stopPropagation()">
+              <div style="font-size:12px; font-weight:700; color:#fff; margin-bottom:4px; display:flex; justify-content:space-between;">
+                <span>${etiquetaMostrada}</span>
+                <span style="cursor:pointer; color:var(--muted);" onclick="toggleFlotanteElementoMapaMental(event, '${el.codigo}')">✕</span>
+              </div>
+              <ul class="mm-view-list">${itemsListaHtml}</ul>
+              <div class="mm-inline-actions">
+                <button type="button" class="mm-action-link" onclick="irACompletarCaja('${el.codigo}')">+ Subir fotos</button>
+                ${el.folderId ? `<button type="button" class="mm-action-link" onclick="cargarMiniaturasInline('${el.folderId}', '${el.codigo}', 'gal_${safeId}')">Imágenes</button>` : ""}
+                <a href="${urlDrv}" target="_blank" class="mm-action-link">Drive ↗</a>
+              </div>
+              <div id="gal_${safeId}" class="thumbs" style="display:none; margin-top:6px;"></div>
+            </div>` : ""}
+        </div>`;
+    };
+
+    let html = `<div class="mm-olt"><span class="mm-olt-dot"></span> OLT ${pueblo}</div><div class="mm-branch-group">`;
+
+    if (empalmesRA.length > 0) {
+      const raAbierto = nodosDesplegadosMapa.has("RA");
+      html += `
+        <div class="mm-node-row">
+          <div class="mm-node-header" onclick="toggleNodoMapaMental(event, 'RA')">
+            <span class="mm-arrow ${raAbierto ? 'open' : ''}">▶</span>
+            <span class="mm-node-title">Red Alimentación (RA)</span>
+            <span class="mm-plan-tag tag-terminado">(Terminado)</span>
+          </div>
+          ${raAbierto ? `
+            <div class="mm-sub-group">
+              ${empalmesRA.map(e => renderizarElementoConFlotanteDerecho(e, e.codigo)).join("")}
+            </div>` : ""}
+        </div>`;
+    }
+
+    Object.keys(arbolNodos).sort().forEach(nName => {
+      if (nName === "N-00") return;
+      const nData = arbolNodos[nName];
+      const elNodo = nData.propioNodo || {
+        codigo: nName,
+        tipo: "NODO",
+        vistas: { Abierta: false, Cerrada: false, Panorámica: false },
+        faltan: ["Abierta", "Cerrada"],
+        estadoColor: "ROJO"
+      };
+      if (!mapaEls[nName]) mapaEls[nName] = elNodo;
+
+      // Determinar si el Nodo tiene ramificaciones/CTOs en el plano o está vacío
+      const totalCtosDelNodo = nData.ctosDirectas.length +
+        Object.values(nData.empalmesRD).reduce((acc, e) => acc + (e.ctosHijas ? e.ctosHijas.length : 0), 0);
+      const tieneRamificaciones = totalCtosDelNodo > 0 || Object.keys(nData.empalmesRD).length > 0;
+
+      const etiquetaPlan = tieneRamificaciones
+        ? `<span class="mm-plan-tag tag-terminado">(Terminado)</span>`
+        : `<span class="mm-plan-tag tag-falta">(Falta por hacer)</span>`;
+
+      const estaNodoDesplegado = nodosDesplegadosMapa.has(nName);
+
+      let hijosHtml = "";
+      if (estaNodoDesplegado) {
+        hijosHtml = `<div class="mm-sub-group">`;
+        // Propio armario/caja del Nodo para sus fotos
+        hijosHtml += renderizarElementoConFlotanteDerecho(elNodo, `Fotos ${nName}`);
+
+        // 1º CTOs directas de Nodo
+        nData.ctosDirectas.forEach(c => {
+          hijosHtml += renderizarElementoConFlotanteDerecho(c, `CTO ${c.codigo}`);
+        });
+
+        // 2º Empalmes RD y sus CTOs hijas
+        Object.keys(nData.empalmesRD).sort().forEach(eCod => {
+          const empObj = nData.empalmesRD[eCod];
+          const ctosHijas = empObj.ctosHijas || [];
+          hijosHtml += `
+            <div class="mm-node-row">
+              ${renderizarElementoConFlotanteDerecho(empObj.info, `Empalme ${eCod}`)}
+              ${ctosHijas.length > 0 ? `
+                <div class="mm-sub-group">
+                  ${ctosHijas.map(ch => renderizarElementoConFlotanteDerecho(ch, `CTO ${ch.codigo}`)).join("")}
+                </div>` : ""}
+            </div>`;
+        });
+        hijosHtml += `</div>`;
+      }
+
+      html += `
+        <div class="mm-node-row">
+          <div class="mm-node-header" onclick="toggleNodoMapaMental(event, '${nName}')">
+            <span class="mm-arrow ${estaNodoDesplegado ? 'open' : ''}">▶</span>
+            <span class="mm-dot dot-${elNodo.estadoColor}"></span>
+            <span class="mm-node-title">Nodo ${nName}</span>
+            ${etiquetaPlan}
+          </div>
+          ${hijosHtml}
+        </div>`;
+    });
+
+    html += `</div>`;
+    cont.innerHTML = html;
+  }
+
+  async function cargarMiniaturasInline(folderId, codigoActual, contenedorId) {
+    const box = document.getElementById(contenedorId);
+    if (!box) return;
+    if (box.style.display === "grid") { box.style.display = "none"; return; }
+    box.style.display = "grid";
+    box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--muted);">Cargando...</div>`;
+    try {
+      const r = await fetch(`${obtenerEndpoint()}?action=getFotosElemento&folderId=${encodeURIComponent(folderId)}`, { redirect: "follow" });
+      const d = await r.json();
+      if (!d.fotos || d.fotos.length === 0) {
+        box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--muted);">Sin imágenes.</div>`;
+        return;
+      }
+      box.innerHTML = d.fotos.map(f => `
+        <div class="thumb-card">
+          <img src="${f.base64}" style="height:75px;" onclick="abrirZoom('${f.base64}')" />
+          <button class="dots-btn" onclick="abrirMenuTresPuntos(event, '${f.fileId}')">⋮</button>
+          <div id="menuDots_${f.fileId}" class="dots-menu" style="display:none;" onclick="event.stopPropagation()">
+            <div onclick="abrirModalMoverDesdeEstadoRed('${f.fileId}', '${codigoActual}', '${f.vista}')">📂 Mover</div>
+            <div style="color:#f87171;" onclick="eliminarFotoDeDrive('${f.fileId}')">🗑️ Eliminar</div>
+          </div>
+        </div>`).join("");
+    } catch (e) {
+      box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--red);">Error.</div>`;
+    }
+  }
+
+  function abrirMenuTresPuntos(ev, fileId) {
+    ev.stopPropagation();
+    document.querySelectorAll(".dots-menu").forEach(m => m.style.display = "none");
+    const m = document.getElementById(`menuDots_${fileId}`);
+    if (m) m.style.display = "block";
+  }
+
+  // ==================== 3. MOTOR LECTOR DE PLANOS .DWG (COORDENADAS + RAMIFICACIONES) ====================
+  function convertirUtm30AGps(x, y) {
+    if (!x || !y || isNaN(x) || isNaN(y) || x < 100000 || x > 900000 || y < 3500000 || y > 4800000) return null;
+    const a = 6378137.0;
+    const eccSquared = 0.00669438;
+    const k0 = 0.9996;
+    const eccPrimeSquared = eccSquared / (1 - eccSquared);
+    const e1 = (1 - Math.sqrt(1 - eccSquared)) / (1 + Math.sqrt(1 - eccSquared));
+
+    const xAdj = x - 500000.0;
+    const M = y / k0;
+    const mu = M / (a * (1 - eccSquared / 4 - 3 * eccSquared * eccSquared / 64 - 5 * Math.pow(eccSquared, 3) / 256));
+
+    const phi1Rad = mu
+      + (3 * e1 / 2 - 27 * Math.pow(e1, 3) / 32) * Math.sin(2 * mu)
+      + (21 * e1 * e1 / 16 - 55 * Math.pow(e1, 4) / 32) * Math.sin(4 * mu)
+      + (151 * Math.pow(e1, 3) / 96) * Math.sin(6 * mu);
+
+    const N1 = a / Math.sqrt(1 - eccSquared * Math.sin(phi1Rad) * Math.sin(phi1Rad));
+    const T1 = Math.tan(phi1Rad) * Math.tan(phi1Rad);
+    const C1 = eccPrimeSquared * Math.cos(phi1Rad) * Math.cos(phi1Rad);
+    const R1 = a * (1 - eccSquared) / Math.pow(1 - eccSquared * Math.sin(phi1Rad) * Math.sin(phi1Rad), 1.5);
+    const D = xAdj / (N1 * k0);
+
+    let lat = phi1Rad - (N1 * Math.tan(phi1Rad) / R1) * (D * D / 2 - (5 + 3 * T1 + 10 * C1 - 4 * C1 * C1 - 9 * eccPrimeSquared) * Math.pow(D, 4) / 24);
+    let lng = ((D - (1 + 2 * T1 + C1) * Math.pow(D, 3) / 6) / Math.cos(phi1Rad));
+
+    lat = lat * 180 / Math.PI;
+    lng = -3.0 + (lng * 180 / Math.PI);
+    return { lat: Number(lat.toFixed(6)), lng: Number(lng.toFixed(6)) };
+  }
+
+  async function cargarMotorLibreDwgWasm() {
+    if (libreDwgInstance) return libreDwgInstance;
+    const urlsCdn = [
+      "https://cdn.jsdelivr.net/npm/@mlightcad/libredwg-web@0.1.4/dist/libredwg-web.js",
+      "https://unpkg.com/@mlightcad/libredwg-web@0.1.4/dist/libredwg-web.js"
+    ];
+    for (const url of urlsCdn) {
+      try {
+        const mod = await import(url);
+        const LibreDwg = mod.LibreDwg || (mod.default && mod.default.LibreDwg);
+        if (LibreDwg) {
+          libreDwgInstance = await LibreDwg.create();
+          return libreDwgInstance;
+        }
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  async function extraerDatosDeArrayBufferPlano(arrayBuffer) {
+    const uint8 = new Uint8Array(arrayBuffer);
+    const headerAscii = new TextDecoder("iso-8859-1").decode(uint8.slice(0, 12));
+    const regexCod = /\b(?:NODO[\s-]*\d{1,2}|N-\d{1,2}|E-\d{1,2}-\d{1,2}|E-[A-Z]{2,6}-\d{1,2}|\d{2}-\d{2})\b/gi;
+
+    const elementosSet = new Set();
+    const coordenadasExtraidas = {};
+    const puntosUtmPorCodigo = {};
+    const polilineasCables = [];
+
+    if (headerAscii.startsWith("AC10")) {
+      const dwgEngine = await cargarMotorLibreDwgWasm();
+      if (dwgEngine) {
+        try {
+          const ptr = dwgEngine.dwg_read_data(arrayBuffer, 0);
+          const db = dwgEngine.convert(ptr);
+          dwgEngine.dwg_free(ptr);
+
+          const procesarListaEntidades = (lista) => {
+            (lista || []).forEach(ent => {
+              const texto = [ent.text, ent.string, ent.value, ent.tag, ent.name, ent.block, ent.contents].filter(Boolean).join(" ").replace(/NODO\s*/gi, "N-");
+              const pos = ent.insertionPoint || ent.startPoint || ent.position || ent.center || ent.alignmentPoint || (ent.vertices && ent.vertices[0]);
+              const x = pos ? (pos.x !== undefined ? pos.x : pos[0]) : null;
+              const y = pos ? (pos.y !== undefined ? pos.y : pos[1]) : null;
+
+              if (texto) {
+                const matches = String(texto).match(regexCod) || [];
+                matches.forEach(m => {
+                  const normStr = m.toUpperCase().replace(/NODO[\s-]*/, "N-");
+                  const desc = descomponerCodigoEnRuleta(normStr);
+                  if (desc) {
+                    elementosSet.add(desc.codigo);
+                    if (desc.nodo && desc.nodo.startsWith("N-")) elementosSet.add(desc.nodo);
+                    const gps = convertirUtm30AGps(x, y);
+                    if (gps) {
+                      coordenadasExtraidas[desc.codigo] = { lat: gps.lat, lng: gps.lng, nodo: desc.nodo, tipo: desc.tipo };
+                      puntosUtmPorCodigo[desc.codigo] = { x, y, tipo: desc.tipo, nodo: desc.nodo };
+                    }
+                  }
+                });
+              }
+
+              if (ent.vertices && ent.vertices.length >= 2) {
+                const pts = ent.vertices.map(v => ({ x: v.x !== undefined ? v.x : v[0], y: v.y !== undefined ? v.y : v[1] })).filter(p => p.x && p.y);
+                if (pts.length >= 2) polilineasCables.push(pts);
+              } else if (ent.startPoint && ent.endPoint) {
+                polilineasCables.push([
+                  { x: ent.startPoint.x, y: ent.startPoint.y },
+                  { x: ent.endPoint.x, y: ent.endPoint.y }
+                ]);
+              }
+            });
+          };
+
+          if (db) {
+            procesarListaEntidades(db.entities);
+            if (db.tables && db.tables.BLOCK_RECORD && db.tables.BLOCK_RECORD.entries) {
+              db.tables.BLOCK_RECORD.entries.forEach(blk => procesarListaEntidades(blk.entities));
+            }
+          }
+        } catch (errWasm) {}
+      }
+
+      const textoIso = new TextDecoder("iso-8859-1").decode(uint8).replace(/NODO\s*/gi, "N-");
+      const textoUtf16 = new TextDecoder("utf-16le").decode(uint8).replace(/NODO\s*/gi, "N-");
+      [...(textoIso.match(regexCod) || []), ...(textoUtf16.match(regexCod) || [])].forEach(m => {
+        const desc = descomponerCodigoEnRuleta(m.toUpperCase().replace(/NODO[\s-]*/, "N-"));
+        if (desc) {
+          elementosSet.add(desc.codigo);
+          if (desc.nodo && desc.nodo.startsWith("N-")) elementosSet.add(desc.nodo);
+        }
+      });
+    } else {
+      const rawText = new TextDecoder("iso-8859-1").decode(uint8);
+      const lineas = rawText.split(/\r?\n/);
+      let xActual = null, yActual = null, textoActual = "";
+
+      for (let i = 0; i < lineas.length - 1; i += 2) {
+        const code = lineas[i].trim();
+        const val = lineas[i + 1].trim();
+        if (code === "0") {
+          if (textoActual) {
+            const cleanT = textoActual.replace(/NODO\s*/gi, "N-");
+            const matches = cleanT.match(regexCod) || [];
+            matches.forEach(m => {
+              const desc = descomponerCodigoEnRuleta(m);
+              if (desc) {
+                elementosSet.add(desc.codigo);
+                if (desc.nodo && desc.nodo.startsWith("N-")) elementosSet.add(desc.nodo);
+                const gps = convertirUtm30AGps(xActual, yActual);
+                if (gps) {
+                  coordenadasExtraidas[desc.codigo] = { lat: gps.lat, lng: gps.lng, nodo: desc.nodo, tipo: desc.tipo };
+                  puntosUtmPorCodigo[desc.codigo] = { x: xActual, y: yActual, tipo: desc.tipo, nodo: desc.nodo };
+                }
+              }
+            });
+          }
+          xActual = null; yActual = null; textoActual = "";
+        } else if (code === "10") xActual = parseFloat(val);
+        else if (code === "20") yActual = parseFloat(val);
+        else if (code === "1" || code === "3" || code === "2") textoActual += " " + val;
+      }
+    }
+
+    // Calcular si cada CTO sale directa del Nodo o cuelga de un Empalme RD
+    const enlacesCtoEmpalme = {};
+    const codigosConUtm = Object.keys(puntosUtmPorCodigo);
+    const ctosUtm = codigosConUtm.filter(c => puntosUtmPorCodigo[c].tipo === "CTO");
+    const empalmesUtm = codigosConUtm.filter(c => puntosUtmPorCodigo[c].tipo === "EMPALME_RD");
+
+    ctosUtm.forEach(cCod => {
+      const pCto = puntosUtmPorCodigo[cCod];
+      const pNodo = puntosUtmPorCodigo[pCto.nodo];
+      const empsMismoNodo = empalmesUtm.filter(eCod => puntosUtmPorCodigo[eCod].nodo === pCto.nodo);
+      if (empsMismoNodo.length === 0) return;
+
+      let empPorCable = null;
+      let menorErrorCable = 40;
+      empsMismoNodo.forEach(eCod => {
+        const pEmp = puntosUtmPorCodigo[eCod];
+        polilineasCables.forEach(pts => {
+          const pIni = pts[0], pFin = pts[pts.length - 1];
+          const dDirecta = Math.hypot(pIni.x - pEmp.x, pIni.y - pEmp.y) + Math.hypot(pFin.x - pCto.x, pFin.y - pCto.y);
+          const dInversa = Math.hypot(pFin.x - pEmp.x, pFin.y - pEmp.y) + Math.hypot(pIni.x - pCto.x, pIni.y - pCto.y);
+          const minD = Math.min(dDirecta, dInversa);
+          if (minD < menorErrorCable) {
+            menorErrorCable = minD;
+            empPorCable = eCod;
+          }
+        });
+      });
+
+      if (empPorCable) {
+        enlacesCtoEmpalme[cCod] = empPorCable;
+        return;
+      }
+
+      let empMasCercano = null;
+      let distEmpMin = Infinity;
+      empsMismoNodo.forEach(eCod => {
+        const pEmp = puntosUtmPorCodigo[eCod];
+        const d = Math.hypot(pCto.x - pEmp.x, pCto.y - pEmp.y);
+        if (d < distEmpMin) {
+          distEmpMin = d;
+          empMasCercano = eCod;
+        }
+      });
+
+      const distAlNodo = pNodo ? Math.hypot(pCto.x - pNodo.x, pCto.y - pNodo.y) : Infinity;
+      if (empMasCercano && distEmpMin < distAlNodo && distEmpMin < 240) {
+        enlacesCtoEmpalme[cCod] = empMasCercano;
+      }
+    });
+
+    return {
+      elementosPlano: Array.from(elementosSet).sort(),
+      coordenadas: coordenadasExtraidas,
+      enlacesCtoEmpalme: enlacesCtoEmpalme
+    };
+  }
+
+  async function verificarYProcesarDwgDeDrive(provincia, pueblo, forzar) {
+    const ep = obtenerEndpoint();
+    if (!ep.startsWith("http")) return;
+    const banner = document.getElementById("bannerProgresoDwg");
+
+    try {
+      const r = await fetch(`${ep}?action=getDwgPendiente&provincia=${encodeURIComponent(provincia)}&pueblo=${encodeURIComponent(pueblo)}&forzar=${forzar ? '1' : '0'}`, { redirect: "follow" });
+      const d = await r.json();
+      if (!d || !d.tieneDwgPendiente || !d.base64) return;
+
+      banner.style.display = "block";
+      banner.innerText = `Sincronizando plano de Drive (${d.nombreDwg})...`;
+
+      const binStr = atob(d.base64);
+      const bytes = new Uint8Array(binStr.length);
+      for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+
+      const extraido = await extraerDatosDeArrayBufferPlano(bytes.buffer);
+
+      await fetch(ep, {
+        method: "POST",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "guardarTopologiaPlano",
+          provincia,
+          pueblo,
+          fechaDwg: d.fechaDwg,
+          elementosPlano: extraido.elementosPlano,
+          coordenadas: extraido.coordenadas,
+          enlacesCtoEmpalme: extraido.enlacesCtoEmpalme
+        })
+      });
+
+      banner.style.display = "none";
+      await cargarMapaMentalPueblo(true);
+    } catch (e) {
+      banner.style.display = "none";
+    }
+  }
+
+  async function subirPlanoDwgManual(ev) {
+    const file = ev.target.files[0];
+    if (!file) return;
+    ev.target.value = "";
+
+    const { provincia, pueblo } = seleccionPuebloEstado;
+    const banner = document.getElementById("bannerProgresoDwg");
+    banner.style.display = "block";
+    banner.innerText = `Extrayendo nodos, coordenadas GPS y ramificaciones de ${file.name}...`;
+
+    try {
+      const buffer = await file.arrayBuffer();
+      const extraido = await extraerDatosDeArrayBufferPlano(buffer);
+
+      if (extraido.elementosPlano.length === 0) {
+        banner.style.display = "none";
+        return alert("No se detectaron códigos válidos en este archivo.");
+      }
+
+      banner.innerText = `Guardando ${extraido.elementosPlano.length} elementos y ${Object.keys(extraido.coordenadas).length} coordenadas GPS...`;
+
+      const resp = await fetch(obtenerEndpoint(), {
+        method: "POST",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "guardarTopologiaPlano",
+          provincia,
+          pueblo,
+          fechaDwg: Date.now(),
+          elementosPlano: extraido.elementosPlano,
+          coordenadas: extraido.coordenadas,
+          enlacesCtoEmpalme: extraido.enlacesCtoEmpalme
+        })
+      });
+      const res = await resp.json();
+      if (res.error) throw new Error(res.error);
+
+      banner.style.display = "none";
+      await cargarMapaMentalPueblo(true);
+    } catch (e) {
+      banner.style.display = "none";
+      alert("Aviso al leer el plano: " + (e && e.message ? e.message : String(e)));
+    }
+  }
+
+  // --- MOVER Y ELIMINAR DESDE EL MAPA MENTAL ---
+  function abrirModalMoverDesdeEstadoRed(fileId, codigoOrigen, vistaOrigen) {
+    cerrarFlotantes();
+    const { provincia, pueblo } = seleccionPuebloEstado;
+    const desc = descomponerCodigoEnRuleta(codigoOrigen) || { tipo: "CTO", numNodo: 1, numCaja: 1 };
+
+    contextoMover = { fileId, provinciaSel: provincia, puebloSel: pueblo };
+    document.getElementById("cajaColisionMover").style.display = "none";
+    const btn = document.getElementById("btnConfirmarMover");
+    btn.innerText = "Confirmar";
+    btn.disabled = false;
+    btn.onclick = () => confirmarAccionModalMover(false);
+
+    document.getElementById("txtMoverPueblo").innerText = `${pueblo} (${provincia})`;
+    document.getElementById("inputNodoMover").value = desc.numNodo;
+    document.getElementById("selTipoNuevoModal").value = desc.tipo;
+    document.getElementById("inputNumElementoModal").value = desc.numCaja;
+    document.getElementById("selMoverVista").value = vistaOrigen;
+    document.getElementById("moverFotoModal").style.display = "flex";
+  }
+
+  function cerrarModalMover() {
+    document.getElementById("moverFotoModal").style.display = "none";
+  }
+
+  async function confirmarAccionModalMover(forzarSustitucion) {
+    const provDest = contextoMover.provinciaSel;
+    const pueDest = contextoMover.puebloSel;
+    const numNodo = Math.max(1, Number(document.getElementById("inputNodoMover").value || 1));
+    const tipo = document.getElementById("selTipoNuevoModal").value;
+    const numCaja = Math.max(1, Number(document.getElementById("inputNumElementoModal").value || 1));
+    const codDest = construirCodigoYTitulo(tipo, numNodo, numCaja, pueDest).codigo;
+    const vistaDest = document.getElementById("selMoverVista").value;
+
+    const btn = document.getElementById("btnConfirmarMover");
+    btn.innerText = "Moviendo...";
+    btn.disabled = true;
+
+    try {
+      const resp = await fetch(obtenerEndpoint(), {
+        method: "POST",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "gestionarFotoRed",
+          subAction: "mover",
+          fileId: contextoMover.fileId,
+          provinciaDestino: provDest,
+          puebloDestino: pueDest,
+          codigoDestino: codDest,
+          vistaDestino: vistaDest,
+          forzarSustitucion: Boolean(forzarSustitucion)
+        })
+      });
+      const res = await resp.json();
+      if (res.error) throw new Error(res.error);
+
+      if (res.colision && res.fotoExistente) {
+        document.getElementById("cajaColisionMover").style.display = "block";
+        document.getElementById("textoColisionMover").innerText = res.mensaje;
+        document.getElementById("imgColisionMover").src = res.fotoExistente.base64;
+        document.getElementById("linkDriveColision").href = res.fotoExistente.url;
+        btn.innerText = "Sustituir foto";
+        btn.disabled = false;
+        btn.onclick = () => confirmarAccionModalMover(true);
+        return;
+      }
+
+      cerrarModalMover();
+      await cargarMapaMentalPueblo(true);
+    } catch (e) {
+      alert("Error al mover: " + e.message);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function eliminarFotoDeDrive(fileId) {
+    cerrarFlotantes();
+    if (!confirm("¿Eliminar esta fotografía de Google Drive?")) return;
+    const { provincia, pueblo } = seleccionPuebloEstado;
+    try {
+      await fetch(obtenerEndpoint(), {
+        method: "POST",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "gestionarFotoRed",
+          subAction: "eliminar",
+          fileId,
+          provinciaOrigen: provincia,
+          puebloOrigen: pueblo
+        })
+      });
+      await cargarMapaMentalPueblo(true);
+    } catch (e) {}
+  }
+
+  // Ir a completar un elemento desde el Mapa Mental marcando en verde las vistas que ya están en Drive
+  function irACompletarCaja(codigo) {
+    const { provincia, pueblo } = seleccionPuebloEstado;
+    const desc = descomponerCodigoEnRuleta(codigo);
+    if (!desc) return;
+
+    const infoTit = construirCodigoYTitulo(desc.tipo, desc.numNodo, desc.numCaja, pueblo);
+    const elEnMapa = (datosMapaMentalActual && datosMapaMentalActual.elementos && datosMapaMentalActual.elementos[codigo]) || {};
+    const vistasYaEnDrive = elEnMapa.vistas || {};
+
+    modoCompletando = {
+      codigo: infoTit.codigo,
+      titulo: infoTit.titulo,
+      tipo: desc.tipo,
+      numNodo: desc.numNodo,
+      numCaja: desc.numCaja,
+      vistasEnDrive: vistasYaEnDrive
+    };
+
+    elementoDesplegadoMapa = null;
+    cambiarTab("rafaga");
+
+    const nuevoId = "b_" + Date.now();
+    bloquesCajas = [{
+      id: nuevoId,
+      provincia: provincia || "Murcia",
+      pueblo: pueblo || "Águilas",
+      tipo: desc.tipo,
+      numNodo: desc.numNodo,
+      numCaja: desc.numCaja,
+      fijadoManualmente: true,
+      fotos: []
+    }];
+    ruletaAbiertaId = null;
+
+    document.getElementById("tituloGrandeCompletando").innerText = `Completando ${infoTit.titulo}`;
+    document.getElementById("bannerCompletandoCaja").style.display = "flex";
+    renderTarjetas();
+  }
+</script>
+</body>
+</html>
