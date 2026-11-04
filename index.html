@@ -35,7 +35,6 @@
       letter-spacing: -0.01em;
     }
 
-    /* Barra superior de herramientas discreta (Conexión + Historial 5 estados + Reiniciar escondido) */
     .top-utility-bar {
       display: flex; justify-content: space-between; align-items: center;
       gap: 8px; margin-bottom: 10px;
@@ -64,7 +63,6 @@
     }
     select:focus, input:focus { border-color: var(--border-focus); }
 
-    /* Pestañas */
     .tabs {
       display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
       background: rgba(15, 23, 42, 0.85); padding: 5px;
@@ -90,7 +88,6 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     }
 
-    /* Banner grande de Completando Elemento */
     .completing-banner {
       background: linear-gradient(135deg, rgba(30, 58, 138, 0.92), rgba(15, 23, 42, 0.96));
       border: 1.5px solid #38bdf8;
@@ -109,7 +106,6 @@
       color: #e2e8f0; border-radius: 8px; padding: 6px 10px; font-size: 11.5px; font-weight: 600; cursor: pointer;
     }
 
-    /* Cola Anticaídas de Cobertura (Modo Arqueta / Sótano) */
     .offline-queue-banner {
       background: rgba(245, 158, 11, 0.16);
       border: 1.5px solid #f59e0b;
@@ -119,7 +115,6 @@
       display: flex; justify-content: space-between; align-items: center; gap: 8px;
     }
 
-    /* 4 Botones de Vista con color vivo y Relleno Verde Dinámico */
     .cam-4-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 10px; }
     .btn-cam-direct {
       background: var(--blue-btn);
@@ -177,7 +172,6 @@
       box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
     }
 
-    /* Tarjeta de Elemento y Botón de Título con 3 espacios y doble color */
     .element-card {
       background: rgba(11, 19, 38, 0.85);
       border: 1px solid rgba(96, 165, 250, 0.28);
@@ -205,7 +199,6 @@
       border-color: var(--accent);
       background: rgba(56, 189, 248, 0.2);
     }
-    /* Doble color en el título: Tipo de elemento vs Numeración */
     .title-type-part { color: #93c5fd; font-weight: 600; }
     .title-code-part { color: #38bdf8; font-weight: 800; letter-spacing: 0.02em; }
 
@@ -221,7 +214,6 @@
       white-space: nowrap;
     }
 
-    /* DIALES DE RULETA PLEGADOS POR DEFECTO */
     .wheel-drawer {
       background: rgba(8, 13, 26, 0.95);
       border: 1px solid rgba(56, 189, 248, 0.3);
@@ -264,15 +256,14 @@
     }
 
     .custom-dd-menu {
-      display: none; position: absolute; top: calc(100% + 4px); right: 0; width: 220px;
+      display: none; position: absolute; top: calc(100% + 4px); right: 0; width: 225px;
       background: #0f172a; border: 1px solid rgba(255,255,255,0.18); border-radius: 12px;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.8); z-index: 300; max-height: 250px; overflow-y: auto; text-align: left;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.8); z-index: 300; max-height: 260px; overflow-y: auto; text-align: left;
     }
     .dd-item { padding: 9px 12px; font-size: 12.5px; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; color: var(--text); }
     .dd-item:hover { background: rgba(56, 189, 248, 0.18); }
     .dd-back { background: rgba(30, 41, 59, 0.9); color: var(--accent); font-size: 12px; padding: 8px 12px; font-weight: 700; cursor: pointer; }
 
-    /* Miniaturas */
     .thumbs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .thumb-card {
       background: rgba(15, 23, 42, 0.8); padding: 6px;
@@ -308,7 +299,6 @@
     .dup-box { background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 6px; margin-top: 5px; font-size: 10.5px; }
     .small-btn { padding: 6px 10px; border-radius: 8px; font-size: 11.5px; font-weight: 600; text-decoration: none; border: 1px solid rgba(96, 165, 250, 0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; color: var(--text); background: rgba(37, 99, 235, 0.25); }
 
-    /* ==================== PESTAÑA 2: REGISTRO DE DRIVE LIMPIO POR NODOS ==================== */
     .drive-registry-list { display: flex; flex-direction: column; gap: 8px; }
     .drive-node-card {
       background: rgba(15, 23, 42, 0.82);
@@ -372,7 +362,7 @@
     </div>
   </div>
 
-  <!-- 3. MODAL DE HISTORIAL DE SEGURIDAD (ÚLTIMOS 5 ESTADOS ANTES DE SALIR O BORRAR) -->
+  <!-- 3. MODAL DE HISTORIAL DE SEGURIDAD (ÚLTIMOS 5 ESTADOS) -->
   <div id="historialModal" class="modal-overlay" onclick="document.getElementById('historialModal').style.display='none'">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -488,18 +478,21 @@
         ↺ Restaurar página
       </button>
       <button type="button" class="util-pill" onclick="document.getElementById('configBox').open = !document.getElementById('configBox').open">
-        ⚙️ <span id="badgeEstadoConexion">Drive</span>
+        🔒 <span id="badgeEstadoConexion">Drive</span>
       </button>
     </div>
   </div>
 
   <details class="config-bar" id="configBox">
-    <summary><span>Configuración de Enlace y Claves OCR</span></summary>
+    <summary><span>Conexión Corporativa Protegida</span></summary>
     <div style="margin-top: 8px; display:flex; flex-direction:column; gap:6px;">
-      <input type="text" id="scriptUrlInput" placeholder="Enlace Google Apps Script (.../exec)" oninput="guardarYProbarConfiguracion()" />
-      <input type="text" id="geminiKeyInput" placeholder="Claves API OCR" oninput="guardarConfiguracion()" />
+      <input type="password" id="scriptUrlInput" placeholder="🔒 Enlace corporativo protegido" oninput="guardarYProbarConfiguracion()" />
+      <input type="password" id="geminiKeyInput" placeholder="🔒 Claves OCR protegidas" oninput="guardarConfiguracion()" />
     </div>
   </details>
+
+  <!-- Banner silencioso cuando indexa los planos .DWG de la carpeta PRUEBA_FTTH_DRIVE/planos -->
+  <div id="bannerIndexadorPlanosGlobal" style="display:none; margin-bottom:10px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); border-radius:10px; padding:8px 12px; font-size:11.5px; color:var(--accent); font-weight:600;"></div>
 
   <div class="tabs">
     <div class="tab active" id="tabRafaga" onclick="cambiarTab('rafaga')">📸 Captura de Campo</div>
@@ -508,7 +501,7 @@
 
   <!-- ==================== PESTAÑA 1: CAPTURA DE CAMPO ==================== -->
   <div id="vistaRafaga" class="box">
-    <!-- Cola Anticaídas de Cobertura (Modo Arqueta / Sótano) -->
+    <!-- Cola Anticaídas de Cobertura -->
     <div id="bannerColaOffline" style="display:none;" class="offline-queue-banner">
       <div style="font-size:12px; font-weight:600; color:#fde68a;">
         📡 Subida pendiente guardada sin cobertura (<span id="numFotosOffline">0</span> fotos)
@@ -555,7 +548,6 @@
       </button>
     </div>
 
-    <!-- Botón ancho de Galería (SIN el botón peligroso de papelera al lado) -->
     <button class="btn-gal-wide" onclick="document.getElementById('galInput').click()">
       🖼️ Añadir lote desde Galería o PC
     </button>
@@ -583,7 +575,6 @@
           🔄 Actualizar Drive
         </button>
       </div>
-      <div id="bannerProgresoDwg" style="display:none; margin-top:8px; font-size:11.5px; color:var(--accent); font-weight:600;"></div>
       <div id="resumenGlobalPueblo" style="font-size:11.5px; color:var(--muted); margin-top:8px;"></div>
     </div>
 
@@ -602,6 +593,21 @@
     });
   }
 
+  // --- OFUSCACIÓN CRIPTOGRÁFICA DEL ENLACE /exec PARA GITHUB PÚBLICO ---
+  const CIFRADO_EXEC_B64 = "CRcVExBWWxwQAAkXGU5IABZGDgAMQwgfBR5BHggKAAwXBhxPShY6KAcYAAt5TQI5Sz8wWjdcPAk4JSYxORk9JBoqPgI5K2kZDCUNASoXIDs6KTEqKScpHCg7OxxcWltSWVMBCgM7BScJFhcXSAQaAwAc";
+  const SAL_INTERNA = "acacio";
+
+  function desofuscarEndpointOficial() {
+    try {
+      const bin = atob(CIFRADO_EXEC_B64);
+      let res = "";
+      for (let i = 0; i < bin.length; i++) {
+        res += String.fromCharCode(bin.charCodeAt(i) ^ SAL_INTERNA.charCodeAt(i % SAL_INTERNA.length));
+      }
+      return res;
+    } catch (e) { return ""; }
+  }
+
   const CLAVES_OFICIALES = [
     "AQ.Ab8RN6JNotP201VBuOQxKWkMzuEWvZfuReneFzGCNb0Y_CRGow",
     "AQ.Ab8RN6IKJ1LUAD1v11Dvv9-g6u5Nr71OVfCE3wnPpoSmR5sa-g",
@@ -609,31 +615,36 @@
   ];
   const URL_ANTIGUA_ELIMINADA = "AKfycbzI5iCR2IuqMqIYXOARESJgqvjq3i8eVO6v6PChnoESyk7s5YZOj0gC7OxOmQtxkptr";
 
+  // LOS 20 PUEBLOS Y SUS DIMINUTIVOS OFICIALES EXACTOS
   const COORDENADAS_PUEBLOS_OFICIALES = [
-    { provincia: "Almería", pueblo: "Antas", prefijo: "ANTA", lat: 37.2453, lng: -1.9175 },
-    { provincia: "Almería", pueblo: "Campo Hermoso", prefijo: "CHER", lat: 36.9367, lng: -2.1331 },
-    { provincia: "Almería", pueblo: "Garrucha", prefijo: "GARR", lat: 37.1814, lng: -1.8225 },
-    { provincia: "Almería", pueblo: "Los Gallardos", prefijo: "GALL", lat: 37.1678, lng: -1.9392 },
-    { provincia: "Almería", pueblo: "Mojácar", prefijo: "MOJA", lat: 37.1403, lng: -1.8507 },
-    { provincia: "Almería", pueblo: "San Juan de los Terreros", prefijo: "TERR", lat: 37.3578, lng: -1.6622 },
-    { provincia: "Almería", pueblo: "Turre", prefijo: "TURR", lat: 37.1525, lng: -1.8947 },
-    { provincia: "Almería", pueblo: "Vera Playa", prefijo: "VPLA", lat: 37.2185, lng: -1.8090 },
+    // Almería (10)
+    { provincia: "Almería", pueblo: "Antas", prefijo: "ANTS", lat: 37.2453, lng: -1.9175 },
+    { provincia: "Almería", pueblo: "Campo Hermoso", prefijo: "CAMH", lat: 36.9367, lng: -2.1331 },
+    { provincia: "Almería", pueblo: "San Isidro", prefijo: "SISI", lat: 36.9036, lng: -2.1708 },
     { provincia: "Almería", pueblo: "Vera Pueblo", prefijo: "VERA", lat: 37.2475, lng: -1.8686 },
+    { provincia: "Almería", pueblo: "Turre", prefijo: "TURR", lat: 37.1525, lng: -1.8947 },
+    { provincia: "Almería", pueblo: "Garrucha", prefijo: "GARR", lat: 37.1814, lng: -1.8225 },
+    { provincia: "Almería", pueblo: "San Juan de los Terreros", prefijo: "SJT", lat: 37.3578, lng: -1.6622 },
+    { provincia: "Almería", pueblo: "Vera Playa", prefijo: "VPLA", lat: 37.2185, lng: -1.8090 },
+    { provincia: "Almería", pueblo: "Los Gallardos", prefijo: "GALL", lat: 37.1678, lng: -1.9392 },
+    { provincia: "Almería", pueblo: "Mojácar", prefijo: "MOJC", lat: 37.1403, lng: -1.8507 },
+    // Murcia (1)
     { provincia: "Murcia", pueblo: "Águilas", prefijo: "AGUI", lat: 37.4063, lng: -1.5829 },
-    { provincia: "Granada", pueblo: "Alfacar", prefijo: "ALFA", lat: 37.2367, lng: -3.5706 },
+    // Granada (9)
+    { provincia: "Granada", pueblo: "Ronda", prefijo: "RNDA", lat: 37.1722, lng: -3.6083 },
+    { provincia: "Granada", pueblo: "Alfacar", prefijo: "ALFC", lat: 37.2367, lng: -3.5706 },
     { provincia: "Granada", pueblo: "Beas de Granada", prefijo: "BEAS", lat: 37.2181, lng: -3.4811 },
-    { provincia: "Granada", pueblo: "Canales (Güejar Sierra)", prefijo: "CANA", lat: 37.1611, lng: -3.4736 },
+    { provincia: "Granada", pueblo: "Canales", prefijo: "CNLS", lat: 37.1611, lng: -3.4736 },
     { provincia: "Granada", pueblo: "El Florio", prefijo: "FLOR", lat: 37.2025, lng: -3.6331 },
-    { provincia: "Granada", pueblo: "Güejar Sierra", prefijo: "GUEJ", lat: 37.1592, lng: -3.4394 },
-    { provincia: "Granada", pueblo: "Huétor Santillán", prefijo: "HUET", lat: 37.2181, lng: -3.5169 },
-    { provincia: "Granada", pueblo: "Ronda", prefijo: "ROND", lat: 37.1722, lng: -3.6083 },
-    { provincia: "Granada", pueblo: "San Jerónimo", prefijo: "SJER", lat: 37.1825, lng: -3.6067 },
+    { provincia: "Granada", pueblo: "Güejar Sierra", prefijo: "GJS", lat: 37.1592, lng: -3.4394 },
+    { provincia: "Granada", pueblo: "Huétor Santillán", prefijo: "HSAN", lat: 37.2181, lng: -3.5169 },
+    { provincia: "Granada", pueblo: "San Jerónimo", prefijo: "SANJ", lat: 37.1825, lng: -3.6067 },
     { provincia: "Granada", pueblo: "Zaidín", prefijo: "ZAID", lat: 37.1583, lng: -3.5972 }
   ];
 
   const MAPA_PUEBLOS_OFICIAL = {
-    "Almería": ["Antas", "Campo Hermoso", "Garrucha", "Los Gallardos", "Mojácar", "San Juan de los Terreros", "Turre", "Vera Playa", "Vera Pueblo"],
-    "Granada": ["Alfacar", "Beas de Granada", "Canales (Güejar Sierra)", "El Florio", "Güejar Sierra", "Huétor Santillán", "Ronda", "San Jerónimo", "Zaidín"],
+    "Almería": ["Antas", "Campo Hermoso", "Garrucha", "Los Gallardos", "Mojácar", "San Isidro", "San Juan de los Terreros", "Turre", "Vera Playa", "Vera Pueblo"],
+    "Granada": ["Alfacar", "Beas de Granada", "Canales", "El Florio", "Güejar Sierra", "Huétor Santillán", "Ronda", "San Jerónimo", "Zaidín"],
     "Murcia": ["Águilas"]
   };
 
@@ -660,8 +671,8 @@
   let cacheCoordenadasPorPueblo = {};
   let contextoMover = null;
   let libreDwgInstance = null;
+  let indexandoPlanosEnCurso = false;
 
-  // ==================== INICIALIZACIÓN, BLOQUEO DEL BOTÓN ATRÁS E HISTORIAL INDEXEDDB ====================
   window.onload = async () => {
     activarTrampaBotonAtrasMovil();
 
@@ -669,24 +680,19 @@
     document.getElementById("geminiKeyInput").value = CLAVES_OFICIALES.join(", ");
 
     let savedUrl = localStorage.getItem("ftth_script_url") || "";
-    if (savedUrl.includes(URL_ANTIGUA_ELIMINADA)) {
-      localStorage.removeItem("ftth_script_url");
-      savedUrl = "";
+    if (!savedUrl || savedUrl.includes(URL_ANTIGUA_ELIMINADA)) {
+      savedUrl = desofuscarEndpointOficial();
+      localStorage.setItem("ftth_script_url", savedUrl);
     }
     document.getElementById("scriptUrlInput").value = savedUrl;
-    if (!savedUrl) {
-      document.getElementById("configBox").open = true;
-    } else {
-      verificarConexionScript();
-    }
 
+    verificarConexionScript();
     await inicializarSesionEHistorial();
     await verificarColaSubidaOffline();
     obtenerGpsYCargarDwgAutomatico();
     actualizarBotonesSuperioresVerde();
   };
 
-  // Bloquea el botón "Atrás" del móvil para que cierre modales/ruletas pero NUNCA salga de la página
   function activarTrampaBotonAtrasMovil() {
     try {
       window.history.pushState({ ftthStay: true }, "", window.location.href);
@@ -713,7 +719,6 @@
       });
     } catch (e) {}
 
-    // Guardar instantánea justo antes de que el navegador se cierre o recargue
     window.addEventListener("pagehide", () => {
       if (bloquesCajas.some(b => b.fotos.length > 0)) {
         guardarEstadoEnHistorialDB("Cierre de navegador / pestaña");
@@ -721,7 +726,6 @@
     });
   }
 
-  // Base de datos IndexedDB para sesión activa, Historial de los últimos 5 estados y Cola Offline
   function abrirDB() {
     return new Promise((resolve, reject) => {
       const req = indexedDB.open("FTTH_Studio_Pro_DB", 2);
@@ -770,7 +774,6 @@
     await dbSet("sesion_activa", bloquesCajas);
   }
 
-  // Guarda una copia de seguridad en el Historial (máximo los últimos 5 estados con fotos)
   async function guardarEstadoEnHistorialDB(motivo) {
     const cajasConFotos = bloquesCajas.filter(b => b.fotos && b.fotos.length > 0);
     if (cajasConFotos.length === 0) return;
@@ -780,7 +783,6 @@
     const clon = JSON.parse(JSON.stringify(cajasConFotos));
 
     let hist = (await dbGet("historial_5")) || [];
-    // Si el último snapshot tiene exactamente las mismas fotos y códigos, lo actualiza; si cambió, añade nueva entrada
     const firmaNueva = `${totalFotos}_${resumenCodigos}`;
     if (hist.length > 0 && hist[0].firma === firmaNueva && motivo === "Auto-guardado") {
       hist[0].fecha = Date.now();
@@ -796,7 +798,7 @@
       });
     }
 
-    hist = hist.slice(0, 5); // Mantener los últimos 5 estados
+    hist = hist.slice(0, 5);
     await dbSet("historial_5", hist);
     await actualizarContadorHistorialUI();
   }
@@ -844,7 +846,6 @@
     await persistirSesionActiva();
   }
 
-  // Confirmación obligatoria antes de restaurar/vaciar la página ([Sí] - [No])
   function pedirConfirmacionRestaurarPagina() {
     document.getElementById("confirmarRestaurarModal").style.display = "flex";
   }
@@ -871,14 +872,13 @@
     return String(pueblo || "AGUI").replace(/[^a-zA-Z]/g, "").slice(0, 4).toUpperCase() || "AGUI";
   }
 
-  // Construcción del Código y del Título con 3 espacios y doble color
   function construirCodigoYTitulo(tipo, numNodo, numCaja, pueblo) {
     const nPad = String(Math.max(1, numNodo || 1)).padStart(2, "0");
     const cPad = String(Math.max(1, numCaja || 1)).padStart(2, "0");
     if (tipo === "NODO") {
       return {
         codigo: `N-${nPad}`,
-        nodo: `N-${nPad}`,
+        nodo: `Nodo ${nPad}`,
         tipoTexto: "Nodo",
         tituloPlano: `Nodo   N-${nPad}`,
         tituloHtml: `<span class="title-type-part">Nodo</span>   <span class="title-code-part">N-${nPad}</span>`
@@ -887,7 +887,7 @@
     if (tipo === "EMPALME_RD") {
       return {
         codigo: `E-${nPad}-${cPad}`,
-        nodo: `N-${nPad}`,
+        nodo: `Nodo ${nPad}`,
         tipoTexto: "Empalme RD",
         tituloPlano: `Empalme RD   E-${nPad}-${cPad}`,
         tituloHtml: `<span class="title-type-part">Empalme RD</span>   <span class="title-code-part">E-${nPad}-${cPad}</span>`
@@ -905,14 +905,13 @@
     }
     return {
       codigo: `${nPad}-${cPad}`,
-      nodo: `N-${nPad}`,
+      nodo: `Nodo ${nPad}`,
       tipoTexto: "CTO",
       tituloPlano: `CTO   ${nPad}-${cPad}`,
       tituloHtml: `<span class="title-type-part">CTO</span>   <span class="title-code-part">${nPad}-${cPad}</span>`
     };
   }
 
-  // Extractor flexible de códigos (Ignora texto extra de la IA y prohíbe Nodo 00)
   function descomponerCodigoEnRuleta(codigoRaw) {
     if (!codigoRaw) return null;
     const clean = String(codigoRaw).trim().toUpperCase();
@@ -922,7 +921,7 @@
       const n1 = Number(m[1]), n2 = Number(m[2]);
       if (n1 >= 1 && n1 <= 99 && n2 >= 1 && n2 <= 64) {
         const nPad = String(n1).padStart(2, "0"), cPad = String(n2).padStart(2, "0");
-        return { tipo: "EMPALME_RD", numNodo: n1, numCaja: n2, nodo: `N-${nPad}`, codigo: `E-${nPad}-${cPad}` };
+        return { tipo: "EMPALME_RD", numNodo: n1, numCaja: n2, nodo: `Nodo ${nPad}`, codigo: `E-${nPad}-${cPad}` };
       }
     }
     m = clean.match(/\bE[\s-]*([A-Z]{2,6})[\s-/]+(\d{1,2})\b/);
@@ -944,7 +943,7 @@
       const n1 = Number(m[1]), n2 = Number(m[2]);
       if (n1 >= 1 && n1 <= 99 && n2 >= 1 && n2 <= 64) {
         const nPad = String(n1).padStart(2, "0"), cPad = String(n2).padStart(2, "0");
-        return { tipo: "CTO", numNodo: n1, numCaja: n2, nodo: `N-${nPad}`, codigo: `${nPad}-${cPad}` };
+        return { tipo: "CTO", numNodo: n1, numCaja: n2, nodo: `Nodo ${nPad}`, codigo: `${nPad}-${cPad}` };
       }
     }
     m = clean.match(/\b(?:NODO|N)[\s-]*(\d{1,2})\b/);
@@ -952,14 +951,15 @@
       const n1 = Number(m[1]);
       if (n1 >= 1 && n1 <= 99) {
         const nPad = String(n1).padStart(2, "0");
-        return { tipo: "NODO", numNodo: n1, numCaja: 1, nodo: `N-${nPad}`, codigo: `N-${nPad}` };
+        return { tipo: "NODO", numNodo: n1, numCaja: 1, nodo: `Nodo ${nPad}`, codigo: `N-${nPad}` };
       }
     }
     return null;
   }
 
   function obtenerEndpoint() {
-    return document.getElementById("scriptUrlInput").value.trim();
+    const val = document.getElementById("scriptUrlInput").value.trim();
+    return val || desofuscarEndpointOficial();
   }
 
   function obtenerClavesActivas() {
@@ -981,12 +981,6 @@
   async function verificarConexionScript() {
     const ep = obtenerEndpoint();
     const badge = document.getElementById("badgeEstadoConexion");
-    if (!ep.startsWith("http") || ep.includes(URL_ANTIGUA_ELIMINADA)) {
-      badge.style.color = "#f87171";
-      badge.innerText = "Sin enlace";
-      document.getElementById("configBox").open = true;
-      return false;
-    }
     try {
       const r = await fetch(`${ep}?action=getPueblos`, { redirect: "follow" });
       const d = await r.json();
@@ -1002,7 +996,6 @@
     return false;
   }
 
-  // Detecta la ubicación al abrir la app y carga automáticamente el .DWG y el Registro de ese pueblo
   function obtenerGpsYCargarDwgAutomatico() {
     const iniciarCargaPueblo = (prov, pue) => {
       seleccionPuebloEstado = { provincia: prov, pueblo: pue };
@@ -1081,6 +1074,7 @@
     document.querySelectorAll(".dots-menu, .custom-dd-menu").forEach(m => m.style.display = "none");
   }
 
+  // === PEGAR AQUÍ LA PARTE 2 ===
   // --- SELECTOR PROVINCIA ➔ PUEBLO ---
   function abrirMenuPueblo(ev, menuId, modo, bloqueId) {
     ev.stopPropagation();
@@ -1112,7 +1106,7 @@
       </div>` +
       pueblos.map(pue => `
         <div class="dd-item" onclick="seleccionarPuebloEnMenu(event, '${menuId}', '${provincia}', '${pue}', '${modo}', '${bloqueId || ''}')">
-          <span>${pue}</span>
+          <span>${pue} &nbsp;<small style="color:var(--muted);">(${obtenerPrefijoPueblo(pue)})</small></span>
         </div>
       `).join("");
   }
@@ -1196,7 +1190,7 @@
     actualizarBotonesSuperioresVerde();
   }
 
-  // --- 1. CAPTURA DE CAMPO + OCR REPARADO A 800PX CON DOBLE VÍA ---
+  // --- 1. CAPTURA DE CAMPO + OCR 800PX DOBLE VÍA + CRUCE DICCIONARIO GPS ---
   function dispararCamaraConVista(vista) {
     vistaCamaraPendiente = vista;
     document.getElementById("camInput").click();
@@ -1303,7 +1297,6 @@
       let pueblo = gpsDispositivo.pueblo || "Águilas";
       let timestamp = file.lastModified || Date.now();
 
-      // Copia de 800px (calidad 0.76) para que el OCR en móvil lea etiquetas de CTO con total nitidez
       const [exifData, imgDrive, imgOcr] = await Promise.all([
         extraerExifRapido(file),
         comprimirRapidoPorUrl(file, 1600, 0.82),
@@ -1396,7 +1389,6 @@
     dispararOcrYCoordenadasEnParalelo();
   }
 
-  // Ejecuta OCR en todas las fotos nuevas (sin bloquearse aunque hayas tocado la ruleta antes)
   function dispararOcrYCoordenadasEnParalelo() {
     bloquesCajas.forEach(bloque => {
       if (bloque.bloqueadoPorCompletar) {
@@ -1409,7 +1401,6 @@
         sugerirCajaPorGpsEnSegundoPlano(bloque);
       }
 
-      // Priorizar Cerrada y Abierta, pero permitir que cualquier foto del lote aporte la etiqueta
       const pendientes = bloque.fotos.filter(f => f.ocrEstado === "pendiente");
       pendientes.sort((a, b) => {
         const peso = v => (v === "Cerrada" ? 1 : v === "Abierta" ? 2 : 3);
@@ -1443,6 +1434,13 @@
 
   async function sugerirCajaPorGpsEnSegundoPlano(bloque) {
     const key = `${bloque.provincia}|${bloque.pueblo}`;
+    if (!cacheCoordenadasPorPueblo[key]) {
+      try {
+        const r = await fetch(`${obtenerEndpoint()}?action=getDiccionarioGps&pueblo=${encodeURIComponent(bloque.pueblo)}`, { redirect: "follow" });
+        const d = await r.json();
+        cacheCoordenadasPorPueblo[key] = d.coordenadas || {};
+      } catch (e) {}
+    }
     const mapaGps = cacheCoordenadasPorPueblo[key] || {};
     const f0 = bloque.fotos[0];
     if (!f0 || !f0.lat || !f0.lng) return;
@@ -1466,13 +1464,14 @@
         bloque.tipo = desc.tipo;
         bloque.numNodo = desc.numNodo;
         bloque.numCaja = desc.numCaja;
+        ultimoNodoFijo = desc.numNodo;
+        localStorage.setItem("ftth_last_nodo_num", String(ultimoNodoFijo));
         vibrarTick(15);
         renderTarjetas();
       }
     }
   }
 
-  // DOBLE VÍA OCR: 1º Directo navegador (gemini-2.5-flash / 3.8-flash con thinkingBudget: 0) -> 2º Respaldo Código.gs
   async function leerCodigoOcrDobleVia(base64Ocr) {
     const prompt = `Lee la etiqueta o rotulación FTTH de esta caja (ejemplos: "17-37", "01-08", "E-17-01", "N-17"). Responde únicamente en JSON con el código leído: {"codigo":"17-37"}`;
     const parts = [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64Ocr } }];
@@ -1484,7 +1483,6 @@
       "models/gemini-1.5-flash"
     ];
 
-    // VÍA 1: Directa desde el navegador
     for (let i = 0; i < claves.length; i++) {
       const apiKey = claves[(indiceTurnoClave + i) % claves.length];
       for (const mod of modelos) {
@@ -1531,7 +1529,6 @@
       }
     }
 
-    // VÍA 2: Respaldo automático en Google Apps Script (Código.gs) si el navegador móvil bloqueó la llamada
     const ep = obtenerEndpoint();
     if (ep.startsWith("http")) {
       try {
@@ -1553,7 +1550,6 @@
   // ==================== RENDERIZADO DE TARJETAS Y MOVIMIENTO ENTRE CAJAS ====================
   function renderTarjetas() {
     const cont = document.getElementById("contenedorTarjetas");
-    // Eliminar automáticamente cualquier caja que haya quedado vacía (salvo la vacía recién creada al venir de "Completar")
     bloquesCajas = bloquesCajas.filter(b => b.fotos.length > 0 || (modoCompletando && bloquesCajas.length === 1));
     const totalFotosCargadas = bloquesCajas.reduce((acc, b) => acc + b.fotos.length, 0);
 
@@ -1588,7 +1584,6 @@
       const alertaResumenHtml = generarAlertaCortaBloque(b, infoNombre.codigo);
       const vistasPermitidas = b.tipo === "CTO" ? ORDEN_VISTAS_CTO : ORDEN_VISTAS_NODO_EMP;
 
-      // Opciones en el desplegable para mover la foto a otra caja ya creada en pantalla
       const otrasCajasActivas = bloquesCajas.filter(otra => otra.id !== b.id && otra.fotos.length > 0);
       const optsMoverAOtraCaja = otrasCajasActivas.map(otra => {
         const infoOtra = construirCodigoYTitulo(otra.tipo, otra.numNodo, otra.numCaja, otra.pueblo);
@@ -1608,7 +1603,6 @@
         optsMoverAOtraCaja +
         (b.fotos.length > 1 ? `<option value="__SEPARAR__">➕ Separar en caja nueva</option>` : "");
 
-        // Botón renombrado a "⚡ Usar de foto con potencia"
         let btnUsarPotenciaHtml = "";
         if (b.tipo === "CTO" && (f.vista === "Abierta" || f.vista === "Cerrada")) {
           const activo = Boolean(f.usarParaPotencia);
@@ -1649,7 +1643,6 @@
       cont.innerHTML += `
         <div class="element-card">
           <div class="element-header">
-            <!-- TÍTULO CON 3 ESPACIOS Y DOBLE COLOR -->
             <button type="button" class="element-title-btn ${estaRuletaAbierta ? 'open' : ''}" onclick="toggleRuletaBloque('${b.id}')">
               <span id="lblTitulo_${b.id}">${infoNombre.tituloHtml}</span>
               <span style="font-size:11px; color:var(--muted); margin-left:6px;">${estaRuletaAbierta ? '▴' : '▾'}</span>
@@ -1814,14 +1807,12 @@
     });
   }
 
-  // Cambiar vista con auto-intercambio O mover la foto a otra caja existente (eliminando la caja origen si queda vacía)
   async function cambiarVistaOMoverEntreCajas(bloqueId, fotoId, valorSeleccionado) {
     const b = bloquesCajas.find(x => x.id === bloqueId);
     if (!b) return;
     const fotoActual = b.fotos.find(f => f.id === fotoId);
     if (!fotoActual) return;
 
-    // CASO 1: Mover foto a otra caja ya creada en pantalla
     if (valorSeleccionado.startsWith("__MOVER_A__")) {
       const idDestino = valorSeleccionado.replace("__MOVER_A__", "");
       const cajaDestino = bloquesCajas.find(x => x.id === idDestino);
@@ -1832,7 +1823,6 @@
           fotoActual.vista = ORDEN_VISTAS_CTO.find(v => !ocupadasDest.includes(v)) || "Panorámica";
         }
         cajaDestino.fotos.push(fotoActual);
-        // Si la caja origen quedó vacía, renderTarjetas la elimina automáticamente
         vibrarTick(18);
         renderTarjetas();
         await persistirSesionActiva();
@@ -1842,7 +1832,6 @@
       return;
     }
 
-    // CASO 2: Separar en una caja nueva
     if (valorSeleccionado === "__SEPARAR__") {
       b.fotos = b.fotos.filter(f => f.id !== fotoId);
       const nuevoId = "b_" + Date.now();
@@ -1863,7 +1852,6 @@
       return;
     }
 
-    // CASO 3: Auto-intercambio de vista dentro de la misma caja
     const vistaAnterior = fotoActual.vista;
     const otraFoto = b.fotos.find(f => f.id !== fotoId && f.vista === valorSeleccionado);
     if (otraFoto) {
@@ -1919,7 +1907,7 @@
 
   async function verificarDuplicadosEnSegundoPlano() {
     const ep = obtenerEndpoint();
-    if (!ep.startsWith("http") || ep.includes(URL_ANTIGUA_ELIMINADA)) return;
+    if (!ep.startsWith("http")) return;
 
     const consultas = [];
     bloquesCajas.forEach(b => {
@@ -1996,12 +1984,6 @@
   }
 
   async function subirTodoADrive() {
-    const ep = obtenerEndpoint();
-    if (!ep.startsWith("http") || ep.includes(URL_ANTIGUA_ELIMINADA)) {
-      document.getElementById("configBox").open = true;
-      return alert("Configura arriba el enlace (/exec) de Google Apps Script.");
-    }
-
     const itemsSubida = [];
     bloquesCajas.forEach(b => {
       const info = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
@@ -2057,14 +2039,13 @@
 
       const linksHtml = (res.resultados || []).map(r =>
         `<div style="margin-top:8px; background:rgba(16,185,129,0.12); padding:10px; border-radius:12px; border:1px solid rgba(16,185,129,0.35); font-size:12px;">` +
-        `✓ Guardado en <b>${r.pueblo} · ${r.codigo}</b> (${r.archivos.join(", ")}) ` +
-        `<a href="${r.folderUrl}" target="_blank" style="color:var(--accent); margin-left:6px; text-decoration:none;">Abrir Drive ↗</a></div>`
+        `✓ Guardado en <b>${r.pueblo} / ${r.nodo}</b>: ${r.archivos.join(", ")} ` +
+        `<a href="${r.folderUrl}" target="_blank" style="color:var(--accent); margin-left:6px; text-decoration:none;">Abrir Nodo ↗</a></div>`
       ).join("");
 
       precargarRegistroYDwgSilencioso(itemsSubida[0].provincia, itemsSubida[0].pueblo);
       msg.innerHTML = linksHtml;
     } catch (err) {
-      // Guardar en la cola offline para no perder las fotos si falló la cobertura
       await dbSet("cola_offline", itemsSubida);
       await verificarColaSubidaOffline();
       msg.style.color = "#fbbf24";
@@ -2099,9 +2080,8 @@
             dibujarRegistroDrive();
           }
         }
-        // Si hay un .DWG en la carpeta de Drive del pueblo que aún no tiene extraídas las coordenadas GPS, lo procesa solo
-        if (d.hayDwgSinProcesar) {
-          verificarYProcesarDwgDeDrive(provincia, pueblo, false);
+        if (d.planosPendientes && d.planosPendientes.length > 0 && !indexandoPlanosEnCurso) {
+          indexarPlanosDeCarpetaCentral(d.planosPendientes);
         }
       }
     } catch (e) {}
@@ -2122,7 +2102,7 @@
       return;
     }
 
-    cont.innerHTML = `<div style="color:var(--muted); text-align:center; padding:18px; font-size:12.5px;">Sincronizando carpetas de Drive en ${pueblo}...</div>`;
+    cont.innerHTML = `<div style="color:var(--muted); text-align:center; padding:18px; font-size:12.5px;">Sincronizando carpetas Nodo 01, Nodo 02... de ${pueblo}...</div>`;
 
     try {
       const r = await fetch(`${ep}?action=getRegistroDrive&provincia=${encodeURIComponent(provincia)}&pueblo=${encodeURIComponent(pueblo)}&forzar=${forzar ? '1' : '0'}`, { redirect: "follow" });
@@ -2134,8 +2114,8 @@
       localStorage.setItem(`ftth_reg_${key}`, JSON.stringify(d));
       dibujarRegistroDrive();
 
-      if (d.hayDwgSinProcesar) {
-        verificarYProcesarDwgDeDrive(provincia, pueblo, false);
+      if (d.planosPendientes && d.planosPendientes.length > 0 && !indexandoPlanosEnCurso) {
+        indexarPlanosDeCarpetaCentral(d.planosPendientes);
       }
     } catch (e) {
       cont.innerHTML = `<div style="color:var(--red); text-align:center; padding:18px; font-size:12px;">Error: ${e.message}</div>`;
@@ -2159,9 +2139,8 @@
 
     Object.keys(rawEls).sort().forEach(cod => {
       const desc = descomponerCodigoEnRuleta(cod);
-      if (!desc) return; // Ignora cualquier N-00
+      if (!desc) return;
       const el = rawEls[cod];
-      // Solo mostrar elementos que tienen fotos subidas en Drive
       if (!el.archivos || el.archivos.length === 0) return;
 
       if (el.completo) totalVerdes++;
@@ -2175,12 +2154,12 @@
     const listaNodos = Object.keys(gruposPorNodo).sort();
     const totalGps = Object.keys((datosRegistroActual && datosRegistroActual.coordenadas) || {}).length;
     document.getElementById("resumenGlobalPueblo").innerText =
-      `Carpetas en Drive: ${totalVerdes + totalNaranjas}  ·  🟢 Completas: ${totalVerdes}  ·  🟠 Incompletas: ${totalNaranjas}  ·  📍 ${totalGps} GPS del plano`;
+      `Elementos en Drive: ${totalVerdes + totalNaranjas}  ·  🟢 Completos: ${totalVerdes}  ·  🟠 Incompletos: ${totalNaranjas}  ·  📍 ${totalGps} GPS del plano`;
 
     if (listaNodos.length === 0) {
       cont.innerHTML = `
         <div class="box" style="text-align:center; padding:22px; color:var(--muted); font-size:12.5px;">
-          Aún no hay carpetas de fotos subidas en el Drive de <b>${pueblo}</b>.
+          Aún no hay fotos subidas en las carpetas de Nodos de <b>${pueblo}</b>.
         </div>`;
       return;
     }
@@ -2190,8 +2169,8 @@
       const incompletasNodo = cajas.filter(x => !x.completo).length;
       const abierto = nodosAbiertosRegistro.has(nName);
       const badgeNodo = incompletasNodo === 0
-        ? `<span style="color:var(--green-soft); font-size:11.5px; font-weight:600;">🟢 ${cajas.length} completas</span>`
-        : `<span style="color:var(--orange-soft); font-size:11.5px; font-weight:600;">🟠 ${incompletasNodo} incompleta(s) de ${cajas.length}</span>`;
+        ? `<span style="color:var(--green-soft); font-size:11.5px; font-weight:600;">🟢 ${cajas.length} completos</span>`
+        : `<span style="color:var(--orange-soft); font-size:11.5px; font-weight:600;">🟠 ${incompletasNodo} incompleto(s) de ${cajas.length}</span>`;
 
       const cuerpoHtml = cajas.map(el => {
         const infoTit = construirCodigoYTitulo(el.desc.tipo, el.desc.numNodo, el.desc.numCaja, pueblo);
@@ -2225,7 +2204,7 @@
       return `
         <div class="drive-node-card">
           <div class="drive-node-header" onclick="toggleNodoRegistro('${nName}')">
-            <span style="font-size:14px; font-weight:700; color:#f8fafc;">${abierto ? '▾' : '▸'} &nbsp;${nName === 'Empalmes RA' ? 'Empalmes RA' : `Nodo   ${nName}`}</span>
+            <span style="font-size:14px; font-weight:700; color:#f8fafc;">${abierto ? '▾' : '▸'} &nbsp;${nName}</span>
             ${badgeNodo}
           </div>
           ${abierto ? `<div class="drive-node-body">${cuerpoHtml}</div>` : ""}
@@ -2238,12 +2217,12 @@
     if (!box) return;
     if (box.style.display === "grid") { box.style.display = "none"; return; }
     box.style.display = "grid";
-    box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--muted);">Cargando miniaturas...</div>`;
+    box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--muted);">Cargando miniaturas de ${codigoActual}...</div>`;
     try {
-      const r = await fetch(`${obtenerEndpoint()}?action=getFotosElemento&folderId=${encodeURIComponent(folderId)}`, { redirect: "follow" });
+      const r = await fetch(`${obtenerEndpoint()}?action=getFotosElemento&folderId=${encodeURIComponent(folderId)}&codigo=${encodeURIComponent(codigoActual)}`, { redirect: "follow" });
       const d = await r.json();
       if (!d.fotos || d.fotos.length === 0) {
-        box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--muted);">Sin imágenes.</div>`;
+        box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--muted);">Sin imágenes para ${codigoActual}.</div>`;
         return;
       }
       box.innerHTML = d.fotos.map(f => `
@@ -2268,7 +2247,7 @@
     if (m) m.style.display = "block";
   }
 
-  // ==================== 3. LECTOR SILENCIOSO DE COORDENADAS .DWG EN DRIVE ====================
+  // ==================== 3. INDEXADOR AUTOMÁTICO DE LA CARPETA "PRUEBA_FTTH_DRIVE/planos" ====================
   function convertirUtm30AGps(x, y) {
     if (!x || !y || isNaN(x) || isNaN(y) || x < 100000 || x > 900000 || y < 3500000 || y > 4800000) return null;
     const a = 6378137.0;
@@ -2319,11 +2298,44 @@
     return null;
   }
 
-  async function extraerCoordenadasDePlanoBuffer(arrayBuffer) {
+  function deducirPuebloPorNombrePlano(nombreArchivo) {
+    const norm = String(nombreArchivo || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    for (const item of COORDENADAS_PUEBLOS_OFICIALES) {
+      const pNorm = item.pueblo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (norm.includes(pNorm) || norm.includes(item.prefijo.toLowerCase())) {
+        return item.pueblo;
+      }
+    }
+    if (norm.includes("terreros")) return "San Juan de los Terreros";
+    if (norm.includes("gallardos")) return "Los Gallardos";
+    if (norm.includes("hermoso")) return "Campo Hermoso";
+    if (norm.includes("isidro")) return "San Isidro";
+    if (norm.includes("guejar")) return "Güejar Sierra";
+    if (norm.includes("huetor")) return "Huétor Santillán";
+    if (norm.includes("jeronimo")) return "San Jerónimo";
+    return "General";
+  }
+
+  async function extraerCoordenadasDePlanoBuffer(arrayBuffer, puebloPorDefecto) {
     const uint8 = new Uint8Array(arrayBuffer);
     const headerAscii = new TextDecoder("iso-8859-1").decode(uint8.slice(0, 12));
     const regexCod = /\b(?:NODO[\s-]*\d{1,2}|N-\d{1,2}|E-\d{1,2}-\d{1,2}|E-[A-Z]{2,6}-\d{1,2}|\d{2}-\d{2})\b/gi;
     const coordenadasExtraidas = {};
+
+    const registrarPuntoExtraido = (mStr, x, y) => {
+      const desc = descomponerCodigoEnRuleta(mStr);
+      const gps = convertirUtm30AGps(x, y);
+      if (desc && gps) {
+        const locExacta = resolverPuebloPorCoordenadas(gps.lat, gps.lng);
+        coordenadasExtraidas[desc.codigo] = {
+          lat: gps.lat,
+          lng: gps.lng,
+          nodo: desc.nodo,
+          tipo: desc.tipo,
+          puebloDetectado: locExacta ? locExacta.pueblo : puebloPorDefecto
+        };
+      }
+    };
 
     if (headerAscii.startsWith("AC10")) {
       const dwgEngine = await cargarMotorLibreDwgWasm();
@@ -2341,13 +2353,7 @@
               const y = pos ? (pos.y !== undefined ? pos.y : pos[1]) : null;
               if (texto && x && y) {
                 const matches = String(texto).match(regexCod) || [];
-                matches.forEach(m => {
-                  const desc = descomponerCodigoEnRuleta(m);
-                  const gps = convertirUtm30AGps(x, y);
-                  if (desc && gps) {
-                    coordenadasExtraidas[desc.codigo] = { lat: gps.lat, lng: gps.lng, nodo: desc.nodo, tipo: desc.tipo };
-                  }
-                });
+                matches.forEach(m => registrarPuntoExtraido(m, x, y));
               }
             });
           };
@@ -2360,46 +2366,70 @@
           }
         } catch (e) {}
       }
+    } else {
+      const rawText = new TextDecoder("iso-8859-1").decode(uint8);
+      const lineas = rawText.split(/\r?\n/);
+      let xActual = null, yActual = null, textoActual = "";
+      for (let i = 0; i < lineas.length - 1; i += 2) {
+        const code = lineas[i].trim(), val = lineas[i + 1].trim();
+        if (code === "0") {
+          if (textoActual && xActual && yActual) {
+            const matches = textoActual.replace(/NODO\s*/gi, "N-").match(regexCod) || [];
+            matches.forEach(m => registrarPuntoExtraido(m, xActual, yActual));
+          }
+          xActual = null; yActual = null; textoActual = "";
+        } else if (code === "10") xActual = parseFloat(val);
+        else if (code === "20") yActual = parseFloat(val);
+        else if (code === "1" || code === "3" || code === "2") textoActual += " " + val;
+      }
     }
     return coordenadasExtraidas;
   }
 
-  async function verificarYProcesarDwgDeDrive(provincia, pueblo, forzar) {
+  async function indexarPlanosDeCarpetaCentral(listaPendientes) {
+    if (indexandoPlanosEnCurso || !listaPendientes || listaPendientes.length === 0) return;
+    indexandoPlanosEnCurso = true;
+    const banner = document.getElementById("bannerIndexadorPlanosGlobal");
     const ep = obtenerEndpoint();
-    if (!ep.startsWith("http")) return;
-    const banner = document.getElementById("bannerProgresoDwg");
 
     try {
-      const r = await fetch(`${ep}?action=getDwgPendiente&provincia=${encodeURIComponent(provincia)}&pueblo=${encodeURIComponent(pueblo)}&forzar=${forzar ? '1' : '0'}`, { redirect: "follow" });
-      const d = await r.json();
-      if (!d || !d.tieneDwgPendiente || !d.base64) return;
+      for (let i = 0; i < listaPendientes.length; i++) {
+        const pl = listaPendientes[i];
+        banner.style.display = "block";
+        banner.innerText = `📐 Indexando plano (${i + 1}/${listaPendientes.length}): ${pl.nombre}...`;
 
-      banner.style.display = "block";
-      banner.innerText = `📐 Sincronizando coordenadas del plano ${d.nombreDwg}...`;
+        const rDesc = await fetch(`${ep}?action=descargarPlanoPorId&fileId=${encodeURIComponent(pl.fileId)}`, { redirect: "follow" });
+        const dDesc = await rDesc.json();
+        if (!dDesc || !dDesc.base64) continue;
 
-      const binStr = atob(d.base64);
-      const bytes = new Uint8Array(binStr.length);
-      for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+        const binStr = atob(dDesc.base64);
+        const bytes = new Uint8Array(binStr.length);
+        for (let k = 0; k < binStr.length; k++) bytes[k] = binStr.charCodeAt(k);
 
-      const coords = await extraerCoordenadasDePlanoBuffer(bytes.buffer);
+        const puebloDeducido = deducirPuebloPorNombrePlano(pl.nombre);
+        const coords = await extraerCoordenadasDePlanoBuffer(bytes.buffer, puebloDeducido);
 
-      await fetch(ep, {
-        method: "POST",
-        redirect: "follow",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          action: "guardarCoordenadasPlano",
-          provincia,
-          pueblo,
-          fechaDwg: d.fechaDwg,
-          coordenadas: coords
-        })
-      });
-
+        await fetch(ep, {
+          method: "POST",
+          redirect: "follow",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "guardarDiccionarioGpsPlano",
+            fileId: pl.fileId,
+            nombre: pl.nombre,
+            fecha: pl.fecha,
+            pueblo: puebloDeducido,
+            coordenadas: coords
+          })
+        });
+      }
       banner.style.display = "none";
-      precargarRegistroYDwgSilencioso(provincia, pueblo);
+      cacheCoordenadasPorPueblo = {};
+      precargarRegistroYDwgSilencioso(seleccionPuebloEstado.provincia, seleccionPuebloEstado.pueblo);
     } catch (e) {
       banner.style.display = "none";
+    } finally {
+      indexandoPlanosEnCurso = false;
     }
   }
 
