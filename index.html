@@ -1,436 +1,811 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes" />
-  <meta name="theme-color" content="#0b1326" />
+  <meta name="theme-color" content="#09090b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>FTTH Studio · Captura & Registro Drive</title>
+
+  <!-- Manifiesto PWA Offline -->
+  <link rel="manifest" href="./manifest.json" />
+
+  <!-- Tipografía Técnica: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Librería EXIF -->
   <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
+
   <style>
     :root {
-      --bg: #0b1326;
-      --surface: rgba(20, 31, 56, 0.9);
-      --border: rgba(148, 163, 184, 0.18);
-      --border-focus: rgba(56, 189, 248, 0.55);
+      --bg: #09090b;
+      --surface: #121216;
+      --surface-elevated: #18181d;
+      --border: rgba(255, 255, 255, 0.12);
+      --border-highlight: rgba(255, 255, 255, 0.22);
       --accent: #38bdf8;
-      --blue-btn: linear-gradient(145deg, #2563eb, #1d4ed8);
-      --green-btn: linear-gradient(145deg, #10b981, #059669);
       --green-text: #34d399;
-      --orange-soft: #fdba74;
+      --orange-soft: #fbbf24;
       --green-soft: #6ee7b7;
       --red: #f87171;
-      --text: #f8fafc;
-      --muted: #94a3b8;
+      --text: #fafafa;
+      --muted: #a1a1aa;
     }
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+    }
+
     body {
       margin: 0;
-      background: radial-gradient(circle at 50% 0%, #172a54 0%, var(--bg) 75%);
+      background-color: var(--bg);
+      background-image: radial-gradient(at 50% -10%, rgba(56, 189, 248, 0.10) 0px, transparent 55%);
+      background-attachment: fixed;
       color: var(--text);
-      padding: 12px;
-      max-width: 650px;
+      padding: 14px 12px 115px 12px;
+      max-width: 600px;
       margin-inline: auto;
-      padding-bottom: 100px;
       min-height: 100vh;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.012em;
     }
 
+    /* Barra superior utilitaria de alto contraste */
     .top-utility-bar {
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 8px; margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
     }
     .util-pill {
-      background: rgba(15, 23, 42, 0.78); border: 1px solid var(--border);
-      color: #cbd5e1; padding: 6px 11px; border-radius: 10px;
-      font-size: 11.5px; font-weight: 600; cursor: pointer;
-      display: inline-flex; align-items: center; gap: 5px;
-    }
-    .util-pill:active { transform: scale(0.97); }
-
-    details.config-bar {
-      background: rgba(15, 23, 42, 0.82);
+      background: var(--surface-elevated);
       border: 1px solid var(--border);
-      padding: 10px 12px;
-      border-radius: 12px;
-      margin-bottom: 12px;
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 2px 6px rgba(0, 0, 0, 0.35);
+      color: #f4f4f5;
+      padding: 7px 11px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: transform 0.16s, border-color 0.16s, background 0.16s;
+      min-height: 34px;
     }
-    summary { font-weight: 600; cursor: pointer; font-size: 12px; color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; list-style: none; }
-    summary::-webkit-details-marker { display: none; }
-    select, input {
-      width: 100%; padding: 8px 10px; border-radius: 9px;
-      border: 1px solid var(--border); background: rgba(11, 19, 38, 0.92);
-      color: var(--text); font-size: 12.5px; font-weight: 600; outline: none;
-    }
-    select:focus, input:focus { border-color: var(--border-focus); }
+    .util-pill:hover { border-color: var(--border-highlight); background: #222229; }
+    .util-pill:active { transform: scale(0.95); }
 
-    .tabs {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
-      background: rgba(15, 23, 42, 0.85); padding: 5px;
-      border-radius: 14px; border: 1px solid var(--border); margin-bottom: 14px;
-    }
-    .tab {
-      padding: 10px; text-align: center; border-radius: 10px;
-      font-weight: 600; font-size: 13px; color: var(--muted);
-      cursor: pointer; transition: all 0.2s ease;
-    }
-    .tab.active {
-      background: linear-gradient(135deg, #2563eb, #1e40af);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
-    }
-
-    .box {
+    /* Panel de configuración y compilador DXF */
+    details.config-bar {
       background: var(--surface);
-      padding: 14px;
+      border: 1px solid var(--border);
+      padding: 12px 14px;
       border-radius: 16px;
       margin-bottom: 12px;
-      border: 1px solid var(--border);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 10px 26px -10px rgba(0, 0, 0, 0.65);
+    }
+    summary {
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 12.5px;
+      color: #d4d4d8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      list-style: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+
+    select, input {
+      width: 100%;
+      padding: 9px 11px;
+      border-radius: 11px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: #09090b;
+      color: var(--text);
+      font-size: 12.5px;
+      font-weight: 600;
+      outline: none;
+      transition: border-color 0.18s, box-shadow 0.18s;
+    }
+    select:focus, input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
     }
 
-    .completing-banner {
-      background: linear-gradient(135deg, rgba(30, 58, 138, 0.92), rgba(15, 23, 42, 0.96));
-      border: 1.5px solid #38bdf8;
+    /* Segmented Control (Pestañas) */
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      background: #141418;
+      padding: 4px;
       border-radius: 14px;
-      padding: 12px 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .tab {
+      padding: 10px 12px;
+      text-align: center;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 13px;
+      color: #a1a1aa;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+      user-select: none;
+    }
+    .tab.active {
+      background: #27272e;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    }
+
+    /* Contenedor Principal */
+    .box {
+      background: var(--surface);
+      padding: 15px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 16px 36px -14px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Banner Completando Elemento */
+    .completing-banner {
+      background: linear-gradient(135deg, rgba(14, 116, 144, 0.34) 0%, #141419 100%);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      border-radius: 15px;
+      padding: 13px 15px;
       margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 6px 18px rgba(56, 189, 248, 0.18);
     }
-    .completing-sub { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #93c5fd; }
-    .completing-big { font-size: 20px; font-weight: 800; color: #fff; margin-top: 2px; white-space: pre; }
+    .completing-sub {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #38bdf8;
+    }
+    .completing-big {
+      font-size: 18px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-top: 2px;
+      white-space: pre;
+    }
     .completing-exit {
-      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #e2e8f0; border-radius: 8px; padding: 6px 10px; font-size: 11.5px; font-weight: 600; cursor: pointer;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
     }
 
+    /* Banner Cola Offline */
     .offline-queue-banner {
       background: rgba(245, 158, 11, 0.16);
-      border: 1.5px solid #f59e0b;
-      border-radius: 12px;
-      padding: 10px 12px;
+      border: 1px solid rgba(245, 158, 11, 0.55);
+      border-radius: 14px;
+      padding: 10px 13px;
       margin-bottom: 12px;
-      display: flex; justify-content: space-between; align-items: center; gap: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
     }
 
-    .cam-4-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 10px; }
+    /* 4 Botones superiores de cámara (Alto contraste exterior) */
+    .cam-4-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
     .btn-cam-direct {
-      background: var(--blue-btn);
-      border: 1px solid #60a5fa;
+      background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
+      border: 1px solid rgba(147, 197, 253, 0.42);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.22), 0 6px 14px -4px rgba(30, 64, 175, 0.5);
       color: #ffffff;
-      padding: 10px 4px;
-      border-radius: 12px;
+      padding: 11px 4px;
+      border-radius: 15px;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       text-align: center;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-      min-height: 58px;
+      transition: transform 0.16s, filter 0.16s, background 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      min-height: 68px;
     }
-    .btn-cam-direct:active { transform: scale(0.95); }
-    .btn-cam-direct .cam-icon { font-size: 15px; }
-    .btn-cam-direct .cam-sub { font-size: 9.5px; font-weight: 600; opacity: 0.92; color: #fde68a; }
+    .btn-cam-direct:active { transform: scale(0.94); }
+    .btn-cam-direct .cam-icon { font-size: 17px; line-height: 1; }
+    .btn-cam-direct .cam-sub { font-size: 9.5px; font-weight: 600; color: #dbeafe; }
 
     .btn-cam-direct.loaded {
-      background: var(--green-btn);
-      border-color: #6ee7b7;
-      color: #ffffff;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.42);
+      background: linear-gradient(180deg, #059669 0%, #047857 100%);
+      border-color: rgba(110, 231, 183, 0.65);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.26), 0 6px 16px -4px rgba(5, 150, 105, 0.55);
     }
-    .btn-cam-direct.loaded .cam-sub { color: #d1fae5; }
+    .btn-cam-direct.loaded .cam-sub { color: #d1fae5; font-weight: 700; }
 
+    /* Botones de Galería dual (Rápida + Archivos con GPS) */
+    .gal-dual-grid {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 8px;
+    }
     .btn-gal-wide {
-      background: linear-gradient(135deg, #6366f1, #4f46e5);
-      border: 1px solid #818cf8;
+      background: linear-gradient(180deg, #4f46e5 0%, #4338ca 100%);
+      border: 1px solid rgba(165, 180, 252, 0.42);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.22), 0 6px 16px -4px rgba(67, 56, 202, 0.45);
       color: #ffffff;
-      padding: 12px;
-      border-radius: 12px;
-      font-size: 13px;
+      padding: 12px 10px;
+      border-radius: 13px;
+      font-size: 12.5px;
       font-weight: 700;
       width: 100%;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-      transition: transform 0.15s;
+      transition: transform 0.16s, filter 0.16s;
     }
-    .btn-gal-wide:active { transform: scale(0.98); }
+    .btn-gal-wide:active { transform: scale(0.97); }
 
+    .btn-gal-gps {
+      background: #1c1c24;
+      border: 1px solid rgba(56, 189, 248, 0.42);
+      color: #e0f2fe;
+      padding: 12px 8px;
+      border-radius: 13px;
+      font-size: 12px;
+      font-weight: 700;
+      width: 100%;
+      cursor: pointer;
+      transition: transform 0.16s, background 0.16s;
+    }
+    .btn-gal-gps:hover { background: #23232e; }
+    .btn-gal-gps:active { transform: scale(0.97); }
+
+    /* Botón Principal Subida a Drive */
     .btn-confirm {
-      background: var(--green-btn);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 800;
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      font-size: 14.5px;
+      font-weight: 700;
       padding: 14px;
-      border-radius: 12px;
-      border: 1px solid #6ee7b7;
+      border-radius: 14px;
+      border: 1px solid rgba(110, 231, 183, 0.5);
       width: 100%;
       cursor: pointer;
       margin-top: 14px;
-      box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.28), 0 10px 22px -5px rgba(16, 185, 129, 0.48);
+      transition: transform 0.16s, opacity 0.16s;
+    }
+    .btn-confirm:active { transform: scale(0.98); }
+    .btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Barra de progreso foto a foto */
+    .upload-progress-box {
+      margin-top: 12px;
+      background: #0d0d11;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 13px;
+      padding: 11px 13px;
+    }
+    .upload-progress-track {
+      width: 100%;
+      height: 8px;
+      background: #27272f;
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-top: 7px;
+    }
+    .upload-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #10b981);
+      border-radius: 9999px;
+      transition: width 0.25s ease;
     }
 
+    /* Tarjeta de Elemento */
     .element-card {
-      background: rgba(11, 19, 38, 0.85);
-      border: 1px solid rgba(96, 165, 250, 0.28);
-      border-radius: 16px;
-      padding: 12px;
-      margin-top: 12px;
+      background: #0b0b0f;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 18px;
+      padding: 13px;
+      margin-top: 13px;
+      animation: cardAppear 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @keyframes cardAppear {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .element-header {
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 8px; padding-bottom: 8px; margin-bottom: 8px;
-      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
     }
+
+    /* Título 3 espacios y doble color */
     .element-title-btn {
-      background: rgba(30, 41, 59, 0.75);
-      border: 1px solid rgba(96, 165, 250, 0.45);
-      padding: 7px 14px;
-      border-radius: 20px;
-      font-size: 14px;
+      background: #1e1e26;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 7px 13px;
+      border-radius: 9999px;
+      font-size: 13.5px;
       cursor: pointer;
-      display: inline-flex; align-items: center;
-      transition: all 0.18s;
+      display: inline-flex;
+      align-items: center;
       white-space: pre;
+      transition: all 0.18s;
     }
     .element-title-btn.open {
       border-color: var(--accent);
-      background: rgba(56, 189, 248, 0.2);
+      background: rgba(56, 189, 248, 0.16);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.16);
     }
-    .title-type-part { color: #93c5fd; font-weight: 600; }
-    .title-code-part { color: #38bdf8; font-weight: 800; letter-spacing: 0.02em; }
+    .title-type-part { color: #93c5fd; font-weight: 700; }
+    .title-code-part { font-family: 'JetBrains Mono', monospace; color: #38bdf8; font-weight: 800; }
 
     .pueblo-pill {
-      background: rgba(30, 41, 59, 0.7);
-      border: 1px solid var(--border);
-      color: #e2e8f0;
+      background: #1c1c24;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #f4f4f5;
       padding: 6px 11px;
-      border-radius: 20px;
+      border-radius: 9999px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
     }
 
+    /* Triple Ruleta Vertical iOS */
     .wheel-drawer {
-      background: rgba(8, 13, 26, 0.95);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 14px;
-      padding: 10px 8px;
-      margin-bottom: 10px;
-      box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.65);
+      background: #07070a;
+      border: 1px solid rgba(56, 189, 248, 0.32);
+      border-radius: 15px;
+      padding: 11px 10px;
+      margin-bottom: 11px;
+      box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.8);
     }
     .wheel-grid {
-      display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 6px;
-      align-items: center; max-width: 340px; margin-inline: auto;
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1fr;
+      gap: 8px;
+      align-items: center;
+      max-width: 350px;
+      margin-inline: auto;
     }
     .wheel-col-label {
-      font-size: 9.5px; color: #94a3b8; text-align: center;
-      font-weight: 700; margin-bottom: 3px; letter-spacing: 0.04em; text-transform: uppercase;
+      font-size: 9.5px;
+      color: #a1a1aa;
+      text-align: center;
+      font-weight: 700;
+      margin-bottom: 4px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
     .wheel-drum-wrap { position: relative; height: 96px; }
     .wheel-drum-wrap::after {
-      content: ""; position: absolute; left: 4px; right: 4px; top: 32px; height: 32px;
-      background: rgba(56, 189, 248, 0.12);
-      border-top: 1px solid rgba(56, 189, 248, 0.38);
-      border-bottom: 1px solid rgba(56, 189, 248, 0.38);
-      border-radius: 6px; pointer-events: none;
+      content: "";
+      position: absolute;
+      left: 2px; right: 2px; top: 32px; height: 32px;
+      background: rgba(56, 189, 248, 0.08);
+      border-top: 1px solid rgba(56, 189, 248, 0.42);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.42);
+      border-radius: 8px;
+      pointer-events: none;
     }
     .wheel-drum {
-      height: 96px; overflow-y: scroll; scroll-snap-type: y mandatory;
-      scrollbar-width: none; -ms-overflow-style: none;
-      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
-      mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+      height: 96px;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%);
     }
     .wheel-drum::-webkit-scrollbar { display: none; }
     .wheel-spacer { height: 32px; }
     .wheel-item {
-      height: 32px; display: flex; align-items: center; justify-content: center;
-      scroll-snap-align: center; font-size: 12.5px; font-weight: 500;
-      color: #64748b; cursor: pointer; user-select: none; transition: all 0.12s;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      scroll-snap-align: center;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #71717a;
+      cursor: pointer;
+      user-select: none;
     }
     .wheel-item.selected {
-      color: #fff; font-size: 14px; font-weight: 700;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', 'Inter', sans-serif;
     }
 
+    /* Desplegables flotantes */
     .custom-dd-menu {
-      display: none; position: absolute; top: calc(100% + 4px); right: 0; width: 225px;
-      background: #0f172a; border: 1px solid rgba(255,255,255,0.18); border-radius: 12px;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.8); z-index: 300; max-height: 260px; overflow-y: auto; text-align: left;
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      width: 240px;
+      background: #16161c;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 14px;
+      box-shadow: 0 18px 38px -8px rgba(0, 0, 0, 0.9);
+      z-index: 300;
+      max-height: 270px;
+      overflow-y: auto;
+      text-align: left;
+      padding: 4px;
     }
-    .dd-item { padding: 9px 12px; font-size: 12.5px; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; color: var(--text); }
+    .dd-item {
+      padding: 9px 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      color: var(--text);
+    }
     .dd-item:hover { background: rgba(56, 189, 248, 0.18); }
-    .dd-back { background: rgba(30, 41, 59, 0.9); color: var(--accent); font-size: 12px; padding: 8px 12px; font-weight: 700; cursor: pointer; }
-
-    .thumbs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .thumb-card {
-      background: rgba(15, 23, 42, 0.8); padding: 6px;
-      border-radius: 12px; border: 1px solid var(--border); position: relative;
+    .dd-back {
+      background: #24242d;
+      color: var(--accent);
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      font-weight: 700;
+      cursor: pointer;
     }
-    .thumb-card img { width: 100%; height: 114px; object-fit: cover; border-radius: 8px; cursor: zoom-in; display: block; }
+
+    /* Tarjetas de Miniaturas */
+    .thumbs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .thumb-card {
+      background: #16161c;
+      padding: 7px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+    .thumb-card.blurry-warn {
+      border-color: rgba(251, 191, 36, 0.75);
+      box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
+    }
+    .thumb-card img {
+      width: 100%;
+      height: 118px;
+      object-fit: cover;
+      border-radius: 9px;
+      cursor: zoom-in;
+      display: block;
+    }
     .del-btn {
-      position: absolute; top: 10px; right: 10px;
-      background: rgba(239, 68, 68, 0.9); color: #fff;
-      border: none; border-radius: 50%;
-      width: 24px; height: 24px; font-size: 11px; font-weight: 700; cursor: pointer;
+      position: absolute; top: 11px; right: 11px;
+      background: rgba(9, 9, 11, 0.85);
+      color: #f87171;
+      border: 1px solid rgba(248, 113, 113, 0.45);
+      border-radius: 9999px;
+      width: 27px; height: 27px;
+      font-size: 11.5px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
     }
     .ocr-badge {
-      position: absolute; top: 10px; left: 10px;
-      background: rgba(8, 12, 20, 0.88); color: var(--accent);
-      font-size: 10px; font-weight: 600; padding: 2px 7px;
-      border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.4);
+      position: absolute; top: 11px; left: 11px;
+      background: rgba(9, 9, 11, 0.9);
+      color: #38bdf8;
+      font-size: 10px; font-weight: 700;
+      padding: 3px 8px; border-radius: 9999px;
+      border: 1px solid rgba(56, 189, 248, 0.5);
     }
-    .btn-potencia-toggle {
-      width: 100%; margin-top: 5px; padding: 6px; border-radius: 7px;
-      font-size: 11px; font-weight: 600; cursor: pointer;
-      border: 1px solid rgba(96, 165, 250, 0.35); background: rgba(37, 99, 235, 0.18); color: #bfdbfe;
-      transition: all 0.15s;
-    }
-    .btn-potencia-toggle.active {
-      background: rgba(16, 185, 129, 0.22); border-color: #34d399; color: #6ee7b7;
+    .ocr-badge.err { color: #fca5a5; border-color: rgba(248, 113, 113, 0.55); }
+    .blur-badge {
+      position: absolute; bottom: 52px; left: 11px;
+      background: rgba(120, 53, 15, 0.92);
+      color: #fde68a;
+      font-size: 9.5px; font-weight: 700;
+      padding: 2px 7px; border-radius: 9999px;
+      border: 1px solid rgba(251, 191, 36, 0.55);
+      pointer-events: none;
     }
 
-    .status-line { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 8px; padding-left: 2px; }
+    .btn-potencia-toggle {
+      width: 100%; margin-top: 6px; padding: 7px 8px;
+      border-radius: 9px; font-size: 11px; font-weight: 700; cursor: pointer;
+      border: 1px solid rgba(96, 165, 250, 0.35);
+      background: rgba(37, 99, 235, 0.18);
+      color: #bfdbfe;
+    }
+    .btn-potencia-toggle.active {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: rgba(52, 211, 153, 0.65);
+      color: #a7f3d0;
+    }
+
+    .status-line { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 9px; padding-left: 3px; }
     .status-line.ok { color: var(--green-text); }
     .status-line.warn { color: #fbbf24; }
 
-    .dup-box { background: rgba(239, 68, 68, 0.14); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 8px; padding: 6px; margin-top: 5px; font-size: 10.5px; }
-    .small-btn { padding: 6px 10px; border-radius: 8px; font-size: 11.5px; font-weight: 600; text-decoration: none; border: 1px solid rgba(96, 165, 250, 0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; color: var(--text); background: rgba(37, 99, 235, 0.25); }
+    .dup-box {
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-radius: 10px;
+      padding: 7px;
+      margin-top: 6px;
+      font-size: 10.5px;
+    }
+    .small-btn {
+      padding: 6px 10px;
+      border-radius: 9px;
+      font-size: 11.5px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text);
+      background: #23232c;
+    }
+    .small-btn:active { transform: scale(0.96); }
 
-    .drive-registry-list { display: flex; flex-direction: column; gap: 8px; }
+    /* Pestaña 2: Registro Drive */
+    .drive-registry-list { display: flex; flex-direction: column; gap: 10px; }
     .drive-node-card {
-      background: rgba(15, 23, 42, 0.82);
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 16px;
       overflow: hidden;
     }
     .drive-node-header {
-      padding: 12px 14px;
-      display: flex; justify-content: space-between; align-items: center;
-      cursor: pointer; user-select: none;
+      padding: 14px 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
     }
-    .drive-node-header:hover { background: rgba(255, 255, 255, 0.03); }
     .drive-node-body {
-      padding: 8px 12px 12px 12px;
+      padding: 10px 13px 13px 13px;
       border-top: 1px solid var(--border);
-      display: flex; flex-direction: column; gap: 8px;
-      background: rgba(8, 13, 26, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      background: #0a0a0e;
     }
     .drive-el-item {
-      background: rgba(20, 31, 56, 0.75);
-      border: 1px solid var(--border);
-      border-radius: 11px;
-      padding: 10px 12px;
+      background: #15151b;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 13px;
+      padding: 11px 12px;
     }
-    .v-in-drive { color: #34d399; font-weight: 600; }
-    .v-missing-drive { color: #f87171; font-weight: 600; }
+    .v-in-drive { color: #34d399; font-weight: 700; }
+    .v-missing-drive { color: #f87171; font-weight: 700; }
 
-    .dots-btn { position: absolute; top: 8px; right: 8px; background: rgba(8,12,20,0.85); color: #fff; border: 1px solid var(--border); border-radius: 6px; width: 24px; height: 24px; font-size: 14px; cursor: pointer; }
-    .dots-menu { position: absolute; top: 34px; right: 8px; background: #1e293b; border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.75); z-index: 300; width: 165px; overflow: hidden; }
-    .dots-menu div { padding: 8px 10px; font-size: 11.5px; cursor: pointer; border-bottom: 1px solid var(--border); }
+    .dots-btn {
+      position: absolute; top: 9px; right: 9px;
+      background: rgba(9, 9, 11, 0.85);
+      color: #fff; border: 1px solid var(--border); border-radius: 8px;
+      width: 27px; height: 27px; font-size: 14px; cursor: pointer;
+    }
+    .dots-menu {
+      position: absolute; top: 38px; right: 9px;
+      background: #18181f; border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 11px; box-shadow: 0 14px 30px rgba(0,0,0,0.85);
+      z-index: 300; width: 170px; overflow: hidden;
+    }
+    .dots-menu div {
+      padding: 9px 12px; font-size: 12px; font-weight: 600;
+      cursor: pointer; border-bottom: 1px solid var(--border);
+    }
 
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(4, 7, 13, 0.85); backdrop-filter: blur(6px); z-index: 9999; justify-content: center; align-items: center; padding: 14px; }
-    .modal-box { background: #111c35; border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 16px; padding: 16px; width: 100%; max-width: 390px; max-height: 90vh; overflow-y: auto; }
-    .zoom-img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 10px; }
-    .close-zoom { position: absolute; top: 16px; right: 16px; background: rgba(239,68,68,0.9); color: #fff; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 700; font-size: 12px; cursor: pointer; }
+    /* Modales */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      padding: 14px;
+    }
+    .modal-box {
+      background: #14141a;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+      border-radius: 20px;
+      padding: 18px;
+      width: 100%;
+      max-width: 400px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .zoom-img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 12px; }
+    .close-zoom {
+      position: absolute; top: 16px; right: 16px;
+      background: #dc2626; color: #fff;
+      border: 1px solid rgba(255,255,255,0.22); padding: 8px 15px;
+      border-radius: 9999px; font-weight: 700; font-size: 12.5px; cursor: pointer;
+    }
   </style>
 </head>
 <body onclick="cerrarFlotantes()">
 
-  <!-- 1. VISOR DE FOTO EN GRANDE -->
+  <!-- 0. PANTALLA DE DESBLOQUEO POR PIN (SE PIDE 1 SOLA VEZ POR DISPOSITIVO) -->
+  <div id="pinModal" class="modal-overlay" style="z-index:10050;">
+    <div class="modal-box text-center" onclick="event.stopPropagation()">
+      <div class="w-12 h-12 rounded-2xl bg-sky-500/15 border border-sky-400/35 flex items-center justify-center mx-auto mb-3 text-sky-400 text-xl">🔒</div>
+      <div class="text-[16px] font-extrabold text-white">Acceso FTTH Studio</div>
+      <div class="text-[12px] text-zinc-400 mt-1 mb-4">Introduce el PIN de equipo para desbloquear Drive y el lector OCR en este dispositivo.</div>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" id="pinInput" placeholder="PIN (ej. ••••)" class="text-center font-mono text-[20px] tracking-[0.35em] !py-3 mb-3" onkeydown="if(event.key==='Enter') enviarPinDesbloqueo()" />
+      <div id="pinErrorMsg" class="text-[12px] text-red-400 font-semibold mb-3" style="display:none;"></div>
+      <button id="btnDesbloquearPin" class="btn-confirm !mt-0" onclick="enviarPinDesbloqueo()">Desbloquear App</button>
+    </div>
+  </div>
+
+  <!-- 1. MODAL "¿DÓNDE ESTOY?" + RADAR DE ELEMENTOS + IR A CAJA EN MAPS -->
+  <div id="dondeEstoyModal" class="modal-overlay" onclick="cerrarModalDondeEstoy()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="flex justify-between items-center mb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-[15.5px] font-extrabold text-sky-400">📍 ¿Dónde estoy?</span>
+          <span id="dePrecisionBadge" class="font-mono text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-white/10">GPS...</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" class="small-btn !py-1 !px-2.5" onclick="actualizarModalDondeEstoy(true)">🔄</button>
+          <span class="cursor-pointer text-zinc-400 hover:text-white font-bold px-1" onclick="cerrarModalDondeEstoy()">✕</span>
+        </div>
+      </div>
+
+      <!-- Dirección postal exacta -->
+      <div class="bg-zinc-950 border border-white/10 rounded-2xl p-3 mb-3">
+        <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Dirección actual</div>
+        <div id="deDireccionTxt" class="text-[13.5px] font-bold text-zinc-100 mt-1 leading-snug">Obteniendo calle y número...</div>
+        <div class="flex justify-between items-center mt-2 gap-2">
+          <span id="deCoordsTxt" class="font-mono text-[11px] text-zinc-400">--</span>
+          <button type="button" class="small-btn !py-1 !px-2.5 !text-[11px]" onclick="copiarUbicacionActual()">📋 Copiar ubicación</button>
+        </div>
+      </div>
+
+      <!-- Radar de los 3 elementos más cercanos del plano -->
+      <div class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2">Elementos de red más cercanos</div>
+      <div id="deRadarLista" class="flex flex-col gap-2 mb-4"></div>
+
+      <!-- Buscador inverso: Ir a una caja del plano con Google Maps -->
+      <div class="border-t border-white/10 pt-3">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">🗺️ Ir a cualquier caja del plano (Google Maps)</div>
+        <input type="text" id="deBuscarCajaInput" placeholder="Buscar código (ej. 17-37, E-05-01, N-12)..." oninput="filtrarBuscadorIrACaja()" class="mb-2" />
+        <div id="deListaBuscadorMaps" class="flex flex-col gap-1.5 max-h-[155px] overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. VISOR DE FOTO EN GRANDE -->
   <div id="zoomModal" class="modal-overlay" onclick="cerrarZoom()">
     <button class="close-zoom" onclick="cerrarZoom()">✕ Cerrar</button>
     <img id="zoomImg" class="zoom-img" src="" onclick="event.stopPropagation()" />
   </div>
 
-  <!-- 2. MODAL DE CONFIRMACIÓN PARA RESTAURAR/VACIAR PÁGINA ([Sí] - [No]) -->
+  <!-- 3. MODAL CONFIRMACIÓN RESTAURAR PÁGINA ([Sí] - [No]) -->
   <div id="confirmarRestaurarModal" class="modal-overlay" onclick="document.getElementById('confirmarRestaurarModal').style.display='none'">
-    <div class="modal-box" onclick="event.stopPropagation()" style="text-align:center;">
-      <div style="font-size:15.5px; font-weight:700; color:#f8fafc; margin-bottom:14px; line-height:1.4;">
+    <div class="modal-box text-center" onclick="event.stopPropagation()">
+      <div class="w-11 h-11 rounded-full bg-red-500/15 border border-red-500/35 flex items-center justify-center mx-auto mb-3 text-red-400 text-lg">↺</div>
+      <div class="text-[15px] font-bold text-zinc-100 mb-5 leading-snug">
         ¿Quieres restaurar la página? Se perderán todas las fotos.
       </div>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-        <button class="btn-confirm" style="margin:0; padding:11px; background:linear-gradient(135deg, #ef4444, #dc2626); border-color:#fca5a5;" onclick="ejecutarRestauracionPaginaConfirmada()">
-          Sí
-        </button>
-        <button class="btn-gal-wide" style="margin:0; padding:11px; background:rgba(30,41,59,0.9); border-color:var(--border);" onclick="document.getElementById('confirmarRestaurarModal').style.display='none'">
-          No
-        </button>
+      <div class="grid grid-cols-2 gap-3">
+        <button class="btn-confirm !m-0 !py-2.5 !bg-gradient-to-b !from-red-500 !to-red-600 !border-red-400/50" onclick="ejecutarRestauracionPaginaConfirmada()">Sí</button>
+        <button class="btn-gal-wide !m-0 !py-2.5 !bg-zinc-800 !from-zinc-800 !to-zinc-900 !border-white/15 !shadow-none" onclick="document.getElementById('confirmarRestaurarModal').style.display='none'">No</button>
       </div>
     </div>
   </div>
 
-  <!-- 3. MODAL DE HISTORIAL DE SEGURIDAD (ÚLTIMOS 5 ESTADOS) -->
+  <!-- 4. MODAL HISTORIAL DE SEGURIDAD (ÚLTIMOS 5 ESTADOS EN BLOBS) -->
   <div id="historialModal" class="modal-overlay" onclick="document.getElementById('historialModal').style.display='none'">
     <div class="modal-box" onclick="event.stopPropagation()">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-        <span style="font-size:15px; font-weight:700; color:var(--accent);">🕒 Historial de Seguridad (Últimos 5)</span>
-        <span style="cursor:pointer; color:var(--muted); font-weight:700;" onclick="document.getElementById('historialModal').style.display='none'">✕</span>
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-[15px] font-bold text-sky-400">🕒 Historial de Seguridad (Últimos 5)</span>
+        <span class="cursor-pointer text-zinc-400 hover:text-white font-bold px-1.5" onclick="document.getElementById('historialModal').style.display='none'">✕</span>
       </div>
-      <div style="font-size:11.5px; color:var(--muted); margin-bottom:10px;">
-        Toca cualquiera de los estados guardados para recuperar sus cajas y fotografías:
-      </div>
-      <div id="listaSnapshotsHistorial" style="display:flex; flex-direction:column; gap:8px;"></div>
+      <div class="text-[12px] text-zinc-400 mb-3">Toca cualquier estado para recuperar sus cajas y fotografías:</div>
+      <div id="listaSnapshotsHistorial" class="flex flex-col gap-2.5"></div>
     </div>
   </div>
 
-  <!-- 4. MODAL REGISTRO DE POTENCIA -->
+  <!-- 5. MODAL REGISTRO DE POTENCIA (5 OPCIONES) -->
   <div id="potenciaModal" class="modal-overlay" onclick="document.getElementById('potenciaModal').style.display='none'">
     <div class="modal-box" onclick="event.stopPropagation()">
-      <div style="font-size:15px; font-weight:700; color:var(--text); margin-bottom:12px;">⚡ Registro de Potencia</div>
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        <button class="btn-cam-direct" style="min-height:46px; font-size:13px;" onclick="elegirOpcionPotencia('HACER_FOTO')">
-          📷 Hacer foto de Potencia
-        </button>
-        <button class="btn-gal-wide" style="padding:11px; font-size:13px;" onclick="elegirOpcionPotencia('SUBIR_GALERIA')">
-          🖼️ Subir de galería
-        </button>
-        <button id="btnPotUsarAbierta" class="btn-cam-direct" style="min-height:44px; font-size:12.5px; background:rgba(30,41,59,0.9); border-color:var(--border);" onclick="elegirOpcionPotencia('USAR_ABIERTA')">
-          🔗 Usar foto Abierta ("Abierta con potencia")
-        </button>
-        <button id="btnPotUsarCerrada" class="btn-cam-direct" style="min-height:44px; font-size:12.5px; background:rgba(30,41,59,0.9); border-color:var(--border);" onclick="elegirOpcionPotencia('USAR_CERRADA')">
-          🔗 Usar foto Cerrada ("Cerrada con potencia")
-        </button>
-        <button class="btn-cam-direct" style="min-height:40px; font-size:12px; background:transparent; border-color:var(--border); color:var(--muted); box-shadow:none;" onclick="elegirOpcionPotencia('SIN_POTENCIA')">
-          Dejar sin foto de potencia
-        </button>
+      <div class="text-[15px] font-bold text-zinc-100 mb-3 flex items-center gap-2">
+        <span class="text-amber-400">⚡</span> Registro de Potencia
+      </div>
+      <div class="flex flex-col gap-2.5">
+        <button class="btn-cam-direct !min-h-[46px] !text-[13px]" onclick="elegirOpcionPotencia('HACER_FOTO')">📷 Hacer foto de Potencia</button>
+        <button class="btn-gal-wide !py-3 !text-[13px]" onclick="elegirOpcionPotencia('SUBIR_GALERIA')">🖼️ Subir de galería</button>
+        <button id="btnPotUsarAbierta" class="btn-cam-direct !min-h-[44px] !text-[12.5px] !bg-zinc-900 !from-zinc-800 !to-zinc-900 !border-white/15 !shadow-none" onclick="elegirOpcionPotencia('USAR_ABIERTA')">🔗 Usar foto Abierta ("Abierta con potencia")</button>
+        <button id="btnPotUsarCerrada" class="btn-cam-direct !min-h-[44px] !text-[12.5px] !bg-zinc-900 !from-zinc-800 !to-zinc-900 !border-white/15 !shadow-none" onclick="elegirOpcionPotencia('USAR_CERRADA')">🔗 Usar foto Cerrada ("Cerrada con potencia")</button>
+        <button class="btn-cam-direct !min-h-[40px] !text-[12px] !bg-transparent !from-transparent !to-transparent !border-white/15 !text-zinc-400 !shadow-none" onclick="elegirOpcionPotencia('SIN_POTENCIA')">Dejar sin foto de potencia</button>
       </div>
     </div>
   </div>
 
-  <!-- 5. VISOR DE FOTO YA EXISTENTE EN DRIVE -->
+  <!-- 6. VISOR DE FOTO YA EXISTENTE EN DRIVE -->
   <div id="verDriveModal" class="modal-overlay" onclick="document.getElementById('verDriveModal').style.display='none'">
     <div class="modal-box" onclick="event.stopPropagation()">
-      <div style="font-size:14px; font-weight:700; color:var(--accent); margin-bottom:8px;">Fotografía actual en Drive</div>
-      <div style="background:#080c14; padding:8px; border-radius:12px; border:1px solid var(--border); text-align:center;">
-        <img id="imgDriveExistenteModal" src="" style="width:100%; max-height:300px; object-fit:contain; border-radius:8px; cursor:zoom-in;" onclick="abrirZoom(this.src)" />
-        <div id="txtNombreDriveModal" style="font-size:11.5px; color:var(--muted); margin-top:6px;">Cargando...</div>
-        <a id="btnIrDriveModal" href="#" target="_blank" class="small-btn" style="margin-top:8px;">📂 Abrir en Google Drive</a>
+      <div class="text-[14px] font-bold text-sky-400 mb-2.5">Fotografía actual en Drive</div>
+      <div class="bg-zinc-950 p-2.5 rounded-2xl border border-white/10 text-center">
+        <img id="imgDriveExistenteModal" src="" class="w-full max-h-[300px] object-contain rounded-xl cursor-zoom-in" onclick="abrirZoom(this.src)" />
+        <div id="txtNombreDriveModal" class="text-[11.5px] text-zinc-400 mt-2 font-mono">Cargando...</div>
+        <a id="btnIrDriveModal" href="#" target="_blank" class="small-btn mt-2.5">📂 Abrir en Google Drive</a>
       </div>
     </div>
   </div>
 
-  <!-- 6. MODAL MOVER DE CARPETA EN DRIVE -->
+  <!-- 7. MODAL MOVER DE CARPETA EN DRIVE -->
   <div id="moverFotoModal" class="modal-overlay">
     <div class="modal-box" onclick="event.stopPropagation()">
-      <div style="font-size:14px; font-weight:700; margin-bottom:10px; color:var(--accent);">Mover fotografía en Drive</div>
-      <div style="margin-bottom:8px; position:relative;">
-        <label style="font-size:11px; color:var(--muted);">1º Pueblo:</label>
-        <button type="button" class="pueblo-pill" style="width:100%; text-align:left; padding:8px 10px; border-radius:8px; margin-top:3px;" onclick="abrirMenuPueblo(event, 'menuMoverPueblo', 'MODAL_MOVER')">
-          <span id="txtMoverPueblo">Seleccionar...</span> <span style="float:right;">▾</span>
+      <div class="text-[15px] font-bold mb-3 text-sky-400">Mover fotografía en Drive</div>
+      <div class="mb-2.5 relative">
+        <label class="text-[11px] text-zinc-400 font-medium">1º Pueblo:</label>
+        <button type="button" class="pueblo-pill w-full text-left !py-2.5 !px-3 !rounded-xl mt-1" onclick="abrirMenuPueblo(event, 'menuMoverPueblo', 'MODAL_MOVER')">
+          <span id="txtMoverPueblo">Seleccionar...</span> <span class="float-right opacity-60">▾</span>
         </button>
-        <div id="menuMoverPueblo" class="custom-dd-menu" style="left:0; width:100%;" onclick="event.stopPropagation()"></div>
+        <div id="menuMoverPueblo" class="custom-dd-menu left-0 w-full" onclick="event.stopPropagation()"></div>
       </div>
-      <div style="display:grid; grid-template-columns: 1fr 1.2fr 1fr; gap:6px; margin-bottom:8px;">
+      <div class="grid grid-cols-[1fr_1.2fr_1fr] gap-2 mb-2.5">
         <div>
-          <label style="font-size:10.5px; color:var(--muted);">2º Nodo:</label>
-          <input type="number" id="inputNodoMover" min="1" max="99" value="1" />
+          <label class="text-[10.5px] text-zinc-400 font-medium">2º Nodo:</label>
+          <input type="number" id="inputNodoMover" min="1" max="99" value="1" class="mt-1 font-mono" />
         </div>
         <div>
-          <label style="font-size:10.5px; color:var(--muted);">3º Tipo:</label>
-          <select id="selTipoNuevoModal">
+          <label class="text-[10.5px] text-zinc-400 font-medium">3º Tipo:</label>
+          <select id="selTipoNuevoModal" class="mt-1">
             <option value="CTO">CTO</option>
             <option value="EMPALME_RD">Empalme RD</option>
             <option value="EMPALME_RA">Empalme RA</option>
@@ -438,13 +813,13 @@
           </select>
         </div>
         <div>
-          <label style="font-size:10.5px; color:var(--muted);">4º Nº:</label>
-          <input type="number" id="inputNumElementoModal" min="1" max="64" value="1" />
+          <label class="text-[10.5px] text-zinc-400 font-medium">4º Nº:</label>
+          <input type="number" id="inputNumElementoModal" min="1" max="64" value="1" class="mt-1 font-mono" />
         </div>
       </div>
-      <div style="margin-bottom:8px;">
-        <label style="font-size:10.5px; color:var(--muted);">5º Vista:</label>
-        <select id="selMoverVista">
+      <div class="mb-2.5">
+        <label class="text-[10.5px] text-zinc-400 font-medium">5º Vista:</label>
+        <select id="selMoverVista" class="mt-1">
           <option value="Abierta">Abierta</option>
           <option value="Abierta con potencia">Abierta con potencia</option>
           <option value="Cerrada">Cerrada</option>
@@ -453,47 +828,65 @@
           <option value="Panorámica">Panorámica</option>
         </select>
       </div>
-      <div id="cajaColisionMover" style="display:none; background:#080c14; border:1px solid #f59e0b; border-radius:10px; padding:8px; margin-top:8px;">
-        <div id="textoColisionMover" style="font-size:11.5px; color:#fcd34d; margin-bottom:6px;"></div>
-        <img id="imgColisionMover" src="" style="width:100%; height:120px; object-fit:cover; border-radius:6px; cursor:zoom-in;" onclick="abrirZoom(this.src)" />
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
-          <span style="font-size:10.5px; color:var(--muted);">Foto actual en Drive</span>
+      <div id="cajaColisionMover" style="display:none;" class="bg-zinc-950 border border-amber-500/40 rounded-xl p-2.5 mt-2.5">
+        <div id="textoColisionMover" class="text-[11.5px] text-amber-300 mb-2"></div>
+        <img id="imgColisionMover" src="" class="w-full h-[120px] object-cover rounded-lg cursor-zoom-in" onclick="abrirZoom(this.src)" />
+        <div class="flex justify-between items-center mt-2">
+          <span class="text-[10.5px] text-zinc-400">Foto actual en Drive</span>
           <a id="linkDriveColision" href="#" target="_blank" class="small-btn">📂 Drive</a>
         </div>
       </div>
-      <div style="display:flex; gap:8px; margin-top:12px;">
-        <button class="btn-gal-wide" style="background:transparent; border-color:var(--border); color:var(--muted); box-shadow:none;" onclick="cerrarModalMover()">Cancelar</button>
-        <button id="btnConfirmarMover" class="btn-confirm" style="margin:0; padding:10px;" onclick="confirmarAccionModalMover(false)">Confirmar</button>
+      <div class="flex gap-2.5 mt-4">
+        <button class="btn-gal-wide !bg-transparent !from-transparent !to-transparent !border-white/15 !text-zinc-400 !shadow-none" onclick="cerrarModalMover()">Cancelar</button>
+        <button id="btnConfirmarMover" class="btn-confirm !m-0 !py-2.5" onclick="confirmarAccionModalMover(false)">Confirmar</button>
       </div>
     </div>
   </div>
 
-  <!-- BARRA SUPERIOR CON HISTORIAL DE 5 ESTADOS Y BOTÓN DE RESTAURAR ESCONDIDO -->
+  <!-- BARRA SUPERIOR CON HISTORIAL, ¿DÓNDE ESTOY?, RESTAURAR ESCONDIDO Y CONEXIÓN -->
   <div class="top-utility-bar">
-    <button type="button" class="util-pill" onclick="abrirModalHistorial()">
-      🕒 Historial (<span id="contadorHistorial">0</span>/5)
-    </button>
-    <div style="display:flex; gap:6px; align-items:center;">
-      <button type="button" id="btnRestaurarEscondido" class="util-pill" style="display:none; color:#fca5a5; border-color:rgba(248,113,113,0.28);" onclick="pedirConfirmacionRestaurarPagina()">
-        ↺ Restaurar página
+    <div class="flex gap-1.5 items-center">
+      <button type="button" class="util-pill" onclick="abrirModalHistorial()">
+        <span class="text-sky-400">🕒</span>
+        <span class="font-mono text-[11px]"><span id="contadorHistorial">0</span>/5</span>
+      </button>
+      <button type="button" class="util-pill !border-sky-400/40 !bg-sky-500/15 !text-sky-200" onclick="abrirModalDondeEstoy()">
+        <span>📍 ¿Dónde estoy?</span>
+      </button>
+    </div>
+
+    <div class="flex gap-1.5 items-center">
+      <button type="button" id="btnRestaurarEscondido" class="util-pill !text-red-300 !border-red-500/35 !bg-red-500/10" style="display:none;" onclick="pedirConfirmacionRestaurarPagina()">
+        ↺ Restaurar
       </button>
       <button type="button" class="util-pill" onclick="document.getElementById('configBox').open = !document.getElementById('configBox').open">
-        🔒 <span id="badgeEstadoConexion">Drive</span>
+        <span>⚙️</span> <span id="badgeEstadoConexion">Drive</span>
       </button>
     </div>
   </div>
 
+  <!-- PANEL DE CONFIGURACIÓN + COMPILADOR MASIVO DE PLANOS .DXF -->
   <details class="config-bar" id="configBox">
-    <summary><span>Conexión Corporativa Protegida</span></summary>
-    <div style="margin-top: 8px; display:flex; flex-direction:column; gap:6px;">
-      <input type="password" id="scriptUrlInput" placeholder="🔒 Enlace corporativo protegido" oninput="guardarYProbarConfiguracion()" />
-      <input type="password" id="geminiKeyInput" placeholder="🔒 Claves OCR protegidas" oninput="guardarConfiguracion()" />
+    <summary><span>⚙️ Ajustes, PIN y Compilador de Planos .DXF</span></summary>
+    <div class="mt-3 flex flex-col gap-3">
+      <div class="bg-zinc-950 border border-white/10 rounded-xl p-3">
+        <div class="text-[12px] font-bold text-sky-400 mb-1">📐 Compilador de Planos .DXF a Mapa GPS</div>
+        <div id="resumenDicGpsConfig" class="text-[11px] text-zinc-400 mb-2.5">Cargando estado del diccionario GPS...</div>
+        <input type="file" id="dxfFilesInput" accept=".dxf,.DXF" multiple style="display:none" onchange="compilarArchivosDxfSeleccionados(event)" />
+        <button type="button" class="btn-gal-wide !py-2.5 !text-[12px]" onclick="document.getElementById('dxfFilesInput').click()">
+          📂 Seleccionar archivos .DXF (Ctrl+A en C:\Planos_DXF)
+        </button>
+        <div id="estadoCompiladorDxf" class="text-[11.5px] mt-2 font-semibold text-emerald-400"></div>
+      </div>
+
+      <div class="flex gap-2 items-center">
+        <input type="password" id="scriptUrlInput" placeholder="🔒 Enlace /exec corporativo" onchange="guardarEndpointPersonalizado()" class="flex-1" />
+        <button type="button" class="small-btn !py-2.5 !text-red-300 !border-red-500/30" onclick="cerrarSesionPin()">🔒 Bloquear PIN</button>
+      </div>
     </div>
   </details>
 
-  <!-- Banner silencioso cuando indexa los planos .DWG de la carpeta PRUEBA_FTTH_DRIVE/planos -->
-  <div id="bannerIndexadorPlanosGlobal" style="display:none; margin-bottom:10px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); border-radius:10px; padding:8px 12px; font-size:11.5px; color:var(--accent); font-weight:600;"></div>
-
+  <!-- PESTAÑAS PRINCIPALES -->
   <div class="tabs">
     <div class="tab active" id="tabRafaga" onclick="cambiarTab('rafaga')">📸 Captura de Campo</div>
     <div class="tab" id="tabEstado" onclick="cambiarTab('estado')">📂 Registro Drive</div>
@@ -503,11 +896,11 @@
   <div id="vistaRafaga" class="box">
     <!-- Cola Anticaídas de Cobertura -->
     <div id="bannerColaOffline" style="display:none;" class="offline-queue-banner">
-      <div style="font-size:12px; font-weight:600; color:#fde68a;">
-        📡 Subida pendiente guardada sin cobertura (<span id="numFotosOffline">0</span> fotos)
+      <div class="text-[12px] font-semibold text-amber-200">
+        📡 Subida pendiente sin cobertura (<span id="numFotosOffline">0</span> fotos)
       </div>
-      <button type="button" class="small-btn" style="background:#f59e0b; color:#080c14; border:none; font-weight:800;" onclick="reintentarSubidaPendienteOffline()">
-        🔄 Reintentar ahora
+      <button type="button" class="small-btn !bg-amber-400 !text-zinc-950 !border-none !font-bold" onclick="reintentarSubidaPendienteOffline()">
+        🔄 Reintentar
       </button>
     </div>
 
@@ -520,8 +913,19 @@
       <button type="button" class="completing-exit" onclick="salirModoCompletar()">✕ Salir</button>
     </div>
 
+    <!-- Indicador discreto de precisión GPS en vivo -->
+    <div class="flex justify-between items-center mb-2.5 px-1">
+      <span id="gpsLivePill" class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-400">
+        <span id="gpsLiveDot" class="w-2 h-2 rounded-full bg-zinc-500 inline-block"></span>
+        <span id="gpsLiveText">Buscando señal GPS...</span>
+      </span>
+      <span id="ocrStatusHint" class="text-[10.5px] font-mono text-zinc-500">OCR listo</span>
+    </div>
+
+    <!-- Inputs ocultos -->
     <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="archivosSeleccionados(event, 'CAMARA')" />
     <input type="file" id="galInput" accept="image/*" multiple style="display:none" onchange="archivosSeleccionados(event, 'GALERIA')" />
+    <input type="file" id="galGpsInput" accept="image/jpeg,image/png,application/octet-stream" multiple style="display:none" onchange="archivosSeleccionados(event, 'GALERIA_GPS')" />
     <input type="file" id="potGalInput" accept="image/*" style="display:none" onchange="archivoPotenciaDesdeGaleria(event)" />
 
     <!-- 4 BOTONES CON COLOR VIVO Y RELLENO VERDE AUTOMÁTICO -->
@@ -548,54 +952,61 @@
       </button>
     </div>
 
-    <button class="btn-gal-wide" onclick="document.getElementById('galInput').click()">
-      🖼️ Añadir lote desde Galería o PC
-    </button>
+    <!-- Selector Dual de Galería: Rápida + Archivos con EXIF GPS Intacto -->
+    <div class="gal-dual-grid">
+      <button class="btn-gal-wide" onclick="document.getElementById('galInput').click()">
+        🖼️ Galería rápida
+      </button>
+      <button class="btn-gal-gps" onclick="document.getElementById('galGpsInput').click()">
+        📂 Archivos (GPS)
+      </button>
+    </div>
 
     <div id="contenedorTarjetas"></div>
 
-    <div id="msgEstado" style="margin-top:10px; text-align:center; font-weight:600; font-size:13px;"></div>
+    <!-- Barra de progreso de subida foto a foto -->
+    <div id="barraProgresoSubida" style="display:none;" class="upload-progress-box">
+      <div class="flex justify-between items-center text-[12px] font-bold text-sky-300">
+        <span id="textoProgresoSubida">Subiendo foto 1 de 4...</span>
+        <span id="pctProgresoSubida" class="font-mono">0%</span>
+      </div>
+      <div class="upload-progress-track">
+        <div id="fillProgresoSubida" class="upload-progress-fill"></div>
+      </div>
+    </div>
+
+    <div id="msgEstado" class="mt-3 text-center font-semibold text-[13px]"></div>
 
     <button id="btnSubirTodas" class="btn-confirm" style="display:none;" onclick="subirTodoADrive()">
       ✅ Subir a Google Drive
     </button>
   </div>
 
-  <!-- ==================== PESTAÑA 2: REGISTRO DE DRIVE LIMPIO POR NODOS ==================== -->
+  <!-- ==================== PESTAÑA 2: REGISTRO DRIVE POR NODOS ==================== -->
   <div id="vistaEstado" style="display:none;">
-    <div class="box" style="padding:12px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-        <div style="position:relative; flex:1;">
-          <button type="button" class="pueblo-pill" style="width:100%; text-align:left; padding:9px 12px; border-radius:10px; color:var(--text);" onclick="abrirMenuPueblo(event, 'menuEstadoPueblo', 'ESTADO_RED')">
-            <span id="txtEstadoPueblo">📍 Águilas (Murcia)</span> <span style="float:right; opacity:0.7;">▾</span>
+    <div class="box !p-3.5">
+      <div class="flex justify-between items-center gap-2">
+        <div class="relative flex-1">
+          <button type="button" class="pueblo-pill w-full text-left !py-2.5 !px-3.5 !rounded-xl !text-zinc-100" onclick="abrirMenuPueblo(event, 'menuEstadoPueblo', 'ESTADO_RED')">
+            <span id="txtEstadoPueblo">📍 Águilas (Murcia)</span> <span class="float-right opacity-60">▾</span>
           </button>
-          <div id="menuEstadoPueblo" class="custom-dd-menu" style="left:0; width:100%;" onclick="event.stopPropagation()"></div>
+          <div id="menuEstadoPueblo" class="custom-dd-menu left-0 w-full" onclick="event.stopPropagation()"></div>
         </div>
-        <button class="small-btn" style="padding:9px 12px;" onclick="cargarRegistroDrivePueblo(true)">
-          🔄 Actualizar Drive
+        <button class="small-btn !py-2.5 !px-3.5 !rounded-xl" onclick="cargarRegistroDrivePueblo(true)">
+          🔄 Actualizar
         </button>
       </div>
-      <div id="resumenGlobalPueblo" style="font-size:11.5px; color:var(--muted); margin-top:8px;"></div>
+      <div id="resumenGlobalPueblo" class="text-[11.5px] text-zinc-400 mt-2.5 px-1"></div>
     </div>
 
     <div id="contenedorRegistroDrive" class="drive-registry-list"></div>
   </div>
 
 <script>
-  if (typeof URL !== "undefined" && !URL.prototype.startsWith) {
-    URL.prototype.startsWith = function(s) { return String(this.href || this).startsWith(s); };
-  }
-  if (!Object.prototype.startsWith) {
-    Object.defineProperty(Object.prototype, "startsWith", {
-      value: function(s) { return String(this).startsWith(s); },
-      configurable: true,
-      writable: true
-    });
-  }
-
-  // --- OFUSCACIÓN CRIPTOGRÁFICA DEL ENLACE /exec PARA GITHUB PÚBLICO ---
+  // --- OFUSCACIÓN DEL ENLACE /exec (LA CLAVE OCR NUNCA ESTÁ EN GITHUB; SE ENTREGA CON PIN) ---
   const CIFRADO_EXEC_B64 = "CRcVExBWWxwQAAkXGU5IABZGDgAMQwgfBR5BHggKAAwXBhxPShY6KAcYAAt5TQI5Sz8wWjdcPAk4JSYxORk9JBoqPgI5K2kZDCUNASoXIDs6KTEqKScpHCg7OxxcWltSWVMBCgM7BScJFhcXSAQaAwAc";
   const SAL_INTERNA = "acacio";
+  const URL_ANTIGUA_ELIMINADA = "AKfycbzI5iCR2IuqMqIYXOARESJgqvjq3i8eVO6v6PChnoESyk7s5YZOj0gC7OxOmQtxkptr";
 
   function desofuscarEndpointOficial() {
     try {
@@ -608,16 +1019,8 @@
     } catch (e) { return ""; }
   }
 
-  const CLAVES_OFICIALES = [
-    "AQ.Ab8RN6JNotP201VBuOQxKWkMzuEWvZfuReneFzGCNb0Y_CRGow",
-    "AQ.Ab8RN6IKJ1LUAD1v11Dvv9-g6u5Nr71OVfCE3wnPpoSmR5sa-g",
-    "AQ.Ab8RN6JuE0jWB4EBZgX-56w01qbxjHeU0Yw6YrpmillocyIZzg"
-  ];
-  const URL_ANTIGUA_ELIMINADA = "AKfycbzI5iCR2IuqMqIYXOARESJgqvjq3i8eVO6v6PChnoESyk7s5YZOj0gC7OxOmQtxkptr";
-
   // LOS 20 PUEBLOS Y SUS DIMINUTIVOS OFICIALES EXACTOS
   const COORDENADAS_PUEBLOS_OFICIALES = [
-    // Almería (10)
     { provincia: "Almería", pueblo: "Antas", prefijo: "ANTS", lat: 37.2453, lng: -1.9175 },
     { provincia: "Almería", pueblo: "Campo Hermoso", prefijo: "CAMH", lat: 36.9367, lng: -2.1331 },
     { provincia: "Almería", pueblo: "San Isidro", prefijo: "SISI", lat: 36.9036, lng: -2.1708 },
@@ -628,9 +1031,7 @@
     { provincia: "Almería", pueblo: "Vera Playa", prefijo: "VPLA", lat: 37.2185, lng: -1.8090 },
     { provincia: "Almería", pueblo: "Los Gallardos", prefijo: "GALL", lat: 37.1678, lng: -1.9392 },
     { provincia: "Almería", pueblo: "Mojácar", prefijo: "MOJC", lat: 37.1403, lng: -1.8507 },
-    // Murcia (1)
     { provincia: "Murcia", pueblo: "Águilas", prefijo: "AGUI", lat: 37.4063, lng: -1.5829 },
-    // Granada (9)
     { provincia: "Granada", pueblo: "Ronda", prefijo: "RNDA", lat: 37.1722, lng: -3.6083 },
     { provincia: "Granada", pueblo: "Alfacar", prefijo: "ALFC", lat: 37.2367, lng: -3.5706 },
     { provincia: "Granada", pueblo: "Beas de Granada", prefijo: "BEAS", lat: 37.2181, lng: -3.4811 },
@@ -657,81 +1058,41 @@
     { id: "NODO", label: "Nodo" }
   ];
 
-  let indiceTurnoClave = 0;
+  // Modelos verificados 200 OK con tu clave AI Studio
+  const MODELOS_OCR_VERIFICADOS = [
+    "models/gemini-3.1-flash-lite",
+    "models/gemini-3.5-flash-lite",
+    "models/gemini-2.5-flash-lite",
+    "models/gemini-3.8-flash"
+  ];
+
+  // Estado global de sesión
+  let pinActivo = localStorage.getItem("ftth_pin_activo") || "";
+  let apiKeyOcrActiva = localStorage.getItem("ftth_ocr_apikey") || "";
   let bloquesCajas = [];
+  let objectUrlCache = new Map();
   let ruletaAbiertaId = null;
   let nodosAbiertosRegistro = new Set();
   let modoCompletando = null;
   let vistaCamaraPendiente = "Abierta";
-  let gpsDispositivo = { lat: null, lng: null, provincia: "Murcia", pueblo: "Águilas" };
+  let gpsDispositivo = { lat: null, lng: null, acc: null, provincia: "Murcia", pueblo: "Águilas" };
   let ultimoNodoFijo = Number(localStorage.getItem("ftth_last_nodo_num") || 1);
   let seleccionPuebloEstado = { provincia: "Murcia", pueblo: "Águilas" };
   let datosRegistroActual = null;
   let cacheRegistroPorPueblo = {};
-  let cacheCoordenadasPorPueblo = {};
+  let diccionarioGpsGlobal = { actualizado: null, porPueblo: {} };
   let contextoMover = null;
-  let libreDwgInstance = null;
-  let indexandoPlanosEnCurso = false;
+  let subiendoActualmente = false;
+  let ultimaDireccionTexto = "";
 
-  window.onload = async () => {
-    activarTrampaBotonAtrasMovil();
-
-    localStorage.setItem("ftth_gemini_key", CLAVES_OFICIALES.join(", "));
-    document.getElementById("geminiKeyInput").value = CLAVES_OFICIALES.join(", ");
-
-    let savedUrl = localStorage.getItem("ftth_script_url") || "";
-    if (!savedUrl || savedUrl.includes(URL_ANTIGUA_ELIMINADA)) {
-      savedUrl = desofuscarEndpointOficial();
-      localStorage.setItem("ftth_script_url", savedUrl);
-    }
-    document.getElementById("scriptUrlInput").value = savedUrl;
-
-    verificarConexionScript();
-    await inicializarSesionEHistorial();
-    await verificarColaSubidaOffline();
-    obtenerGpsYCargarDwgAutomatico();
-    actualizarBotonesSuperioresVerde();
-  };
-
-  function activarTrampaBotonAtrasMovil() {
-    try {
-      window.history.pushState({ ftthStay: true }, "", window.location.href);
-      window.addEventListener("popstate", () => {
-        window.history.pushState({ ftthStay: true }, "", window.location.href);
-
-        const modales = ["zoomModal", "confirmarRestaurarModal", "historialModal", "potenciaModal", "verDriveModal", "moverFotoModal"];
-        for (const mId of modales) {
-          const el = document.getElementById(mId);
-          if (el && el.style.display === "flex") {
-            el.style.display = "none";
-            return;
-          }
-        }
-        if (ruletaAbiertaId !== null) {
-          ruletaAbiertaId = null;
-          renderTarjetas();
-          return;
-        }
-        if (document.getElementById("vistaEstado").style.display !== "none") {
-          cambiarTab("rafaga");
-          return;
-        }
-      });
-    } catch (e) {}
-
-    window.addEventListener("pagehide", () => {
-      if (bloquesCajas.some(b => b.fotos.length > 0)) {
-        guardarEstadoEnHistorialDB("Cierre de navegador / pestaña");
-      }
-    });
-  }
-
+  // ==================== MOTOR INDEXEDDB CON BLOBS NATIVOS (BAJA RAM) ====================
   function abrirDB() {
     return new Promise((resolve, reject) => {
-      const req = indexedDB.open("FTTH_Studio_Pro_DB", 2);
+      const req = indexedDB.open("FTTH_Studio_Pro_BlobDB", 3);
       req.onupgradeneeded = e => {
         const db = e.target.result;
         if (!db.objectStoreNames.contains("kv")) db.createObjectStore("kv", { keyPath: "k" });
+        if (!db.objectStoreNames.contains("blobs")) db.createObjectStore("blobs", { keyPath: "id" });
       };
       req.onsuccess = e => resolve(e.target.result);
       req.onerror = e => reject(e);
@@ -761,17 +1122,291 @@
     } catch (e) { return false; }
   }
 
+  async function dbPutBlob(id, blobDrive, blobOcr) {
+    try {
+      const db = await abrirDB();
+      return new Promise(res => {
+        const tx = db.transaction("blobs", "readwrite");
+        tx.objectStore("blobs").put({ id, blobDrive, blobOcr, ts: Date.now() });
+        tx.oncomplete = () => res(true);
+        tx.onerror = () => res(false);
+      });
+    } catch (e) { return false; }
+  }
+
+  async function dbGetBlob(id) {
+    try {
+      const db = await abrirDB();
+      return new Promise(res => {
+        const req = db.transaction("blobs", "readonly").objectStore("blobs").get(id);
+        req.onsuccess = () => res(req.result || null);
+        req.onerror = () => res(null);
+      });
+    } catch (e) { return null; }
+  }
+
+  function obtenerUrlPreviewDeBlob(blobId, blob) {
+    if (objectUrlCache.has(blobId)) return objectUrlCache.get(blobId);
+    if (!blob) return "";
+    const url = URL.createObjectURL(blob);
+    objectUrlCache.set(blobId, url);
+    return url;
+  }
+
+  function blobABase64Puro(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const res = String(reader.result || "");
+        resolve(res.includes(",") ? res.split(",")[1] : res);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  function serializarBloquesSinBinarios(listaBloques) {
+    return (listaBloques || []).map(b => ({
+      id: b.id,
+      provincia: b.provincia,
+      pueblo: b.pueblo,
+      tipo: b.tipo,
+      numNodo: b.numNodo,
+      numCaja: b.numCaja,
+      bloqueadoPorCompletar: Boolean(b.bloqueadoPorCompletar),
+      editadoManualmente: Boolean(b.editadoManualmente),
+      codigoYaDetectadoPorOcr: Boolean(b.codigoYaDetectadoPorOcr),
+      fotos: (b.fotos || []).map(f => ({
+        id: f.id,
+        blobId: f.blobId || f.id,
+        lat: f.lat,
+        lng: f.lng,
+        timestamp: f.timestamp,
+        provincia: f.provincia,
+        pueblo: f.pueblo,
+        vista: f.vista,
+        usarParaPotencia: Boolean(f.usarParaPotencia),
+        ocrEstado: f.ocrEstado === "leyendo" ? "pendiente" : f.ocrEstado,
+        ocrError: f.ocrError || "",
+        borrosa: Boolean(f.borrosa),
+        duplicadoInfo: f.duplicadoInfo || null,
+        modoDuplicado: f.modoDuplicado || "sustituir"
+      }))
+    }));
+  }
+
+  async function hidratarBloquesConBlobs(listaSerializada) {
+    const out = [];
+    for (const b of (listaSerializada || [])) {
+      const fotosHidratadas = [];
+      for (const f of (b.fotos || [])) {
+        const rec = await dbGetBlob(f.blobId || f.id);
+        if (rec && rec.blobDrive) {
+          fotosHidratadas.push({
+            ...f,
+            preview: obtenerUrlPreviewDeBlob(f.blobId || f.id, rec.blobDrive)
+          });
+        }
+      }
+      if (fotosHidratadas.length > 0 || b.bloqueadoPorCompletar) {
+        out.push({ ...b, fotos: fotosHidratadas });
+      }
+    }
+    return out;
+  }
+
+  async function limpiarBlobsNoReferenciados() {
+    try {
+      const vivos = new Set();
+      bloquesCajas.forEach(b => (b.fotos || []).forEach(f => vivos.add(f.blobId || f.id)));
+      const hist = (await dbGet("historial_5")) || [];
+      hist.forEach(h => (h.bloques || []).forEach(b => (b.fotos || []).forEach(f => vivos.add(f.blobId || f.id))));
+      const cola = (await dbGet("cola_offline")) || [];
+      cola.forEach(item => { if (item.blobId) vivos.add(item.blobId); });
+
+      const db = await abrirDB();
+      const tx = db.transaction("blobs", "readwrite");
+      const store = tx.objectStore("blobs");
+      const req = store.openCursor();
+      req.onsuccess = e => {
+        const cur = e.target.result;
+        if (cur) {
+          if (!vivos.has(cur.key)) store.delete(cur.key);
+          cur.continue();
+        }
+      };
+    } catch (e) {}
+  }
+
+  // ==================== ARRANQUE, PWA, PIN Y BOTÓN ATRÁS TRIPLE ====================
+  window.onload = async () => {
+    registrarServiceWorkerPWA();
+    activarTrampaBotonAtrasTriple();
+
+    let savedUrl = localStorage.getItem("ftth_script_url") || "";
+    if (!savedUrl || savedUrl.includes(URL_ANTIGUA_ELIMINADA)) {
+      savedUrl = desofuscarEndpointOficial();
+      localStorage.setItem("ftth_script_url", savedUrl);
+    }
+    document.getElementById("scriptUrlInput").value = savedUrl;
+
+    await cargarDiccionarioGpsLocal();
+    await inicializarSesionEHistorial();
+    await verificarColaSubidaOffline();
+    iniciarSeguimientoGpsVivo();
+    actualizarBotonesSuperioresVerde();
+
+    if (!pinActivo || !apiKeyOcrActiva) {
+      mostrarModalPin();
+    } else {
+      verificarConexionYSincronizarSilencioso();
+    }
+  };
+
+  function registrarServiceWorkerPWA() {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    }
+  }
+
+  function activarTrampaBotonAtrasTriple() {
+    try {
+      for (let i = 0; i < 3; i++) {
+        window.history.pushState({ ftthStay: i }, "", window.location.href);
+      }
+      window.addEventListener("popstate", () => {
+        window.history.pushState({ ftthStay: Date.now() }, "", window.location.href);
+
+        const modales = ["zoomModal", "dondeEstoyModal", "confirmarRestaurarModal", "historialModal", "potenciaModal", "verDriveModal", "moverFotoModal"];
+        for (const mId of modales) {
+          const el = document.getElementById(mId);
+          if (el && el.style.display === "flex") {
+            el.style.display = "none";
+            return;
+          }
+        }
+        if (ruletaAbiertaId !== null) {
+          ruletaAbiertaId = null;
+          renderTarjetas();
+          return;
+        }
+        if (document.getElementById("vistaEstado").style.display !== "none") {
+          cambiarTab("rafaga");
+          return;
+        }
+      });
+    } catch (e) {}
+
+    window.addEventListener("pagehide", () => {
+      if (bloquesCajas.some(b => b.fotos.length > 0)) {
+        guardarEstadoEnHistorialDB("Cierre de pestaña");
+      }
+    });
+  }
+
+  function obtenerEndpoint() {
+    const val = (document.getElementById("scriptUrlInput") && document.getElementById("scriptUrlInput").value.trim()) || "";
+    return val || localStorage.getItem("ftth_script_url") || desofuscarEndpointOficial();
+  }
+
+  function guardarEndpointPersonalizado() {
+    const v = document.getElementById("scriptUrlInput").value.trim();
+    if (v) localStorage.setItem("ftth_script_url", v);
+    verificarConexionYSincronizarSilencioso();
+  }
+
+  function mostrarModalPin() {
+    document.getElementById("pinErrorMsg").style.display = "none";
+    document.getElementById("pinInput").value = "";
+    document.getElementById("pinModal").style.display = "flex";
+    setTimeout(() => document.getElementById("pinInput").focus(), 100);
+  }
+
+  function cerrarSesionPin() {
+    localStorage.removeItem("ftth_pin_activo");
+    localStorage.removeItem("ftth_ocr_apikey");
+    pinActivo = "";
+    apiKeyOcrActiva = "";
+    document.getElementById("configBox").open = false;
+    mostrarModalPin();
+  }
+
+  async function enviarPinDesbloqueo() {
+    const pin = document.getElementById("pinInput").value.trim();
+    const errEl = document.getElementById("pinErrorMsg");
+    const btn = document.getElementById("btnDesbloquearPin");
+    if (!pin) {
+      errEl.innerText = "Introduce el PIN numérico.";
+      errEl.style.display = "block";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Verificando...";
+    errEl.style.display = "none";
+
+    try {
+      const r = await fetch(`${obtenerEndpoint()}?action=desbloquear&pin=${encodeURIComponent(pin)}`, { redirect: "follow" });
+      const d = await r.json();
+      if (d && d.ok && d.apiKey) {
+        pinActivo = pin;
+        apiKeyOcrActiva = d.apiKey;
+        localStorage.setItem("ftth_pin_activo", pinActivo);
+        localStorage.setItem("ftth_ocr_apikey", apiKeyOcrActiva);
+        document.getElementById("pinModal").style.display = "none";
+        vibrarTick(25);
+        verificarConexionYSincronizarSilencioso();
+      } else {
+        errEl.innerText = d.mensaje || "PIN incorrecto.";
+        errEl.style.display = "block";
+        vibrarTick(80);
+      }
+    } catch (e) {
+      errEl.innerText = "Sin conexión con Google Drive para validar el PIN.";
+      errEl.style.display = "block";
+    } finally {
+      btn.disabled = false;
+      btn.innerText = "Desbloquear App";
+    }
+  }
+
+  async function verificarConexionYSincronizarSilencioso() {
+    const badge = document.getElementById("badgeEstadoConexion");
+    try {
+      const r = await fetch(`${obtenerEndpoint()}?action=desbloquear&pin=${encodeURIComponent(pinActivo)}`, { redirect: "follow" });
+      const d = await r.json();
+      if (d && d.error === "PIN_INVALIDO") {
+        cerrarSesionPin();
+        return;
+      }
+      if (d && d.ok) {
+        if (d.apiKey) {
+          apiKeyOcrActiva = d.apiKey;
+          localStorage.setItem("ftth_ocr_apikey", apiKeyOcrActiva);
+        }
+        badge.style.color = "#34d399";
+        badge.innerText = "● OK";
+        sincronizarDiccionarioGpsDesdeDrive();
+        precargarRegistroSilencioso(gpsDispositivo.provincia, gpsDispositivo.pueblo);
+        return;
+      }
+    } catch (e) {}
+    badge.style.color = "#fbbf24";
+    badge.innerText = "Offline";
+  }
+
+  // ==================== HISTORIAL (5 ESTADOS) Y SESIÓN ACTIVA ====================
   async function inicializarSesionEHistorial() {
-    const sesionActiva = await dbGet("sesion_activa");
-    if (sesionActiva && Array.isArray(sesionActiva) && sesionActiva.some(b => b.fotos && b.fotos.length > 0)) {
-      bloquesCajas = sesionActiva;
-      renderTarjetas();
+    const rawSesion = await dbGet("sesion_activa_v3");
+    if (rawSesion && Array.isArray(rawSesion)) {
+      bloquesCajas = await hidratarBloquesConBlobs(rawSesion);
+      if (bloquesCajas.length > 0) renderTarjetas();
     }
     await actualizarContadorHistorialUI();
   }
 
   async function persistirSesionActiva() {
-    await dbSet("sesion_activa", bloquesCajas);
+    await dbSet("sesion_activa_v3", serializarBloquesSinBinarios(bloquesCajas));
   }
 
   async function guardarEstadoEnHistorialDB(motivo) {
@@ -780,13 +1415,13 @@
 
     const totalFotos = cajasConFotos.reduce((acc, b) => acc + b.fotos.length, 0);
     const resumenCodigos = cajasConFotos.map(b => construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo).codigo).join(", ");
-    const clon = JSON.parse(JSON.stringify(cajasConFotos));
+    const snapshotLigero = serializarBloquesSinBinarios(cajasConFotos);
 
     let hist = (await dbGet("historial_5")) || [];
     const firmaNueva = `${totalFotos}_${resumenCodigos}`;
     if (hist.length > 0 && hist[0].firma === firmaNueva && motivo === "Auto-guardado") {
       hist[0].fecha = Date.now();
-      hist[0].bloques = clon;
+      hist[0].bloques = snapshotLigero;
     } else {
       hist.unshift({
         id: "h_" + Date.now(),
@@ -794,13 +1429,14 @@
         motivo: motivo || "Estado guardado",
         resumen: `${cajasConFotos.length} caja(s): ${resumenCodigos} (${totalFotos} fotos)`,
         firma: firmaNueva,
-        bloques: clon
+        bloques: snapshotLigero
       });
     }
 
     hist = hist.slice(0, 5);
     await dbSet("historial_5", hist);
     await actualizarContadorHistorialUI();
+    limpiarBlobsNoReferenciados();
   }
 
   async function actualizarContadorHistorialUI() {
@@ -812,19 +1448,17 @@
     const hist = (await dbGet("historial_5")) || [];
     const cont = document.getElementById("listaSnapshotsHistorial");
     if (hist.length === 0) {
-      cont.innerHTML = `<div style="text-align:center; padding:14px; color:var(--muted); font-size:12px;">Aún no hay estados guardados en el historial.</div>`;
+      cont.innerHTML = `<div class="text-center py-4 text-zinc-400 text-[12px]">Aún no hay estados guardados en el historial.</div>`;
     } else {
       cont.innerHTML = hist.map((item, idx) => {
         const hora = new Date(item.fecha).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
         return `
-          <div style="background:rgba(15,23,42,0.9); border:1px solid var(--border); border-radius:11px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div class="bg-zinc-900 border border-white/10 rounded-xl p-3 flex justify-between items-center gap-2.5">
             <div>
-              <div style="font-size:12.5px; font-weight:700; color:#e2e8f0;">#${idx + 1} · ${hora} <span style="font-size:11px; color:var(--accent);">(${item.motivo})</span></div>
-              <div style="font-size:11.5px; color:var(--muted); margin-top:2px;">${item.resumen}</div>
+              <div class="text-[12.5px] font-bold text-zinc-100">#${idx + 1} · <span class="font-mono">${hora}</span> <span class="text-[11px] text-sky-400">(${item.motivo})</span></div>
+              <div class="text-[11.5px] text-zinc-400 mt-0.5">${item.resumen}</div>
             </div>
-            <button type="button" class="small-btn" style="background:var(--green-btn); border:none; padding:7px 11px;" onclick="restaurarSnapshotDeHistorial('${item.id}')">
-              Restaurar
-            </button>
+            <button type="button" class="small-btn !bg-emerald-600 !border-none !text-white !py-1.5 !px-3" onclick="restaurarSnapshotDeHistorial('${item.id}')">Restaurar</button>
           </div>`;
       }).join("");
     }
@@ -838,7 +1472,7 @@
     if (bloquesCajas.some(b => b.fotos && b.fotos.length > 0)) {
       await guardarEstadoEnHistorialDB("Antes de restaurar historial");
     }
-    bloquesCajas = JSON.parse(JSON.stringify(found.bloques));
+    bloquesCajas = await hidratarBloquesConBlobs(found.bloques);
     ruletaAbiertaId = null;
     document.getElementById("historialModal").style.display = "none";
     vibrarTick(20);
@@ -866,6 +1500,8 @@
     try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
   }
 
+  // === PEGAR AQUÍ LA PARTE 2 ===
+  // ==================== UTILIDADES DE CÓDIGOS, PUEBLOS Y GPS ====================
   function obtenerPrefijoPueblo(pueblo) {
     const found = COORDENADAS_PUEBLOS_OFICIALES.find(x => x.pueblo === pueblo);
     if (found) return found.prefijo;
@@ -957,67 +1593,12 @@
     return null;
   }
 
-  function obtenerEndpoint() {
-    const val = document.getElementById("scriptUrlInput").value.trim();
-    return val || desofuscarEndpointOficial();
-  }
-
-  function obtenerClavesActivas() {
-    const raw = document.getElementById("geminiKeyInput").value.trim();
-    const custom = raw.split(",").map(s => s.trim()).filter(Boolean);
-    return Array.from(new Set([...CLAVES_OFICIALES, ...custom]));
-  }
-
-  function guardarConfiguracion() {
-    localStorage.setItem("ftth_script_url", obtenerEndpoint());
-    localStorage.setItem("ftth_gemini_key", document.getElementById("geminiKeyInput").value.trim());
-  }
-
-  async function guardarYProbarConfiguracion() {
-    guardarConfiguracion();
-    await verificarConexionScript();
-  }
-
-  async function verificarConexionScript() {
-    const ep = obtenerEndpoint();
-    const badge = document.getElementById("badgeEstadoConexion");
-    try {
-      const r = await fetch(`${ep}?action=getPueblos`, { redirect: "follow" });
-      const d = await r.json();
-      if (d && (d.pueblos || d.status === "OK")) {
-        badge.style.color = "#34d399";
-        badge.innerText = "● Drive OK";
-        document.getElementById("configBox").open = false;
-        return true;
-      }
-    } catch (e) {}
-    badge.style.color = "#f87171";
-    badge.innerText = "Error";
-    return false;
-  }
-
-  function obtenerGpsYCargarDwgAutomatico() {
-    const iniciarCargaPueblo = (prov, pue) => {
-      seleccionPuebloEstado = { provincia: prov, pueblo: pue };
-      document.getElementById("txtEstadoPueblo").innerText = `📍 ${pue} (${prov})`;
-      precargarRegistroYDwgSilencioso(prov, pue);
-    };
-
-    if (!navigator.geolocation) {
-      iniciarCargaPueblo(gpsDispositivo.provincia, gpsDispositivo.pueblo);
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(pos => {
-      const loc = resolverPuebloPorCoordenadas(pos.coords.latitude, pos.coords.longitude);
-      if (loc) {
-        gpsDispositivo = { lat: pos.coords.latitude, lng: pos.coords.longitude, provincia: loc.provincia, pueblo: loc.pueblo };
-        iniciarCargaPueblo(loc.provincia, loc.pueblo);
-      } else {
-        iniciarCargaPueblo(gpsDispositivo.provincia, gpsDispositivo.pueblo);
-      }
-    }, () => {
-      iniciarCargaPueblo(gpsDispositivo.provincia, gpsDispositivo.pueblo);
-    }, { enableHighAccuracy: true, timeout: 4500 });
+  function distanciaMetros(lat1, lon1, lat2, lon2) {
+    const R = 6371000;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
   function resolverPuebloPorCoordenadas(lat, lng) {
@@ -1037,14 +1618,514 @@
     return null;
   }
 
-  function distanciaMetros(lat1, lon1, lat2, lon2) {
-    const R = 6371000;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  function obtenerProvinciaDePueblo(pueblo) {
+    const f = COORDENADAS_PUEBLOS_OFICIALES.find(x => x.pueblo === pueblo);
+    return f ? f.provincia : "Almería";
   }
 
+  // ==================== SEGUIMIENTO GPS EN VIVO + SEMÁFORO DE PRECISIÓN ====================
+  function iniciarSeguimientoGpsVivo() {
+    const actualizarPosicion = pos => {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const acc = Math.round(pos.coords.accuracy || 99);
+      const loc = resolverPuebloPorCoordenadas(lat, lng);
+      const cambioPueblo = loc && loc.pueblo !== gpsDispositivo.pueblo;
+
+      gpsDispositivo = {
+        lat, lng, acc,
+        provincia: loc ? loc.provincia : gpsDispositivo.provincia,
+        pueblo: loc ? loc.pueblo : gpsDispositivo.pueblo
+      };
+
+      const dot = document.getElementById("gpsLiveDot");
+      const txt = document.getElementById("gpsLiveText");
+      if (dot && txt) {
+        if (acc <= 12) {
+          dot.className = "w-2 h-2 rounded-full bg-emerald-400 inline-block";
+          txt.style.color = "#6ee7b7";
+        } else if (acc <= 30) {
+          dot.className = "w-2 h-2 rounded-full bg-amber-400 inline-block";
+          txt.style.color = "#fcd34d";
+        } else {
+          dot.className = "w-2 h-2 rounded-full bg-red-400 inline-block";
+          txt.style.color = "#fca5a5";
+        }
+        txt.innerText = `GPS ±${acc}m · ${gpsDispositivo.pueblo}`;
+      }
+
+      if (cambioPueblo) {
+        seleccionPuebloEstado = { provincia: gpsDispositivo.provincia, pueblo: gpsDispositivo.pueblo };
+        document.getElementById("txtEstadoPueblo").innerText = `📍 ${gpsDispositivo.pueblo} (${gpsDispositivo.provincia})`;
+        precargarRegistroSilencioso(gpsDispositivo.provincia, gpsDispositivo.pueblo);
+      }
+    };
+
+    if (!navigator.geolocation) {
+      document.getElementById("gpsLiveText").innerText = "GPS no disponible";
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(actualizarPosicion, () => {
+      document.getElementById("gpsLiveText").innerText = `Sin GPS · ${gpsDispositivo.pueblo}`;
+    }, { enableHighAccuracy: true, timeout: 6000, maximumAge: 5000 });
+
+    navigator.geolocation.watchPosition(actualizarPosicion, () => {}, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 4000
+    });
+  }
+
+  // ==================== DICCIONARIO MAESTRO GPS (LOCAL + DRIVE) ====================
+  async function cargarDiccionarioGpsLocal() {
+    const localDic = await dbGet("diccionario_gps_global");
+    if (localDic && localDic.porPueblo) {
+      diccionarioGpsGlobal = localDic;
+    }
+    actualizarResumenDicGpsUI();
+  }
+
+  async function sincronizarDiccionarioGpsDesdeDrive() {
+    if (!pinActivo) return;
+    try {
+      const r = await fetch(`${obtenerEndpoint()}?action=getDiccionarioGpsGlobal&pin=${encodeURIComponent(pinActivo)}`, { redirect: "follow" });
+      const d = await r.json();
+      if (d && d.ok && d.porPueblo) {
+        diccionarioGpsGlobal = { actualizado: d.actualizado, porPueblo: d.porPueblo };
+        await dbSet("diccionario_gps_global", diccionarioGpsGlobal);
+        actualizarResumenDicGpsUI();
+      }
+    } catch (e) {}
+  }
+
+  function actualizarResumenDicGpsUI() {
+    const el = document.getElementById("resumenDicGpsConfig");
+    if (!el) return;
+    const porPueblo = (diccionarioGpsGlobal && diccionarioGpsGlobal.porPueblo) || {};
+    const pueblos = Object.keys(porPueblo);
+    let total = 0;
+    pueblos.forEach(p => { total += Object.keys(porPueblo[p] || {}).length; });
+    if (total === 0) {
+      el.innerText = "Aún no hay coordenadas compiladas. Selecciona tus .DXF desde el PC.";
+    } else {
+      const fecha = diccionarioGpsGlobal.actualizado ? new Date(diccionarioGpsGlobal.actualizado).toLocaleDateString("es-ES") : "";
+      el.innerText = `✅ ${total} elementos con GPS cargados en ${pueblos.length} pueblo(s) ${fecha ? "· Act. " + fecha : ""}`;
+    }
+  }
+
+  function obtenerMapaGpsPueblo(pueblo) {
+    const pp = (diccionarioGpsGlobal && diccionarioGpsGlobal.porPueblo) || {};
+    return { ...(pp["General"] || {}), ...(pp[pueblo] || {}) };
+  }
+
+  function buscarElementosCercanosEnDiccionario(lat, lng, puebloPreferente, radioMaxMetros = 2000, limite = 3) {
+    if (!lat || !lng) return [];
+    const pp = (diccionarioGpsGlobal && diccionarioGpsGlobal.porPueblo) || {};
+    const resultados = [];
+
+    const analizarMapa = (mapa, nombrePueblo) => {
+      Object.keys(mapa || {}).forEach(cod => {
+        const pt = mapa[cod];
+        if (!pt || !pt.lat || !pt.lng) return;
+        const dist = distanciaMetros(lat, lng, pt.lat, pt.lng);
+        if (dist <= radioMaxMetros) {
+          resultados.push({
+            codigo: cod,
+            pueblo: nombrePueblo,
+            provincia: obtenerProvinciaDePueblo(nombrePueblo),
+            lat: pt.lat,
+            lng: pt.lng,
+            tipo: pt.tipo || "CTO",
+            nodo: pt.nodo || "Nodo 01",
+            dist: Math.round(dist)
+          });
+        }
+      });
+    };
+
+    if (puebloPreferente && pp[puebloPreferente]) {
+      analizarMapa(pp[puebloPreferente], puebloPreferente);
+    }
+    if (resultados.length < limite) {
+      Object.keys(pp).forEach(pue => {
+        if (pue !== puebloPreferente) analizarMapa(pp[pue], pue);
+      });
+    }
+
+    resultados.sort((a, b) => a.dist - b.dist);
+    const vistos = new Set();
+    const unicos = [];
+    for (const r of resultados) {
+      const k = `${r.pueblo}|${r.codigo}`;
+      if (!vistos.has(k)) {
+        vistos.add(k);
+        unicos.push(r);
+        if (unicos.length >= limite) break;
+      }
+    }
+    return unicos;
+  }
+
+  // ==================== COMPILADOR MASIVO DE ARCHIVOS .DXF (EN PC) ====================
+  function convertirUtm30AGps(x, y) {
+    if (!x || !y || isNaN(x) || isNaN(y) || x < 100000 || x > 900000 || y < 3500000 || y > 4800000) return null;
+    const a = 6378137.0;
+    const eccSquared = 0.00669438;
+    const k0 = 0.9996;
+    const eccPrimeSquared = eccSquared / (1 - eccSquared);
+    const e1 = (1 - Math.sqrt(1 - eccSquared)) / (1 + Math.sqrt(1 - eccSquared));
+
+    const xAdj = x - 500000.0;
+    const M = y / k0;
+    const mu = M / (a * (1 - eccSquared / 4 - 3 * eccSquared * eccSquared / 64 - 5 * Math.pow(eccSquared, 3) / 256));
+
+    const phi1Rad = mu
+      + (3 * e1 / 2 - 27 * Math.pow(e1, 3) / 32) * Math.sin(2 * mu)
+      + (21 * e1 * e1 / 16 - 55 * Math.pow(e1, 4) / 32) * Math.sin(4 * mu)
+      + (151 * Math.pow(e1, 3) / 96) * Math.sin(6 * mu);
+
+    const N1 = a / Math.sqrt(1 - eccSquared * Math.sin(phi1Rad) * Math.sin(phi1Rad));
+    const T1 = Math.tan(phi1Rad) * Math.tan(phi1Rad);
+    const C1 = eccPrimeSquared * Math.cos(phi1Rad) * Math.cos(phi1Rad);
+    const R1 = a * (1 - eccSquared) / Math.pow(1 - eccSquared * Math.sin(phi1Rad) * Math.sin(phi1Rad), 1.5);
+    const D = xAdj / (N1 * k0);
+
+    let lat = phi1Rad - (N1 * Math.tan(phi1Rad) / R1) * (D * D / 2 - (5 + 3 * T1 + 10 * C1 - 4 * C1 * C1 - 9 * eccPrimeSquared) * Math.pow(D, 4) / 24);
+    let lng = ((D - (1 + 2 * T1 + C1) * Math.pow(D, 3) / 6) / Math.cos(phi1Rad));
+
+    lat = lat * 180 / Math.PI;
+    lng = -3.0 + (lng * 180 / Math.PI);
+    return { lat: Number(lat.toFixed(6)), lng: Number(lng.toFixed(6)) };
+  }
+
+  function deducirPuebloPorNombrePlano(nombreArchivo) {
+    const norm = String(nombreArchivo || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    for (const item of COORDENADAS_PUEBLOS_OFICIALES) {
+      const pNorm = item.pueblo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      if (norm.includes(pNorm) || norm.includes(item.prefijo.toLowerCase())) return item.pueblo;
+    }
+    if (norm.includes("terreros")) return "San Juan de los Terreros";
+    if (norm.includes("gallardos")) return "Los Gallardos";
+    if (norm.includes("hermoso")) return "Campo Hermoso";
+    if (norm.includes("isidro")) return "San Isidro";
+    if (norm.includes("guejar")) return "Güejar Sierra";
+    if (norm.includes("huetor")) return "Huétor Santillán";
+    if (norm.includes("jeronimo")) return "San Jerónimo";
+    return "General";
+  }
+
+  function limpiarTextoDxfMtext(raw) {
+    return String(raw || "")
+      .replace(/\\P/gi, " ")
+      .replace(/\\[A-Za-z][^;]*;/g, " ")
+      .replace(/[{}]/g, " ")
+      .replace(/NODO\s*/gi, "N-")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function extraerCoordenadasDeTextoDxf(rawText, puebloPorDefecto, destinoPorPueblo) {
+    const lineas = rawText.split(/\r?\n/);
+    const regexCod = /\b(?:N-\d{1,2}|E-\d{1,2}-\d{1,2}|E-[A-Z]{2,6}-\d{1,2}|\d{2}-\d{2})\b/gi;
+    let x10 = null, y20 = null, x11 = null, y21 = null, textoActual = "", encontrados = 0;
+
+    const volcarEntidad = () => {
+      if (!textoActual) return;
+      const gps = convertirUtm30AGps(x10, y20) || convertirUtm30AGps(x11, y21);
+      if (!gps) return;
+
+      const limpio = limpiarTextoDxfMtext(textoActual);
+      const matches = limpio.match(regexCod) || [];
+      if (matches.length === 0) return;
+
+      const loc = resolverPuebloPorCoordenadas(gps.lat, gps.lng);
+      const puebloFinal = loc ? loc.pueblo : puebloPorDefecto;
+      if (!destinoPorPueblo[puebloFinal]) destinoPorPueblo[puebloFinal] = {};
+
+      matches.forEach(m => {
+        const desc = descomponerCodigoEnRuleta(m);
+        if (desc) {
+          destinoPorPueblo[puebloFinal][desc.codigo] = {
+            lat: gps.lat,
+            lng: gps.lng,
+            tipo: desc.tipo,
+            nodo: desc.nodo,
+            numNodo: desc.numNodo,
+            numCaja: desc.numCaja
+          };
+          encontrados++;
+        }
+      });
+    };
+
+    for (let i = 0; i < lineas.length - 1; i += 2) {
+      const code = lineas[i].trim();
+      const val = lineas[i + 1].trim();
+      if (code === "0") {
+        volcarEntidad();
+        x10 = null; y20 = null; x11 = null; y21 = null; textoActual = "";
+      } else if (code === "10" && x10 === null) x10 = parseFloat(val);
+      else if (code === "20" && y20 === null) y20 = parseFloat(val);
+      else if (code === "11" && x11 === null) x11 = parseFloat(val);
+      else if (code === "21" && y21 === null) y21 = parseFloat(val);
+      else if (code === "1" || code === "3") textoActual += " " + val;
+    }
+    volcarEntidad();
+    return encontrados;
+  }
+
+  async function compilarArchivosDxfSeleccionados(e) {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    e.target.value = "";
+
+    const st = document.getElementById("estadoCompiladorDxf");
+    st.style.color = "#38bdf8";
+    st.innerText = `Procesando ${files.length} archivo(s) .DXF...`;
+
+    const compiladoPorPueblo = {};
+    let totalExtraidos = 0;
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        st.innerText = `Leyendo (${i + 1}/${files.length}): ${f.name}...`;
+        const buf = await f.arrayBuffer();
+        const texto = new TextDecoder("iso-8859-1").decode(buf);
+        const puebloDef = deducirPuebloPorNombrePlano(f.name);
+        totalExtraidos += extraerCoordenadasDeTextoDxf(texto, puebloDef, compiladoPorPueblo);
+      }
+
+      if (totalExtraidos === 0) {
+        st.style.color = "#fbbf24";
+        st.innerText = "⚠️ No se encontraron códigos FTTH con coordenadas UTM válidas en esos DXF (verifica que sean 2018 ASCII DXF).";
+        return;
+      }
+
+      st.innerText = `Subiendo ${totalExtraidos} coordenadas limpias a Google Drive...`;
+      const resp = await fetch(obtenerEndpoint(), {
+        method: "POST",
+        redirect: "follow",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          pin: pinActivo,
+          action: "guardarDiccionarioGpsMasivo",
+          reemplazar: false,
+          porPueblo: compiladoPorPueblo
+        })
+      });
+      const res = await resp.json();
+      if (res.error) throw new Error(res.error);
+
+      await sincronizarDiccionarioGpsDesdeDrive();
+      st.style.color = "#34d399";
+      st.innerText = `✅ Compilación completada: ${res.totalGuardados} elementos con GPS guardados en Drive y cacheados.`;
+      vibrarTick(60);
+    } catch (err) {
+      st.style.color = "#f87171";
+      st.innerText = `❌ Error al compilar: ${err.message}`;
+    }
+  }
+
+  // ==================== MODAL "📍 ¿DÓNDE ESTOY?" + RADAR + BUSCADOR MAPS ====================
+  function abrirModalDondeEstoy() {
+    cerrarFlotantes();
+    document.getElementById("dondeEstoyModal").style.display = "flex";
+    actualizarModalDondeEstoy(false);
+    filtrarBuscadorIrACaja();
+  }
+
+  function cerrarModalDondeEstoy() {
+    document.getElementById("dondeEstoyModal").style.display = "none";
+  }
+
+  async function actualizarModalDondeEstoy(forzarLecturaGps) {
+    const dirEl = document.getElementById("deDireccionTxt");
+    const coordsEl = document.getElementById("deCoordsTxt");
+    const accEl = document.getElementById("dePrecisionBadge");
+    const radarEl = document.getElementById("deRadarLista");
+
+    if (forzarLecturaGps && navigator.geolocation) {
+      dirEl.innerText = "Refrescando GPS de alta precisión...";
+      await new Promise(resolve => {
+        navigator.geolocation.getCurrentPosition(pos => {
+          const loc = resolverPuebloPorCoordenadas(pos.coords.latitude, pos.coords.longitude);
+          gpsDispositivo = {
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+            acc: Math.round(pos.coords.accuracy || 99),
+            provincia: loc ? loc.provincia : gpsDispositivo.provincia,
+            pueblo: loc ? loc.pueblo : gpsDispositivo.pueblo
+          };
+          resolve();
+        }, () => resolve(), { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 });
+      });
+    }
+
+    if (!gpsDispositivo.lat || !gpsDispositivo.lng) {
+      accEl.innerText = "Sin GPS";
+      dirEl.innerText = "Activa la ubicación del móvil para detectar tu calle y la caja más cercana.";
+      coordsEl.innerText = "--";
+      radarEl.innerHTML = `<div class="text-[12px] text-zinc-400 bg-zinc-900/70 p-3 rounded-xl">Esperando coordenadas del teléfono...</div>`;
+      return;
+    }
+
+    const lat = gpsDispositivo.lat;
+    const lng = gpsDispositivo.lng;
+    const acc = gpsDispositivo.acc || 0;
+    accEl.innerText = `±${acc}m`;
+    accEl.style.color = acc <= 12 ? "#34d399" : (acc <= 30 ? "#fbbf24" : "#f87171");
+    coordsEl.innerText = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+    // 1. Radar de los 3 elementos más cercanos del plano
+    const cercanos = buscarElementosCercanosEnDiccionario(lat, lng, gpsDispositivo.pueblo, 5000, 3);
+    const keyReg = `${gpsDispositivo.provincia}|${gpsDispositivo.pueblo}`;
+    const regPueblo = (cacheRegistroPorPueblo[keyReg] && cacheRegistroPorPueblo[keyReg].elementos) || {};
+
+    if (cercanos.length === 0) {
+      radarEl.innerHTML = `<div class="text-[12px] text-zinc-400 bg-zinc-900/70 p-3 rounded-xl border border-white/10">No hay elementos del plano compilados a menos de 5 km. Carga tus .DXF en ⚙️ Ajustes.</div>`;
+    } else {
+      radarEl.innerHTML = cercanos.map((c, idx) => {
+        const desc = descomponerCodigoEnRuleta(c.codigo);
+        const tit = desc ? construirCodigoYTitulo(desc.tipo, desc.numNodo, desc.numCaja, c.pueblo).tituloHtml : c.codigo;
+        const est = regPueblo[c.codigo];
+        let badgeDrive = `<span class="text-zinc-400">⚪ Sin fotos en Drive</span>`;
+        if (est && est.completo) badgeDrive = `<span class="text-emerald-400">🟢 Completo en Drive</span>`;
+        else if (est && est.faltan && est.faltan.length) badgeDrive = `<span class="text-amber-300">🟠 Falta ${est.faltan.join(", ").toLowerCase()}</span>`;
+
+        const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}`;
+        return `
+          <div class="bg-zinc-950 border ${idx === 0 ? 'border-sky-400/50' : 'border-white/10'} rounded-xl p-2.5 flex justify-between items-center gap-2">
+            <div>
+              <div class="text-[13px] whitespace-pre">${idx === 0 ? '🎯' : '📍'} ${tit} <span class="font-mono text-[11px] font-bold text-sky-300 ml-1">a ${c.dist}m</span></div>
+              <div class="text-[11px] mt-0.5">${badgeDrive} · <span class="text-zinc-500">${c.pueblo}</span></div>
+            </div>
+            <div class="flex gap-1.5 shrink-0">
+              <a href="${mapsUrl}" target="_blank" class="small-btn !px-2 !py-1.5" title="Abrir en Google Maps">🗺️</a>
+              <button type="button" class="small-btn !bg-sky-600 !border-none !text-white !px-2.5 !py-1.5" onclick="usarCajaDesdeRadar('${c.provincia}', '${c.pueblo}', '${c.codigo}')">Usar</button>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    // 2. Dirección postal exacta (OpenStreetMap Nominatim gratuito)
+    dirEl.innerText = "Consultando calle y número...";
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 4500);
+      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+        headers: { "Accept-Language": "es" },
+        signal: ctrl.signal
+      });
+      clearTimeout(t);
+      const d = await r.json();
+      const a = d.address || {};
+      const calle = a.road || a.pedestrian || a.residential || a.path || a.neighbourhood || "";
+      const num = a.house_number ? `, ${a.house_number}` : "";
+      const locNombre = a.town || a.city || a.village || gpsDispositivo.pueblo;
+      ultimaDireccionTexto = calle ? `${calle}${num} · ${locNombre}` : (d.display_name || `${gpsDispositivo.pueblo} (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
+      dirEl.innerText = ultimaDireccionTexto;
+    } catch (e) {
+      ultimaDireccionTexto = `${gpsDispositivo.pueblo} (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+      dirEl.innerText = `${gpsDispositivo.pueblo} (sin red para callejero)`;
+    }
+  }
+
+  async function copiarUbicacionActual() {
+    if (!gpsDispositivo.lat || !gpsDispositivo.lng) return;
+    const texto = `${ultimaDireccionTexto || gpsDispositivo.pueblo}\nhttps://maps.google.com/?q=${gpsDispositivo.lat},${gpsDispositivo.lng}`;
+    try {
+      await navigator.clipboard.writeText(texto);
+      vibrarTick(20);
+      const el = document.getElementById("deDireccionTxt");
+      const prev = el.innerText;
+      el.innerText = "✅ Ubicación copiada al portapapeles";
+      setTimeout(() => { el.innerText = prev; }, 1600);
+    } catch (e) {
+      prompt("Copia esta ubicación:", texto);
+    }
+  }
+
+  async function usarCajaDesdeRadar(provincia, pueblo, codigo) {
+    const desc = descomponerCodigoEnRuleta(codigo);
+    if (!desc) return;
+    cerrarModalDondeEstoy();
+    cambiarTab("rafaga");
+
+    let ultimo = bloquesCajas[bloquesCajas.length - 1];
+    if (!ultimo) {
+      ultimo = {
+        id: "b_" + Date.now(),
+        provincia,
+        pueblo,
+        tipo: desc.tipo,
+        numNodo: desc.numNodo,
+        numCaja: desc.numCaja,
+        bloqueadoPorCompletar: false,
+        editadoManualmente: true,
+        codigoYaDetectadoPorOcr: true,
+        fotos: []
+      };
+      bloquesCajas.push(ultimo);
+    } else {
+      ultimo.provincia = provincia;
+      ultimo.pueblo = pueblo;
+      ultimo.tipo = desc.tipo;
+      ultimo.numNodo = desc.numNodo;
+      ultimo.numCaja = desc.numCaja;
+      ultimo.editadoManualmente = true;
+    }
+    ultimoNodoFijo = desc.numNodo;
+    localStorage.setItem("ftth_last_nodo_num", String(ultimoNodoFijo));
+    vibrarTick(25);
+    renderTarjetas();
+    await persistirSesionActiva();
+    verificarDuplicadosEnSegundoPlano();
+  }
+
+  function filtrarBuscadorIrACaja() {
+    const q = (document.getElementById("deBuscarCajaInput").value || "").trim().toUpperCase();
+    const cont = document.getElementById("deListaBuscadorMaps");
+    const pp = (diccionarioGpsGlobal && diccionarioGpsGlobal.porPueblo) || {};
+    const lista = [];
+
+    const pueblosOrden = Object.keys(pp).sort((a, b) => (a === gpsDispositivo.pueblo ? -1 : b === gpsDispositivo.pueblo ? 1 : a.localeCompare(b)));
+    for (const pue of pueblosOrden) {
+      const mapa = pp[pue] || {};
+      for (const cod of Object.keys(mapa)) {
+        if (!q || cod.toUpperCase().includes(q) || pue.toUpperCase().includes(q)) {
+          const pt = mapa[cod];
+          lista.push({ cod, pue, lat: pt.lat, lng: pt.lng });
+          if (lista.length >= 15) break;
+        }
+      }
+      if (lista.length >= 15) break;
+    }
+
+    if (lista.length === 0) {
+      cont.innerHTML = `<div class="text-[11.5px] text-zinc-500 px-1">Sin coincidencias en el diccionario GPS.</div>`;
+      return;
+    }
+
+    cont.innerHTML = lista.map(it => {
+      const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${it.lat},${it.lng}`;
+      const prov = obtenerProvinciaDePueblo(it.pue);
+      return `
+        <div class="bg-zinc-900/90 border border-white/10 rounded-lg px-2.5 py-2 flex justify-between items-center gap-2">
+          <div class="text-[12px]">
+            <span class="font-mono font-bold text-sky-300">${it.cod}</span>
+            <span class="text-zinc-400 text-[11px] ml-1.5">${it.pue}</span>
+          </div>
+          <div class="flex gap-1.5">
+            <button type="button" class="small-btn !py-1 !px-2 !text-[11px]" onclick="usarCajaDesdeRadar('${prov}', '${it.pue}', '${it.cod}')">Usar</button>
+            <a href="${mapsUrl}" target="_blank" class="small-btn !py-1 !px-2 !text-[11px] !bg-emerald-600/80 !border-none !text-white">🗺️ Ir</a>
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  // ==================== PESTAÑAS, ZOOM Y SELECTOR DE PUEBLOS ====================
   function cambiarTab(tab) {
     document.getElementById("vistaRafaga").style.display = tab === "rafaga" ? "block" : "none";
     document.getElementById("vistaEstado").style.display = tab === "estado" ? "block" : "none";
@@ -1067,15 +2148,15 @@
     document.getElementById("zoomImg").src = src;
     document.getElementById("zoomModal").style.display = "flex";
   }
+
   function cerrarZoom() {
     document.getElementById("zoomModal").style.display = "none";
   }
+
   function cerrarFlotantes() {
     document.querySelectorAll(".dots-menu, .custom-dd-menu").forEach(m => m.style.display = "none");
   }
 
-  // === PEGAR AQUÍ LA PARTE 2 ===
-  // --- SELECTOR PROVINCIA ➔ PUEBLO ---
   function abrirMenuPueblo(ev, menuId, modo, bloqueId) {
     ev.stopPropagation();
     const menu = document.getElementById(menuId);
@@ -1088,10 +2169,10 @@
 
   function mostrarProvinciasEnMenu(menuId, modo, bloqueId) {
     const menu = document.getElementById(menuId);
-    menu.innerHTML = `<div style="padding:7px 12px; font-size:10.5px; color:var(--muted); background:#080c14;">Provincia</div>` +
+    menu.innerHTML = `<div class="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Provincia</div>` +
       ["Almería", "Granada", "Murcia"].map(prov => `
         <div class="dd-item" onclick="mostrarPueblosDeProvinciaEnMenu(event, '${menuId}', '${prov}', '${modo}', '${bloqueId || ''}')">
-          <span>${prov}</span> <span style="color:var(--accent);">›</span>
+          <span>${prov}</span> <span class="text-sky-400">›</span>
         </div>
       `).join("");
   }
@@ -1106,7 +2187,7 @@
       </div>` +
       pueblos.map(pue => `
         <div class="dd-item" onclick="seleccionarPuebloEnMenu(event, '${menuId}', '${provincia}', '${pue}', '${modo}', '${bloqueId || ''}')">
-          <span>${pue} &nbsp;<small style="color:var(--muted);">(${obtenerPrefijoPueblo(pue)})</small></span>
+          <span>${pue} &nbsp;<small class="text-zinc-500 font-mono">(${obtenerPrefijoPueblo(pue)})</small></span>
         </div>
       `).join("");
   }
@@ -1122,8 +2203,9 @@
         b.pueblo = pueblo;
         gpsDispositivo.provincia = provincia;
         gpsDispositivo.pueblo = pueblo;
-        precargarRegistroYDwgSilencioso(provincia, pueblo);
+        precargarRegistroSilencioso(provincia, pueblo);
         renderTarjetas();
+        await persistirSesionActiva();
         verificarDuplicadosEnSegundoPlano();
       }
     } else if (modo === "ESTADO_RED") {
@@ -1138,7 +2220,7 @@
     }
   }
 
-  // --- BOTONES SUPERIORES EN VERDE ---
+  // ==================== BOTONES SUPERIORES VERDE DINÁMICO ====================
   function actualizarBotonesSuperioresVerde() {
     const ultimo = bloquesCajas[bloquesCajas.length - 1];
     const vistasLocales = new Set();
@@ -1190,7 +2272,7 @@
     actualizarBotonesSuperioresVerde();
   }
 
-  // --- 1. CAPTURA DE CAMPO + OCR 800PX DOBLE VÍA + CRUCE DICCIONARIO GPS ---
+  // ==================== CAPTURA + BLOBS + DETECTOR BORROSO + OCR DIRECTO (4s) ====================
   function dispararCamaraConVista(vista) {
     vistaCamaraPendiente = vista;
     document.getElementById("camInput").click();
@@ -1227,6 +2309,7 @@
       fAb.usarParaPotencia = true;
       vibrarTick(15);
       renderTarjetas();
+      persistirSesionActiva();
       guardarEstadoEnHistorialDB("Auto-guardado");
     } else if (opcion === "USAR_CERRADA") {
       const fCe = ultimoBloque.fotos.find(f => f.vista === "Cerrada");
@@ -1235,11 +2318,13 @@
       fCe.usarParaPotencia = true;
       vibrarTick(15);
       renderTarjetas();
+      persistirSesionActiva();
       guardarEstadoEnHistorialDB("Auto-guardado");
     } else if (opcion === "SIN_POTENCIA") {
       ultimoBloque.fotos.forEach(f => f.usarParaPotencia = false);
       vibrarTick(15);
       renderTarjetas();
+      persistirSesionActiva();
     }
   }
 
@@ -1266,42 +2351,99 @@
     ]);
   }
 
-  function comprimirRapidoPorUrl(file, maxW, quality) {
+  function calcularNitidezCanvas(canvas) {
+    try {
+      const w = 160;
+      const h = Math.max(80, Math.round((canvas.height / canvas.width) * w));
+      const tmp = document.createElement("canvas");
+      tmp.width = w;
+      tmp.height = h;
+      const ctx = tmp.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(canvas, 0, 0, w, h);
+      const data = ctx.getImageData(0, 0, w, h).data;
+
+      const gray = new Float32Array(w * h);
+      for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+        gray[j] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+      }
+
+      let sum = 0, sumSq = 0, count = 0;
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          const idx = y * w + x;
+          const lap = (4 * gray[idx]) - gray[idx - 1] - gray[idx + 1] - gray[idx - w] - gray[idx + w];
+          sum += lap;
+          sumSq += lap * lap;
+          count++;
+        }
+      }
+      const mean = sum / count;
+      return (sumSq / count) - (mean * mean);
+    } catch (e) {
+      return 999;
+    }
+  }
+
+  function procesarImagenABlobsYMetrica(file) {
     return new Promise(resolve => {
       const objUrl = URL.createObjectURL(file);
       const img = new Image();
       img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const scale = img.width > maxW ? maxW / img.width : 1;
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        const cDrive = document.createElement("canvas");
+        const scaleD = img.width > 1600 ? 1600 / img.width : 1;
+        cDrive.width = Math.round(img.width * scaleD);
+        cDrive.height = Math.round(img.height * scaleD);
+        cDrive.getContext("2d").drawImage(img, 0, 0, cDrive.width, cDrive.height);
+
+        const cOcr = document.createElement("canvas");
+        const scaleO = img.width > 800 ? 800 / img.width : 1;
+        cOcr.width = Math.round(img.width * scaleO);
+        cOcr.height = Math.round(img.height * scaleO);
+        const ctxOcr = cOcr.getContext("2d");
+        ctxOcr.filter = "contrast(1.12)";
+        ctxOcr.drawImage(img, 0, 0, cOcr.width, cOcr.height);
+
+        const varianzaNitidez = calcularNitidezCanvas(cOcr);
         URL.revokeObjectURL(objUrl);
-        resolve(canvas.toDataURL("image/jpeg", quality));
+
+        cDrive.toBlob(blobDrive => {
+          cOcr.toBlob(blobOcr => {
+            resolve({
+              blobDrive,
+              blobOcr,
+              borrosa: varianzaNitidez < 52
+            });
+          }, "image/jpeg", 0.76);
+        }, "image/jpeg", 0.82);
       };
-      img.onerror = () => { URL.revokeObjectURL(objUrl); resolve(""); };
+      img.onerror = () => {
+        URL.revokeObjectURL(objUrl);
+        resolve({ blobDrive: null, blobOcr: null, borrosa: false });
+      };
       img.src = objUrl;
     });
   }
 
   async function archivosSeleccionados(e, origen) {
-    const files = Array.from(e.target.files);
+    const files = Array.from(e.target.files || []).filter(f => !f.type || f.type.startsWith("image/"));
     if (!files.length) return;
     e.target.value = "";
     document.getElementById("msgEstado").innerHTML = "";
+    const esGaleria = (origen === "GALERIA" || origen === "GALERIA_GPS");
 
-    const nuevasFotos = await Promise.all(files.map(async file => {
+    const nuevasFotos = [];
+    for (const file of files) {
       let lat = gpsDispositivo.lat;
       let lng = gpsDispositivo.lng;
       let provincia = gpsDispositivo.provincia || "Murcia";
       let pueblo = gpsDispositivo.pueblo || "Águilas";
       let timestamp = file.lastModified || Date.now();
 
-      const [exifData, imgDrive, imgOcr] = await Promise.all([
+      const [exifData, proc] = await Promise.all([
         extraerExifRapido(file),
-        comprimirRapidoPorUrl(file, 1600, 0.82),
-        comprimirRapidoPorUrl(file, 800, 0.76)
+        procesarImagenABlobsYMetrica(file)
       ]);
+      if (!proc.blobDrive) continue;
 
       if (exifData.timestamp) timestamp = exifData.timestamp;
       if (exifData.gps && exifData.gps.latitude && exifData.gps.longitude) {
@@ -1311,24 +2453,28 @@
         if (loc) {
           provincia = loc.provincia;
           pueblo = loc.pueblo;
-          gpsDispositivo = { lat, lng, provincia, pueblo };
         }
       }
 
-      return {
-        id: "f_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7),
-        preview: imgDrive,
-        base64: imgDrive.split(",")[1],
-        base64Ocr: imgOcr.split(",")[1],
+      const id = "f_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
+      await dbPutBlob(id, proc.blobDrive, proc.blobOcr);
+      const preview = obtenerUrlPreviewDeBlob(id, proc.blobDrive);
+
+      nuevasFotos.push({
+        id,
+        blobId: id,
+        preview,
         lat, lng, timestamp,
         provincia, pueblo,
-        vista: origen === "CAMARA" ? vistaCamaraPendiente : "Abierta",
+        vista: esGaleria ? "Abierta" : vistaCamaraPendiente,
         usarParaPotencia: false,
         ocrEstado: "pendiente",
+        ocrError: "",
+        borrosa: proc.borrosa,
         duplicadoInfo: null,
         modoDuplicado: "sustituir"
-      };
-    }));
+      });
+    }
 
     nuevasFotos.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
@@ -1338,7 +2484,7 @@
 
       if (!bloqueDestino) {
         crearNuevoBloque = true;
-      } else if (origen === "GALERIA" && !modoCompletando) {
+      } else if (esGaleria && !modoCompletando) {
         const ultimaFoto = bloqueDestino.fotos[bloqueDestino.fotos.length - 1];
         if (ultimaFoto) {
           const difMinutos = Math.abs((foto.timestamp || 0) - (ultimaFoto.timestamp || 0)) / 60000;
@@ -1353,28 +2499,27 @@
       }
 
       if (crearNuevoBloque) {
-        const nuevoId = "b_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6);
         bloqueDestino = {
-          id: nuevoId,
+          id: "b_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
           provincia: foto.provincia || "Murcia",
           pueblo: foto.pueblo || "Águilas",
           tipo: modoCompletando ? modoCompletando.tipo : "CTO",
           numNodo: modoCompletando ? modoCompletando.numNodo : Math.max(1, ultimoNodoFijo),
           numCaja: modoCompletando ? modoCompletando.numCaja : 1,
           bloqueadoPorCompletar: Boolean(modoCompletando),
+          editadoManualmente: false,
           codigoYaDetectadoPorOcr: false,
           fotos: []
         };
         bloquesCajas.push(bloqueDestino);
       }
 
-      if (origen === "GALERIA") {
+      if (esGaleria) {
         const vistasDrive = (modoCompletando && modoCompletando.vistasEnDrive) ? modoCompletando.vistasEnDrive : {};
         const ocupadas = bloqueDestino.fotos.map(x => x.vista);
-        const libre = ORDEN_VISTAS_CTO.find(v => !ocupadas.includes(v) && !vistasDrive[v])
+        foto.vista = ORDEN_VISTAS_CTO.find(v => !ocupadas.includes(v) && !vistasDrive[v])
           || ORDEN_VISTAS_CTO.find(v => !ocupadas.includes(v))
           || "Panorámica";
-        foto.vista = libre;
       } else {
         const idxExistente = bloqueDestino.fotos.findIndex(x => x.vista === foto.vista);
         if (idxExistente !== -1) bloqueDestino.fotos.splice(idxExistente, 1);
@@ -1386,21 +2531,38 @@
     renderTarjetas();
     await persistirSesionActiva();
     await guardarEstadoEnHistorialDB("Auto-guardado");
-    dispararOcrYCoordenadasEnParalelo();
+    dispararCruceGpsYOcrEnParalelo();
   }
 
-  function dispararOcrYCoordenadasEnParalelo() {
+  function dispararCruceGpsYOcrEnParalelo() {
     bloquesCajas.forEach(bloque => {
-      if (bloque.bloqueadoPorCompletar) {
+      if (bloque.bloqueadoPorCompletar || bloque.editadoManualmente) {
         bloque.fotos.forEach(f => f.ocrEstado = "listo");
         renderTarjetas();
         return;
       }
 
-      if (!bloque.codigoYaDetectadoPorOcr && bloque.fotos[0] && bloque.fotos[0].lat) {
-        sugerirCajaPorGpsEnSegundoPlano(bloque);
+      // 1º Cruce instantáneo en 0,01 s con diccionario GPS local (si OCR aún no ha confirmado)
+      const fotoConGps = bloque.fotos.find(f => f.lat && f.lng);
+      if (!bloque.codigoYaDetectadoPorOcr && fotoConGps) {
+        const masCercano = buscarElementosCercanosEnDiccionario(fotoConGps.lat, fotoConGps.lng, bloque.pueblo, 45, 1)[0];
+        if (masCercano) {
+          const desc = descomponerCodigoEnRuleta(masCercano.codigo);
+          if (desc) {
+            bloque.tipo = desc.tipo;
+            bloque.numNodo = desc.numNodo;
+            bloque.numCaja = desc.numCaja;
+            bloque.pueblo = masCercano.pueblo;
+            bloque.provincia = masCercano.provincia;
+            ultimoNodoFijo = desc.numNodo;
+            localStorage.setItem("ftth_last_nodo_num", String(ultimoNodoFijo));
+            vibrarTick(14);
+            renderTarjetas();
+          }
+        }
       }
 
+      // 2º Lectura OCR directa en paralelo (prioridad Cerrada -> Abierta -> resto)
       const pendientes = bloque.fotos.filter(f => f.ocrEstado === "pendiente");
       pendientes.sort((a, b) => {
         const peso = v => (v === "Cerrada" ? 1 : v === "Abierta" ? 2 : 3);
@@ -1409,17 +2571,26 @@
 
       pendientes.forEach(async foto => {
         foto.ocrEstado = "leyendo";
+        foto.ocrError = "";
         renderTarjetas();
 
-        const infoLeida = await leerCodigoOcrDobleVia(foto.base64Ocr);
+        const rec = await dbGetBlob(foto.blobId || foto.id);
+        if (!rec || (!rec.blobOcr && !rec.blobDrive)) {
+          foto.ocrEstado = "listo";
+          renderTarjetas();
+          return;
+        }
+        const b64Ocr = await blobABase64Puro(rec.blobOcr || rec.blobDrive);
+        const resOcr = await leerCodigoOcrDirecto(b64Ocr);
         foto.ocrEstado = "listo";
+        foto.ocrError = resOcr.errorCorto || "";
 
-        if (infoLeida && !bloque.bloqueadoPorCompletar) {
-          bloque.tipo = infoLeida.tipo;
-          bloque.numNodo = infoLeida.numNodo;
-          bloque.numCaja = infoLeida.numCaja;
+        if (resOcr.info && !bloque.bloqueadoPorCompletar && !bloque.editadoManualmente) {
+          bloque.tipo = resOcr.info.tipo;
+          bloque.numNodo = resOcr.info.numNodo;
+          bloque.numCaja = resOcr.info.numCaja;
           bloque.codigoYaDetectadoPorOcr = true;
-          ultimoNodoFijo = infoLeida.numNodo;
+          ultimoNodoFijo = resOcr.info.numNodo;
           localStorage.setItem("ftth_last_nodo_num", String(ultimoNodoFijo));
           vibrarTick(25);
           await persistirSesionActiva();
@@ -1432,119 +2603,83 @@
     verificarDuplicadosEnSegundoPlano();
   }
 
-  async function sugerirCajaPorGpsEnSegundoPlano(bloque) {
-    const key = `${bloque.provincia}|${bloque.pueblo}`;
-    if (!cacheCoordenadasPorPueblo[key]) {
-      try {
-        const r = await fetch(`${obtenerEndpoint()}?action=getDiccionarioGps&pueblo=${encodeURIComponent(bloque.pueblo)}`, { redirect: "follow" });
-        const d = await r.json();
-        cacheCoordenadasPorPueblo[key] = d.coordenadas || {};
-      } catch (e) {}
-    }
-    const mapaGps = cacheCoordenadasPorPueblo[key] || {};
-    const f0 = bloque.fotos[0];
-    if (!f0 || !f0.lat || !f0.lng) return;
-
-    let mejorCod = null;
-    let menorDist = 45;
-    Object.keys(mapaGps).forEach(cod => {
-      const item = mapaGps[cod];
-      if (item.lat && item.lng) {
-        const dist = distanciaMetros(f0.lat, f0.lng, item.lat, item.lng);
-        if (dist < menorDist) {
-          menorDist = dist;
-          mejorCod = cod;
-        }
-      }
-    });
-
-    if (mejorCod && !bloque.codigoYaDetectadoPorOcr) {
-      const desc = descomponerCodigoEnRuleta(mejorCod);
-      if (desc) {
-        bloque.tipo = desc.tipo;
-        bloque.numNodo = desc.numNodo;
-        bloque.numCaja = desc.numCaja;
-        ultimoNodoFijo = desc.numNodo;
-        localStorage.setItem("ftth_last_nodo_num", String(ultimoNodoFijo));
-        vibrarTick(15);
-        renderTarjetas();
-      }
-    }
-  }
-
-  async function leerCodigoOcrDobleVia(base64Ocr) {
-    const prompt = `Lee la etiqueta o rotulación FTTH de esta caja (ejemplos: "17-37", "01-08", "E-17-01", "N-17"). Responde únicamente en JSON con el código leído: {"codigo":"17-37"}`;
+  async function leerCodigoOcrDirecto(base64Ocr) {
+    const hintEl = document.getElementById("ocrStatusHint");
+    const prompt = `Lee la etiqueta o rotulación FTTH de esta caja (ejemplos: "17-37", "01-08", "E-17-01", "N-17"). Responde únicamente en JSON con el código leído o vacío si no se ve: {"codigo":"17-37"}`;
     const parts = [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64Ocr } }];
-    const claves = obtenerClavesActivas();
-    const modelos = [
-      "models/gemini-2.5-flash",
-      "models/gemini-3.8-flash",
-      "models/gemini-2.0-flash",
-      "models/gemini-1.5-flash"
-    ];
+    let ultimoError = "";
 
-    for (let i = 0; i < claves.length; i++) {
-      const apiKey = claves[(indiceTurnoClave + i) % claves.length];
-      for (const mod of modelos) {
-        const skipTag = `skip_${apiKey.slice(-6)}_${mod}`;
-        if (Date.now() < Number(sessionStorage.getItem(skipTag) || 0)) continue;
+    if (apiKeyOcrActiva) {
+      for (const mod of MODELOS_OCR_VERIFICADOS) {
+        const skipKey = `skip_ocr_${mod}`;
+        if (Date.now() < Number(sessionStorage.getItem(skipKey) || 0)) continue;
+
+        const t0 = performance.now();
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 4000);
+
         try {
-          const genConfig = { temperature: 0.0, responseMimeType: "application/json" };
-          if (mod.includes("2.5") || mod.includes("3.8")) {
-            genConfig.thinkingConfig = { thinkingBudget: 0 };
-          }
+          const genConfig = {
+            temperature: 0.0,
+            responseMimeType: "application/json",
+            thinkingConfig: { thinkingBudget: 0 }
+          };
 
-          let r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${mod}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+          let r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${mod}:generateContent`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents: [{ parts }], generationConfig: genConfig })
+            headers: {
+              "Content-Type": "application/json",
+              "x-goog-api-key": apiKeyOcrActiva
+            },
+            body: JSON.stringify({ contents: [{ parts }], generationConfig: genConfig }),
+            signal: ctrl.signal
           });
 
-          if (r.status === 400 && genConfig.thinkingConfig) {
+          if (r.status === 400) {
             delete genConfig.thinkingConfig;
-            r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${mod}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+            r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${mod}:generateContent`, {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ contents: [{ parts }], generationConfig: genConfig })
+              headers: {
+                "Content-Type": "application/json",
+                "x-goog-api-key": apiKeyOcrActiva
+              },
+              body: JSON.stringify({ contents: [{ parts }], generationConfig: genConfig }),
+              signal: ctrl.signal
             });
           }
 
+          clearTimeout(timer);
+          const ms = Math.round(performance.now() - t0);
+
           if (r.ok) {
-            indiceTurnoClave = (indiceTurnoClave + i + 1) % claves.length;
             const d = await r.json();
-            const raw = d.candidates[0].content.parts[0].text.replace(/```json|```/g, "").trim();
+            const raw = (((d.candidates || [])[0] || {}).content?.parts?.[0]?.text || "").replace(/```json|```/g, "").trim();
             let textoCod = raw;
-            try {
-              const parsed = JSON.parse(raw);
-              textoCod = parsed.codigo || raw;
-            } catch (eJ) {}
-            const resDesc = descomponerCodigoEnRuleta(textoCod);
-            if (resDesc) return resDesc;
-            return null;
+            try { textoCod = JSON.parse(raw).codigo || raw; } catch (eJ) {}
+            const info = descomponerCodigoEnRuleta(textoCod);
+            if (hintEl) {
+              hintEl.style.color = info ? "#34d399" : "#a1a1aa";
+              hintEl.innerText = info ? `OCR ${info.codigo} · ${ms}ms` : `OCR sin etiqueta · ${ms}ms`;
+            }
+            return { info, errorCorto: "" };
           }
+
           if (r.status === 429 || r.status === 404) {
-            sessionStorage.setItem(skipTag, String(Date.now() + 600000));
+            sessionStorage.setItem(skipKey, String(Date.now() + 300000));
           }
-        } catch (e) {}
+          ultimoError = `HTTP ${r.status}`;
+        } catch (err) {
+          clearTimeout(timer);
+          ultimoError = err.name === "AbortError" ? "Timeout 4s" : "Sin red";
+        }
       }
     }
 
-    const ep = obtenerEndpoint();
-    if (ep.startsWith("http")) {
-      try {
-        const resp = await fetch(ep, {
-          method: "POST",
-          redirect: "follow",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "ocrDigitos", base64: base64Ocr })
-        });
-        const d = await resp.json();
-        if (d && d.info) {
-          return descomponerCodigoEnRuleta(d.info.codigo);
-        }
-      } catch (e) {}
+    if (hintEl && ultimoError) {
+      hintEl.style.color = "#fbbf24";
+      hintEl.innerText = `OCR ${ultimoError}`;
     }
-    return null;
+    return { info: null, errorCorto: ultimoError };
   }
 
   // ==================== RENDERIZADO DE TARJETAS Y MOVIMIENTO ENTRE CAJAS ====================
@@ -1612,27 +2747,33 @@
             </button>`;
         }
 
-        let badgeOcr = f.ocrEstado === "leyendo" ? `<span class="ocr-badge">🔍 Leyendo...</span>` : "";
+        let badgeOcr = "";
+        if (f.ocrEstado === "leyendo") badgeOcr = `<span class="ocr-badge">🔍 Leyendo...</span>`;
+        else if (f.ocrError) badgeOcr = `<span class="ocr-badge err">⚠️ ${f.ocrError}</span>`;
+
+        const mostrarAvisoBorrosa = f.borrosa && (f.vista === "Abierta" || f.vista === "Potencia");
+        const badgeBorrosa = mostrarAvisoBorrosa ? `<span class="blur-badge">⚠️ Posible desenfoque</span>` : "";
 
         let dupHtml = "";
         if (f.duplicadoInfo && f.duplicadoInfo.existe) {
           dupHtml = `
             <div class="dup-box">
-              <div style="color:#fca5a5; margin-bottom:4px;">Ya existe en Drive</div>
-              <div style="display:flex; gap:4px;">
+              <div class="text-red-300 font-semibold mb-1">Ya existe en Drive</div>
+              <div class="flex gap-1.5">
                 <button class="small-btn" onclick="verFotoGuardadaEnDrive('${f.duplicadoInfo.fileId}')">👁️ Ver</button>
                 <button class="small-btn" style="border-color:${f.modoDuplicado === 'sustituir' ? '#f59e0b' : 'transparent'};" onclick="cambiarModoDuplicado('${b.id}', '${f.id}', 'sustituir')">Sustituir</button>
-                <button class="small-btn" style="color:#f87171;" onclick="descartarFotoDeBloque('${b.id}', '${f.id}')">✕</button>
+                <button class="small-btn !text-red-400" onclick="descartarFotoDeBloque('${b.id}', '${f.id}')">✕</button>
               </div>
             </div>`;
         }
 
         return `
-          <div class="thumb-card">
+          <div class="thumb-card ${mostrarAvisoBorrosa ? 'blurry-warn' : ''}">
             ${badgeOcr}
+            ${badgeBorrosa}
             <button class="del-btn" onclick="borrarFotoDeBloque('${b.id}', '${f.id}')">✕</button>
             <img src="${f.preview}" onclick="abrirZoom('${f.preview}')" />
-            <select onchange="cambiarVistaOMoverEntreCajas('${b.id}', '${f.id}', this.value)" style="margin-top:6px;">
+            <select onchange="cambiarVistaOMoverEntreCajas('${b.id}', '${f.id}', this.value)" class="mt-2">
               ${optsVista}
             </select>
             ${btnUsarPotenciaHtml}
@@ -1645,10 +2786,10 @@
           <div class="element-header">
             <button type="button" class="element-title-btn ${estaRuletaAbierta ? 'open' : ''}" onclick="toggleRuletaBloque('${b.id}')">
               <span id="lblTitulo_${b.id}">${infoNombre.tituloHtml}</span>
-              <span style="font-size:11px; color:var(--muted); margin-left:6px;">${estaRuletaAbierta ? '▴' : '▾'}</span>
+              <span class="text-[11px] text-zinc-400 ml-2">${estaRuletaAbierta ? '▴' : '▾'}</span>
             </button>
 
-            <div style="position:relative;">
+            <div class="relative">
               <button type="button" class="pueblo-pill" onclick="abrirMenuPueblo(event, '${menuPuebloId}', 'BLOQUE_CAPTURA', '${b.id}')">
                 📍 ${b.pueblo || 'Elegir'} ▾
               </button>
@@ -1714,9 +2855,9 @@
     if (b.tipo === "CTO" && !tienePotencia) faltan.push("potencia");
     if (b.tipo === "CTO" && !tienePanoramica) faltan.push("panorámica");
 
-    if (faltan.length === 0) return `<div class="status-line ok">● (${codigoMostrado}) Completo</div>`;
+    if (faltan.length === 0) return `<div class="status-line ok">● (<span class="font-mono">${codigoMostrado}</span>) Completo</div>`;
     const listaTexto = faltan.length > 1 ? faltan.slice(0, -1).join(", ") + " y " + faltan[faltan.length - 1] : faltan[0];
-    return `<div class="status-line warn">● (${codigoMostrado}) Falta ${listaTexto}</div>`;
+    return `<div class="status-line warn">● (<span class="font-mono">${codigoMostrado}</span>) Falta ${listaTexto}</div>`;
   }
 
   let timersScrollRuleta = {};
@@ -1765,6 +2906,7 @@
       }
 
       if (cambio) {
+        b.editadoManualmente = true;
         vibrarTick(10);
         actualizarCabeceraYEstilosRuletaSinReconstruir(b);
         actualizarBotonesSuperioresVerde();
@@ -1784,6 +2926,7 @@
       localStorage.setItem("ftth_last_nodo_num", String(ultimoNodoFijo));
     }
     if (campo === "caja") b.numCaja = Math.max(1, Number(valor));
+    b.editadoManualmente = true;
     vibrarTick(12);
     renderTarjetas();
     persistirSesionActiva();
@@ -1834,15 +2977,15 @@
 
     if (valorSeleccionado === "__SEPARAR__") {
       b.fotos = b.fotos.filter(f => f.id !== fotoId);
-      const nuevoId = "b_" + Date.now();
       bloquesCajas.push({
-        id: nuevoId,
+        id: "b_" + Date.now(),
         provincia: b.provincia,
         pueblo: b.pueblo,
         tipo: b.tipo,
         numNodo: b.numNodo,
         numCaja: b.numCaja,
         bloqueadoPorCompletar: false,
+        editadoManualmente: false,
         codigoYaDetectadoPorOcr: false,
         fotos: [fotoActual]
       });
@@ -1906,9 +3049,7 @@
   }
 
   async function verificarDuplicadosEnSegundoPlano() {
-    const ep = obtenerEndpoint();
-    if (!ep.startsWith("http")) return;
-
+    if (!pinActivo) return;
     const consultas = [];
     bloquesCajas.forEach(b => {
       const info = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
@@ -1928,13 +3069,14 @@
 
     if (consultas.length === 0) return;
     try {
-      const resp = await fetch(ep, {
+      const resp = await fetch(obtenerEndpoint(), {
         method: "POST",
         redirect: "follow",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "verificarDuplicados", consultas })
+        body: JSON.stringify({ pin: pinActivo, action: "verificarDuplicados", consultas })
       });
       const d = await resp.json();
+      if (d.error === "PIN_INVALIDO") return cerrarSesionPin();
       const dups = d.duplicados || {};
       let huboCambio = false;
       bloquesCajas.forEach(b => {
@@ -1955,7 +3097,7 @@
     document.getElementById("txtNombreDriveModal").innerText = "Cargando desde Drive...";
     document.getElementById("verDriveModal").style.display = "flex";
     try {
-      const r = await fetch(`${obtenerEndpoint()}?action=getFotoIndividual&fileId=${encodeURIComponent(fileIdDrive)}`, { redirect: "follow" });
+      const r = await fetch(`${obtenerEndpoint()}?action=getFotoIndividual&pin=${encodeURIComponent(pinActivo)}&fileId=${encodeURIComponent(fileIdDrive)}`, { redirect: "follow" });
       const d = await r.json();
       if (d.base64) {
         document.getElementById("imgDriveExistenteModal").src = d.base64;
@@ -1965,7 +3107,7 @@
     } catch (e) {}
   }
 
-  // ==================== SUBIDA A DRIVE + COLA ANTICAÍDAS DE COBERTURA ====================
+  // ==================== SUBIDA FOTO A FOTO + BARRA PROGRESO + WAKE LOCK + COLA OFFLINE ====================
   async function verificarColaSubidaOffline() {
     const cola = await dbGet("cola_offline");
     const banner = document.getElementById("bannerColaOffline");
@@ -1978,17 +3120,22 @@
   }
 
   async function reintentarSubidaPendienteOffline() {
+    if (subiendoActualmente) return;
     const cola = await dbGet("cola_offline");
     if (!cola || cola.length === 0) return;
-    await enviarItemsADriveConRespaldoOffline(cola, true);
+    await enviarColaFotoAFoto(cola, true);
   }
 
   async function subirTodoADrive() {
-    const itemsSubida = [];
+    if (subiendoActualmente) return;
+    if (!pinActivo) return mostrarModalPin();
+
+    const colaEnvio = [];
     bloquesCajas.forEach(b => {
       const info = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
       b.fotos.forEach(f => {
-        itemsSubida.push({
+        colaEnvio.push({
+          blobId: f.blobId || f.id,
           provincia: b.provincia,
           pueblo: b.pueblo,
           nodo: info.nodo,
@@ -1997,100 +3144,169 @@
           usarParaPotencia: Boolean(f.usarParaPotencia),
           modoDuplicado: f.modoDuplicado || "sustituir",
           lat: f.lat,
-          lng: f.lng,
-          base64: f.base64
+          lng: f.lng
         });
       });
     });
 
-    if (itemsSubida.length === 0) return;
+    if (colaEnvio.length === 0) return;
     await guardarEstadoEnHistorialDB("Subida a Drive");
-    await enviarItemsADriveConRespaldoOffline(itemsSubida, false);
+    await enviarColaFotoAFoto(colaEnvio, false);
   }
 
-  async function enviarItemsADriveConRespaldoOffline(itemsSubida, vieneDeColaOffline) {
+  async function enviarColaFotoAFoto(colaItems, vieneDeColaOffline) {
+    subiendoActualmente = true;
+    const btn = document.getElementById("btnSubirTodas");
     const msg = document.getElementById("msgEstado");
-    msg.style.color = "var(--accent)";
-    msg.innerText = "🚀 Subiendo a Google Drive...";
+    const boxProg = document.getElementById("barraProgresoSubida");
+    const txtProg = document.getElementById("textoProgresoSubida");
+    const pctProg = document.getElementById("pctProgresoSubida");
+    const fillProg = document.getElementById("fillProgresoSubida");
+
+    btn.disabled = true;
+    msg.innerHTML = "";
+    boxProg.style.display = "block";
+    fillProg.style.width = "4%";
+
+    let wakeLockSentinel = null;
+    try {
+      if ("wakeLock" in navigator) wakeLockSentinel = await navigator.wakeLock.request("screen");
+    } catch (e) {}
+
+    const subidosOk = [];
+    const pendientesFallidos = [];
+    const total = colaItems.length;
 
     try {
-      const resp = await fetch(obtenerEndpoint(), {
-        method: "POST",
-        redirect: "follow",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "confirmarSubidaLote", items: itemsSubida })
-      });
-      const res = await resp.json();
-      if (res.error) throw new Error(res.error);
+      for (let i = 0; i < total; i++) {
+        const it = colaItems[i];
+        const pct = Math.round((i / total) * 100);
+        txtProg.innerText = `Subiendo foto ${i + 1} de ${total} (${it.codigo} ${it.vista})...`;
+        pctProg.innerText = `${pct}%`;
+        fillProg.style.width = `${Math.max(8, pct)}%`;
 
-      vibrarTick(180);
+        const recBlob = await dbGetBlob(it.blobId);
+        if (!recBlob || !recBlob.blobDrive) continue;
+        const base64 = await blobABase64Puro(recBlob.blobDrive);
 
-      if (vieneDeColaOffline) {
-        await dbSet("cola_offline", []);
-        await verificarColaSubidaOffline();
-      } else {
-        bloquesCajas = [];
-        ruletaAbiertaId = null;
-        modoCompletando = null;
-        document.getElementById("bannerCompletandoCaja").style.display = "none";
-        renderTarjetas();
-        await persistirSesionActiva();
+        const esUltimaDelPueblo = (i === total - 1) || (colaItems[i + 1].pueblo !== it.pueblo);
+
+        try {
+          const resp = await fetch(obtenerEndpoint(), {
+            method: "POST",
+            redirect: "follow",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              pin: pinActivo,
+              action: "subirFotoIndividual",
+              provincia: it.provincia,
+              pueblo: it.pueblo,
+              nodo: it.nodo,
+              codigo: it.codigo,
+              vista: it.vista,
+              usarParaPotencia: it.usarParaPotencia,
+              modoDuplicado: it.modoDuplicado,
+              lat: it.lat,
+              lng: it.lng,
+              base64,
+              actualizarIndice: esUltimaDelPueblo
+            })
+          });
+          const res = await resp.json();
+          if (res.error === "PIN_INVALIDO") {
+            cerrarSesionPin();
+            pendientesFallidos.push(...colaItems.slice(i));
+            break;
+          }
+          if (res.error) throw new Error(res.error);
+          subidosOk.push(res);
+        } catch (errFoto) {
+          pendientesFallidos.push(...colaItems.slice(i));
+          break;
+        }
       }
 
-      const linksHtml = (res.resultados || []).map(r =>
-        `<div style="margin-top:8px; background:rgba(16,185,129,0.12); padding:10px; border-radius:12px; border:1px solid rgba(16,185,129,0.35); font-size:12px;">` +
-        `✓ Guardado en <b>${r.pueblo} / ${r.nodo}</b>: ${r.archivos.join(", ")} ` +
-        `<a href="${r.folderUrl}" target="_blank" style="color:var(--accent); margin-left:6px; text-decoration:none;">Abrir Nodo ↗</a></div>`
-      ).join("");
+      if (pendientesFallidos.length === 0) {
+        pctProg.innerText = "100%";
+        fillProg.style.width = "100%";
+        vibrarTick(180);
 
-      precargarRegistroYDwgSilencioso(itemsSubida[0].provincia, itemsSubida[0].pueblo);
-      msg.innerHTML = linksHtml;
-    } catch (err) {
-      await dbSet("cola_offline", itemsSubida);
-      await verificarColaSubidaOffline();
-      msg.style.color = "#fbbf24";
-      msg.innerText = "⚠️ Sin cobertura: el lote se ha guardado en la cola segura de arriba para reintentar.";
+        if (vieneDeColaOffline) {
+          await dbSet("cola_offline", []);
+          await verificarColaSubidaOffline();
+        } else {
+          bloquesCajas = [];
+          ruletaAbiertaId = null;
+          modoCompletando = null;
+          document.getElementById("bannerCompletandoCaja").style.display = "none";
+          renderTarjetas();
+          await persistirSesionActiva();
+        }
+
+        // Agrupar links de confirmación por Pueblo / Nodo
+        const porNodo = {};
+        subidosOk.forEach(r => {
+          const k = `${r.pueblo}|${r.nodo}`;
+          if (!porNodo[k]) porNodo[k] = { pueblo: r.pueblo, nodo: r.nodo, folderUrl: r.folderUrl, archivos: [] };
+          porNodo[k].archivos.push(r.archivo);
+        });
+
+        msg.innerHTML = Object.values(porNodo).map(r =>
+          `<div class="mt-2 bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/35 text-[12px] text-zinc-100">` +
+          `<span class="text-emerald-400 font-bold">✓</span> Guardado en <b>${r.pueblo} / ${r.nodo}</b>: ` +
+          `<span class="font-mono text-zinc-300">${r.archivos.join(", ")}</span> ` +
+          `<a href="${r.folderUrl}" target="_blank" class="text-sky-400 font-semibold ml-1.5 hover:underline">Abrir Nodo ↗</a></div>`
+        ).join("");
+
+        if (colaItems[0]) precargarRegistroSilencioso(colaItems[0].provincia, colaItems[0].pueblo);
+      } else {
+        await dbSet("cola_offline", pendientesFallidos);
+        await verificarColaSubidaOffline();
+        if (!vieneDeColaOffline && subidosOk.length > 0) {
+          const idsPendientes = new Set(pendientesFallidos.map(x => x.blobId));
+          bloquesCajas.forEach(b => { b.fotos = b.fotos.filter(f => idsPendientes.has(f.blobId || f.id)); });
+          renderTarjetas();
+          await persistirSesionActiva();
+        }
+        msg.style.color = "#fbbf24";
+        msg.innerText = `⚠️ Cobertura perdida: subidas ${subidosOk.length}/${total}. Las ${pendientesFallidos.length} restantes quedan en la cola segura de arriba.`;
+      }
+    } finally {
+      if (wakeLockSentinel) { try { await wakeLockSentinel.release(); } catch (e) {} }
+      setTimeout(() => { boxProg.style.display = "none"; }, 900);
+      btn.disabled = false;
+      subiendoActualmente = false;
+      limpiarBlobsNoReferenciados();
     }
   }
 
-  // ==================== 2. PESTAÑA "REGISTRO DRIVE" LIMPIO POR NODOS ====================
-  async function precargarRegistroYDwgSilencioso(provincia, pueblo) {
-    const ep = obtenerEndpoint();
-    if (!ep.startsWith("http")) return;
+  // ==================== PESTAÑA 2: REGISTRO DRIVE LIMPIO POR NODOS ====================
+  async function precargarRegistroSilencioso(provincia, pueblo) {
+    if (!pinActivo || !pueblo) return;
     const key = `${provincia}|${pueblo}`;
 
     const guardadoLocal = localStorage.getItem(`ftth_reg_${key}`);
     if (guardadoLocal && !cacheRegistroPorPueblo[key]) {
-      try {
-        cacheRegistroPorPueblo[key] = JSON.parse(guardadoLocal);
-        cacheCoordenadasPorPueblo[key] = cacheRegistroPorPueblo[key].coordenadas || {};
-      } catch (e) {}
+      try { cacheRegistroPorPueblo[key] = JSON.parse(guardadoLocal); } catch (e) {}
     }
 
     try {
-      const r = await fetch(`${ep}?action=getRegistroDrive&provincia=${encodeURIComponent(provincia)}&pueblo=${encodeURIComponent(pueblo)}&forzar=0`, { redirect: "follow" });
+      const r = await fetch(`${obtenerEndpoint()}?action=getRegistroDrive&pin=${encodeURIComponent(pinActivo)}&provincia=${encodeURIComponent(provincia)}&pueblo=${encodeURIComponent(pueblo)}&forzar=0`, { redirect: "follow" });
       const d = await r.json();
+      if (d && d.error === "PIN_INVALIDO") return cerrarSesionPin();
       if (d && !d.error) {
         cacheRegistroPorPueblo[key] = d;
-        cacheCoordenadasPorPueblo[key] = d.coordenadas || {};
         localStorage.setItem(`ftth_reg_${key}`, JSON.stringify(d));
         if (seleccionPuebloEstado.provincia === provincia && seleccionPuebloEstado.pueblo === pueblo) {
           datosRegistroActual = d;
-          if (document.getElementById("vistaEstado").style.display !== "none") {
-            dibujarRegistroDrive();
-          }
-        }
-        if (d.planosPendientes && d.planosPendientes.length > 0 && !indexandoPlanosEnCurso) {
-          indexarPlanosDeCarpetaCentral(d.planosPendientes);
+          if (document.getElementById("vistaEstado").style.display !== "none") dibujarRegistroDrive();
         }
       }
     } catch (e) {}
   }
 
   async function cargarRegistroDrivePueblo(forzar) {
-    const ep = obtenerEndpoint();
-    if (!ep.startsWith("http")) return;
-
+    if (!pinActivo) return mostrarModalPin();
     const { provincia, pueblo } = seleccionPuebloEstado;
     const key = `${provincia}|${pueblo}`;
     const cont = document.getElementById("contenedorRegistroDrive");
@@ -2098,27 +3314,23 @@
     if (!forzar && cacheRegistroPorPueblo[key]) {
       datosRegistroActual = cacheRegistroPorPueblo[key];
       dibujarRegistroDrive();
-      precargarRegistroYDwgSilencioso(provincia, pueblo);
+      precargarRegistroSilencioso(provincia, pueblo);
       return;
     }
 
-    cont.innerHTML = `<div style="color:var(--muted); text-align:center; padding:18px; font-size:12.5px;">Sincronizando carpetas Nodo 01, Nodo 02... de ${pueblo}...</div>`;
+    cont.innerHTML = `<div class="text-zinc-400 text-center py-6 text-[12.5px]">Sincronizando carpetas Nodo 01, Nodo 02... de ${pueblo}...</div>`;
 
     try {
-      const r = await fetch(`${ep}?action=getRegistroDrive&provincia=${encodeURIComponent(provincia)}&pueblo=${encodeURIComponent(pueblo)}&forzar=${forzar ? '1' : '0'}`, { redirect: "follow" });
+      const r = await fetch(`${obtenerEndpoint()}?action=getRegistroDrive&pin=${encodeURIComponent(pinActivo)}&provincia=${encodeURIComponent(provincia)}&pueblo=${encodeURIComponent(pueblo)}&forzar=${forzar ? '1' : '0'}`, { redirect: "follow" });
       const d = await r.json();
+      if (d.error === "PIN_INVALIDO") return cerrarSesionPin();
       if (d.error) throw new Error(d.error);
       datosRegistroActual = d;
       cacheRegistroPorPueblo[key] = d;
-      cacheCoordenadasPorPueblo[key] = d.coordenadas || {};
       localStorage.setItem(`ftth_reg_${key}`, JSON.stringify(d));
       dibujarRegistroDrive();
-
-      if (d.planosPendientes && d.planosPendientes.length > 0 && !indexandoPlanosEnCurso) {
-        indexarPlanosDeCarpetaCentral(d.planosPendientes);
-      }
     } catch (e) {
-      cont.innerHTML = `<div style="color:var(--red); text-align:center; padding:18px; font-size:12px;">Error: ${e.message}</div>`;
+      cont.innerHTML = `<div class="text-red-400 text-center py-6 text-[12px]">Error: ${e.message}</div>`;
     }
   }
 
@@ -2152,14 +3364,14 @@
     });
 
     const listaNodos = Object.keys(gruposPorNodo).sort();
-    const totalGps = Object.keys((datosRegistroActual && datosRegistroActual.coordenadas) || {}).length;
+    const totalGps = Object.keys(obtenerMapaGpsPueblo(pueblo)).length;
     document.getElementById("resumenGlobalPueblo").innerText =
-      `Elementos en Drive: ${totalVerdes + totalNaranjas}  ·  🟢 Completos: ${totalVerdes}  ·  🟠 Incompletos: ${totalNaranjas}  ·  📍 ${totalGps} GPS del plano`;
+      `En Drive: ${totalVerdes + totalNaranjas}  ·  🟢 Completos: ${totalVerdes}  ·  🟠 Incompletos: ${totalNaranjas}  ·  📍 ${totalGps} GPS plano`;
 
     if (listaNodos.length === 0) {
       cont.innerHTML = `
-        <div class="box" style="text-align:center; padding:22px; color:var(--muted); font-size:12.5px;">
-          Aún no hay fotos subidas en las carpetas de Nodos de <b>${pueblo}</b>.
+        <div class="box text-center py-8 text-zinc-400 text-[13px]">
+          Aún no hay fotos subidas en las carpetas de Nodos de <b class="text-zinc-200">${pueblo}</b>.
         </div>`;
       return;
     }
@@ -2169,8 +3381,8 @@
       const incompletasNodo = cajas.filter(x => !x.completo).length;
       const abierto = nodosAbiertosRegistro.has(nName);
       const badgeNodo = incompletasNodo === 0
-        ? `<span style="color:var(--green-soft); font-size:11.5px; font-weight:600;">🟢 ${cajas.length} completos</span>`
-        : `<span style="color:var(--orange-soft); font-size:11.5px; font-weight:600;">🟠 ${incompletasNodo} incompleto(s) de ${cajas.length}</span>`;
+        ? `<span class="text-emerald-300 text-[11.5px] font-semibold bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-0.5 rounded-full">🟢 ${cajas.length} completos</span>`
+        : `<span class="text-amber-300 text-[11.5px] font-semibold bg-amber-500/10 border border-amber-500/25 px-2.5 py-0.5 rounded-full">🟠 ${incompletasNodo} incompleto(s) de ${cajas.length}</span>`;
 
       const cuerpoHtml = cajas.map(el => {
         const infoTit = construirCodigoYTitulo(el.desc.tipo, el.desc.numNodo, el.desc.numCaja, pueblo);
@@ -2181,30 +3393,30 @@
 
         const lineaVistasHtml = vistasReq.map(v => {
           const ok = Boolean(vMap[v]);
-          return `<span class="${ok ? 'v-in-drive' : 'v-missing-drive'}">${v} (${ok ? 'está en drive' : 'falta en drive'})</span>`;
+          return `<span class="${ok ? 'v-in-drive' : 'v-missing-drive'}">${v} (${ok ? 'en drive' : 'falta'})</span>`;
         }).join(" &nbsp;·&nbsp; ");
 
         const safeId = el.codigo.replace(/[^a-zA-Z0-9_-]/g, "_");
 
         return `
           <div class="drive-el-item">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-              <span style="font-size:13.5px; white-space:pre;">${el.completo ? '🟢' : '🟠'} ${infoTit.tituloHtml}</span>
-              <div style="display:flex; gap:6px;">
-                ${!el.completo ? `<button type="button" class="small-btn" style="background:var(--green-btn); border:none;" onclick="irACompletarCaja('${el.codigo}')">+ Subir</button>` : ""}
+            <div class="flex justify-between items-center gap-2">
+              <span class="text-[13.5px] whitespace-pre">${el.completo ? '🟢' : '🟠'} ${infoTit.tituloHtml}</span>
+              <div class="flex gap-1.5">
+                ${!el.completo ? `<button type="button" class="small-btn !bg-emerald-600 !border-none !text-white" onclick="irACompletarCaja('${el.codigo}')">+ Subir</button>` : ""}
                 <button type="button" class="small-btn" onclick="cargarMiniaturasInline('${el.folderId}', '${el.codigo}', 'gal_${safeId}')">🖼️ Fotos</button>
                 <a href="${el.folderUrl || '#'}" target="_blank" class="small-btn">Drive ↗</a>
               </div>
             </div>
-            <div style="font-size:11.5px; margin-top:6px; line-height:1.5;">${lineaVistasHtml}</div>
-            <div id="gal_${safeId}" class="thumbs" style="display:none; margin-top:8px;"></div>
+            <div class="text-[11.5px] mt-2 leading-relaxed">${lineaVistasHtml}</div>
+            <div id="gal_${safeId}" class="thumbs" style="display:none; margin-top:10px;"></div>
           </div>`;
       }).join("");
 
       return `
         <div class="drive-node-card">
           <div class="drive-node-header" onclick="toggleNodoRegistro('${nName}')">
-            <span style="font-size:14px; font-weight:700; color:#f8fafc;">${abierto ? '▾' : '▸'} &nbsp;${nName}</span>
+            <span class="text-[14px] font-bold text-zinc-100">${abierto ? '▾' : '▸'} &nbsp;${nName}</span>
             ${badgeNodo}
           </div>
           ${abierto ? `<div class="drive-node-body">${cuerpoHtml}</div>` : ""}
@@ -2217,12 +3429,12 @@
     if (!box) return;
     if (box.style.display === "grid") { box.style.display = "none"; return; }
     box.style.display = "grid";
-    box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--muted);">Cargando miniaturas de ${codigoActual}...</div>`;
+    box.innerHTML = `<div class="col-span-2 text-[11px] text-zinc-400">Cargando miniaturas de ${codigoActual}...</div>`;
     try {
-      const r = await fetch(`${obtenerEndpoint()}?action=getFotosElemento&folderId=${encodeURIComponent(folderId)}&codigo=${encodeURIComponent(codigoActual)}`, { redirect: "follow" });
+      const r = await fetch(`${obtenerEndpoint()}?action=getFotosElemento&pin=${encodeURIComponent(pinActivo)}&folderId=${encodeURIComponent(folderId)}&codigo=${encodeURIComponent(codigoActual)}`, { redirect: "follow" });
       const d = await r.json();
       if (!d.fotos || d.fotos.length === 0) {
-        box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--muted);">Sin imágenes para ${codigoActual}.</div>`;
+        box.innerHTML = `<div class="col-span-2 text-[11px] text-zinc-400">Sin imágenes para ${codigoActual}.</div>`;
         return;
       }
       box.innerHTML = d.fotos.map(f => `
@@ -2231,12 +3443,12 @@
           <button class="dots-btn" onclick="abrirMenuTresPuntos(event, '${f.fileId}')">⋮</button>
           <div id="menuDots_${f.fileId}" class="dots-menu" style="display:none;" onclick="event.stopPropagation()">
             <div onclick="abrirModalMoverDesdeEstadoRed('${f.fileId}', '${codigoActual}', '${f.vista}')">📂 Mover de carpeta</div>
-            <div style="color:#f87171;" onclick="eliminarFotoDeDrive('${f.fileId}')">🗑️ Eliminar</div>
+            <div class="text-red-400" onclick="eliminarFotoDeDrive('${f.fileId}')">🗑️ Eliminar</div>
           </div>
-          <div style="font-size:10.5px; margin-top:4px; color:var(--muted); word-break:break-all;">${f.nombre}</div>
+          <div class="text-[10.5px] mt-1.5 text-zinc-400 font-mono break-all">${f.nombre}</div>
         </div>`).join("");
     } catch (e) {
-      box.innerHTML = `<div style="grid-column:span 2; font-size:11px; color:var(--red);">Error al cargar.</div>`;
+      box.innerHTML = `<div class="col-span-2 text-[11px] text-red-400">Error al cargar.</div>`;
     }
   }
 
@@ -2247,193 +3459,7 @@
     if (m) m.style.display = "block";
   }
 
-  // ==================== 3. INDEXADOR AUTOMÁTICO DE LA CARPETA "PRUEBA_FTTH_DRIVE/planos" ====================
-  function convertirUtm30AGps(x, y) {
-    if (!x || !y || isNaN(x) || isNaN(y) || x < 100000 || x > 900000 || y < 3500000 || y > 4800000) return null;
-    const a = 6378137.0;
-    const eccSquared = 0.00669438;
-    const k0 = 0.9996;
-    const eccPrimeSquared = eccSquared / (1 - eccSquared);
-    const e1 = (1 - Math.sqrt(1 - eccSquared)) / (1 + Math.sqrt(1 - eccSquared));
-
-    const xAdj = x - 500000.0;
-    const M = y / k0;
-    const mu = M / (a * (1 - eccSquared / 4 - 3 * eccSquared * eccSquared / 64 - 5 * Math.pow(eccSquared, 3) / 256));
-
-    const phi1Rad = mu
-      + (3 * e1 / 2 - 27 * Math.pow(e1, 3) / 32) * Math.sin(2 * mu)
-      + (21 * e1 * e1 / 16 - 55 * Math.pow(e1, 4) / 32) * Math.sin(4 * mu)
-      + (151 * Math.pow(e1, 3) / 96) * Math.sin(6 * mu);
-
-    const N1 = a / Math.sqrt(1 - eccSquared * Math.sin(phi1Rad) * Math.sin(phi1Rad));
-    const T1 = Math.tan(phi1Rad) * Math.tan(phi1Rad);
-    const C1 = eccPrimeSquared * Math.cos(phi1Rad) * Math.cos(phi1Rad);
-    const R1 = a * (1 - eccSquared) / Math.pow(1 - eccSquared * Math.sin(phi1Rad) * Math.sin(phi1Rad), 1.5);
-    const D = xAdj / (N1 * k0);
-
-    let lat = phi1Rad - (N1 * Math.tan(phi1Rad) / R1) * (D * D / 2 - (5 + 3 * T1 + 10 * C1 - 4 * C1 * C1 - 9 * eccPrimeSquared) * Math.pow(D, 4) / 24);
-    let lng = ((D - (1 + 2 * T1 + C1) * Math.pow(D, 3) / 6) / Math.cos(phi1Rad));
-
-    lat = lat * 180 / Math.PI;
-    lng = -3.0 + (lng * 180 / Math.PI);
-    return { lat: Number(lat.toFixed(6)), lng: Number(lng.toFixed(6)) };
-  }
-
-  async function cargarMotorLibreDwgWasm() {
-    if (libreDwgInstance) return libreDwgInstance;
-    const urlsCdn = [
-      "https://cdn.jsdelivr.net/npm/@mlightcad/libredwg-web@0.1.4/dist/libredwg-web.js",
-      "https://unpkg.com/@mlightcad/libredwg-web@0.1.4/dist/libredwg-web.js"
-    ];
-    for (const url of urlsCdn) {
-      try {
-        const mod = await import(url);
-        const LibreDwg = mod.LibreDwg || (mod.default && mod.default.LibreDwg);
-        if (LibreDwg) {
-          libreDwgInstance = await LibreDwg.create();
-          return libreDwgInstance;
-        }
-      } catch (e) {}
-    }
-    return null;
-  }
-
-  function deducirPuebloPorNombrePlano(nombreArchivo) {
-    const norm = String(nombreArchivo || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    for (const item of COORDENADAS_PUEBLOS_OFICIALES) {
-      const pNorm = item.pueblo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      if (norm.includes(pNorm) || norm.includes(item.prefijo.toLowerCase())) {
-        return item.pueblo;
-      }
-    }
-    if (norm.includes("terreros")) return "San Juan de los Terreros";
-    if (norm.includes("gallardos")) return "Los Gallardos";
-    if (norm.includes("hermoso")) return "Campo Hermoso";
-    if (norm.includes("isidro")) return "San Isidro";
-    if (norm.includes("guejar")) return "Güejar Sierra";
-    if (norm.includes("huetor")) return "Huétor Santillán";
-    if (norm.includes("jeronimo")) return "San Jerónimo";
-    return "General";
-  }
-
-  async function extraerCoordenadasDePlanoBuffer(arrayBuffer, puebloPorDefecto) {
-    const uint8 = new Uint8Array(arrayBuffer);
-    const headerAscii = new TextDecoder("iso-8859-1").decode(uint8.slice(0, 12));
-    const regexCod = /\b(?:NODO[\s-]*\d{1,2}|N-\d{1,2}|E-\d{1,2}-\d{1,2}|E-[A-Z]{2,6}-\d{1,2}|\d{2}-\d{2})\b/gi;
-    const coordenadasExtraidas = {};
-
-    const registrarPuntoExtraido = (mStr, x, y) => {
-      const desc = descomponerCodigoEnRuleta(mStr);
-      const gps = convertirUtm30AGps(x, y);
-      if (desc && gps) {
-        const locExacta = resolverPuebloPorCoordenadas(gps.lat, gps.lng);
-        coordenadasExtraidas[desc.codigo] = {
-          lat: gps.lat,
-          lng: gps.lng,
-          nodo: desc.nodo,
-          tipo: desc.tipo,
-          puebloDetectado: locExacta ? locExacta.pueblo : puebloPorDefecto
-        };
-      }
-    };
-
-    if (headerAscii.startsWith("AC10")) {
-      const dwgEngine = await cargarMotorLibreDwgWasm();
-      if (dwgEngine) {
-        try {
-          const ptr = dwgEngine.dwg_read_data(arrayBuffer, 0);
-          const db = dwgEngine.convert(ptr);
-          dwgEngine.dwg_free(ptr);
-
-          const procesarEntidades = (lista) => {
-            (lista || []).forEach(ent => {
-              const texto = [ent.text, ent.string, ent.value, ent.tag, ent.name, ent.block, ent.contents].filter(Boolean).join(" ").replace(/NODO\s*/gi, "N-");
-              const pos = ent.insertionPoint || ent.startPoint || ent.position || ent.center || ent.alignmentPoint || (ent.vertices && ent.vertices[0]);
-              const x = pos ? (pos.x !== undefined ? pos.x : pos[0]) : null;
-              const y = pos ? (pos.y !== undefined ? pos.y : pos[1]) : null;
-              if (texto && x && y) {
-                const matches = String(texto).match(regexCod) || [];
-                matches.forEach(m => registrarPuntoExtraido(m, x, y));
-              }
-            });
-          };
-
-          if (db) {
-            procesarEntidades(db.entities);
-            if (db.tables && db.tables.BLOCK_RECORD && db.tables.BLOCK_RECORD.entries) {
-              db.tables.BLOCK_RECORD.entries.forEach(blk => procesarEntidades(blk.entities));
-            }
-          }
-        } catch (e) {}
-      }
-    } else {
-      const rawText = new TextDecoder("iso-8859-1").decode(uint8);
-      const lineas = rawText.split(/\r?\n/);
-      let xActual = null, yActual = null, textoActual = "";
-      for (let i = 0; i < lineas.length - 1; i += 2) {
-        const code = lineas[i].trim(), val = lineas[i + 1].trim();
-        if (code === "0") {
-          if (textoActual && xActual && yActual) {
-            const matches = textoActual.replace(/NODO\s*/gi, "N-").match(regexCod) || [];
-            matches.forEach(m => registrarPuntoExtraido(m, xActual, yActual));
-          }
-          xActual = null; yActual = null; textoActual = "";
-        } else if (code === "10") xActual = parseFloat(val);
-        else if (code === "20") yActual = parseFloat(val);
-        else if (code === "1" || code === "3" || code === "2") textoActual += " " + val;
-      }
-    }
-    return coordenadasExtraidas;
-  }
-
-  async function indexarPlanosDeCarpetaCentral(listaPendientes) {
-    if (indexandoPlanosEnCurso || !listaPendientes || listaPendientes.length === 0) return;
-    indexandoPlanosEnCurso = true;
-    const banner = document.getElementById("bannerIndexadorPlanosGlobal");
-    const ep = obtenerEndpoint();
-
-    try {
-      for (let i = 0; i < listaPendientes.length; i++) {
-        const pl = listaPendientes[i];
-        banner.style.display = "block";
-        banner.innerText = `📐 Indexando plano (${i + 1}/${listaPendientes.length}): ${pl.nombre}...`;
-
-        const rDesc = await fetch(`${ep}?action=descargarPlanoPorId&fileId=${encodeURIComponent(pl.fileId)}`, { redirect: "follow" });
-        const dDesc = await rDesc.json();
-        if (!dDesc || !dDesc.base64) continue;
-
-        const binStr = atob(dDesc.base64);
-        const bytes = new Uint8Array(binStr.length);
-        for (let k = 0; k < binStr.length; k++) bytes[k] = binStr.charCodeAt(k);
-
-        const puebloDeducido = deducirPuebloPorNombrePlano(pl.nombre);
-        const coords = await extraerCoordenadasDePlanoBuffer(bytes.buffer, puebloDeducido);
-
-        await fetch(ep, {
-          method: "POST",
-          redirect: "follow",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "guardarDiccionarioGpsPlano",
-            fileId: pl.fileId,
-            nombre: pl.nombre,
-            fecha: pl.fecha,
-            pueblo: puebloDeducido,
-            coordenadas: coords
-          })
-        });
-      }
-      banner.style.display = "none";
-      cacheCoordenadasPorPueblo = {};
-      precargarRegistroYDwgSilencioso(seleccionPuebloEstado.provincia, seleccionPuebloEstado.pueblo);
-    } catch (e) {
-      banner.style.display = "none";
-    } finally {
-      indexandoPlanosEnCurso = false;
-    }
-  }
-
-  // --- MOVER Y ELIMINAR DESDE EL REGISTRO DE DRIVE ---
+  // ==================== MOVER, ELIMINAR Y COMPLETAR DESDE REGISTRO DRIVE ====================
   function abrirModalMoverDesdeEstadoRed(fileId, codigoOrigen, vistaOrigen) {
     cerrarFlotantes();
     const { provincia, pueblo } = seleccionPuebloEstado;
@@ -2477,6 +3503,7 @@
         redirect: "follow",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({
+          pin: pinActivo,
           action: "gestionarFotoRed",
           subAction: "mover",
           fileId: contextoMover.fileId,
@@ -2488,6 +3515,7 @@
         })
       });
       const res = await resp.json();
+      if (res.error === "PIN_INVALIDO") return cerrarSesionPin();
       if (res.error) throw new Error(res.error);
 
       if (res.colision && res.fotoExistente) {
@@ -2515,11 +3543,12 @@
     if (!confirm("¿Eliminar esta fotografía de Google Drive?")) return;
     const { provincia, pueblo } = seleccionPuebloEstado;
     try {
-      await fetch(obtenerEndpoint(), {
+      const resp = await fetch(obtenerEndpoint(), {
         method: "POST",
         redirect: "follow",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({
+          pin: pinActivo,
           action: "gestionarFotoRed",
           subAction: "eliminar",
           fileId,
@@ -2527,6 +3556,8 @@
           puebloOrigen: pueblo
         })
       });
+      const d = await resp.json();
+      if (d.error === "PIN_INVALIDO") return cerrarSesionPin();
       await cargarRegistroDrivePueblo(true);
     } catch (e) {}
   }
@@ -2551,15 +3582,15 @@
 
     cambiarTab("rafaga");
 
-    const nuevoId = "b_" + Date.now();
     bloquesCajas = [{
-      id: nuevoId,
+      id: "b_" + Date.now(),
       provincia: provincia || "Murcia",
       pueblo: pueblo || "Águilas",
       tipo: desc.tipo,
       numNodo: desc.numNodo,
       numCaja: desc.numCaja,
       bloqueadoPorCompletar: true,
+      editadoManualmente: true,
       codigoYaDetectadoPorOcr: true,
       fotos: []
     }];
