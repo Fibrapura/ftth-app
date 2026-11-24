@@ -1879,6 +1879,8 @@
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
     e.target.value = "";
+    const pinAdmin = prompt("PIN de Administrador para actualizar los planos en Drive:");
+    if (!pinAdmin) return;
 
     const st = document.getElementById("estadoCompiladorDxf");
     st.style.color = "#38bdf8";
@@ -1910,6 +1912,7 @@
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({
           pin: pinActivo,
+          pinAdmin: pinAdmin.trim(),
           action: "guardarDiccionarioGpsMasivo",
           reemplazar: false,
           porPueblo: compiladoPorPueblo
@@ -1949,7 +1952,9 @@
     if (forzarLecturaGps && navigator.geolocation) {
       dirEl.innerText = "Refrescando GPS de alta precisión...";
       await new Promise(resolve => {
-        navigator.geolocation.getCurrentPosition(pos => {
+        navigator.geolo
+          
+        cation.getCurrentPosition(pos => {
           const loc = resolverPuebloPorCoordenadas(pos.coords.latitude, pos.coords.longitude);
           gpsDispositivo = {
             lat: pos.coords.latitude,
@@ -2337,17 +2342,22 @@
     if (!window.exifr) return { gps: null, timestamp: null };
     return Promise.race([
       (async () => {
-        let gps = null, timestamp = null;
-        try { gps = await exifr.gps(file); } catch (e) {}
         try {
-          const meta = await exifr.parse(file, ["DateTimeOriginal", "CreateDate"]);
+          const meta = await exifr.parse(file, { gps: true, exif: true });
+          let gps = null;
+          if (meta && typeof meta.latitude === "number" && typeof meta.longitude === "number" && !isNaN(meta.latitude)) {
+            gps = { latitude: meta.latitude, longitude: meta.longitude };
+          }
+          let timestamp = null;
           if (meta && (meta.DateTimeOriginal || meta.CreateDate)) {
             timestamp = new Date(meta.DateTimeOriginal || meta.CreateDate).getTime();
           }
-        } catch (e) {}
-        return { gps, timestamp };
+          return { gps, timestamp };
+        } catch (e) {
+          return { gps: null, timestamp: null };
+        }
       })(),
-      new Promise(res => setTimeout(() => res({ gps: null, timestamp: null }), 450))
+      new Promise(res => setTimeout(() => res({ gps: null, timestamp: null }), 3000))
     ]);
   }
 
@@ -2446,14 +2456,24 @@
       if (!proc.blobDrive) continue;
 
       if (exifData.timestamp) timestamp = exifData.timestamp;
+      let gpsOrigen = "MOVIL";
       if (exifData.gps && exifData.gps.latitude && exifData.gps.longitude) {
         lat = exifData.gps.latitude;
         lng = exifData.gps.longitude;
+        gpsOrigen = "EXIF";
         const loc = resolverPuebloPorCoordenadas(lat, lng);
         if (loc) {
           provincia = loc.provincia;
           pueblo = loc.pueblo;
         }
+      } else if (!lat || !lng) {
+        gpsOrigen = "SIN_GPS";
+      }
+      const hintGps = document.getElementById("gpsLiveText");
+      if (hintGps && esGaleria) {
+        hintGps.innerText = gpsOrigen === "EXIF"
+          ? `📍 GPS leído de la foto · ${pueblo}`
+          : `⚠️ Foto sin GPS EXIF (usa 📂 Archivos -> DCIM/Camera)`;
       }
 
       const id = "f_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
@@ -2584,6 +2604,7 @@
         const resOcr = await leerCodigoOcrDirecto(b64Ocr);
         foto.ocrEstado = "listo";
         foto.ocrError = resOcr.errorCorto || "";
+        foto.ocrErrorDetalle = resOcr.errorDetalle || "";
 
         if (resOcr.info && !bloque.bloqueadoPorCompletar && !bloque.editadoManualmente) {
           bloque.tipo = resOcr.info.tipo;
@@ -2605,49 +2626,37 @@
 
   async function leerCodigoOcrDirecto(base64Ocr) {
     const hintEl = document.getElementById("ocrStatusHint");
-    const prompt = `Lee la etiqueta o rotulación FTTH de esta caja (ejemplos: "17-37", "01-08", "E-17-01", "N-17"). Responde únicamente en JSON con el código leído o vacío si no se ve: {"codigo":"17-37"}`;
-    const parts = [{ text: prompt }, { inline_data: { mime_type: "image/jpeg", data: base64Ocr } }];
-    let ultimoError = "";
+    const prompt = 'Lee la etiqueta o rotulacion FTTH de esta caja (ejemplos: "17-37", "01-08", "E-17-01", "N-17"). Responde unicamente con el codigo leido o vacio si no se ve.';
+    const payload = {
+      contents: [{
+        role: "user",
+        parts: [
+          { text: prompt },
+          { inlineData: { mimeType: "image/jpeg", data: base64Ocr } }
+        ]
+      }],
+      generationConfig: { temperature: 0.0 }
+    };
 
-    if (apiKeyOcrActiva) {
+    let ultimoError = "";
+    let ultimoDetalle = "";
+
+    if (apiKeyOcrActiva && base64Ocr && base64Ocr.length > 100) {
       for (const mod of MODELOS_OCR_VERIFICADOS) {
         const skipKey = `skip_ocr_${mod}`;
         if (Date.now() < Number(sessionStorage.getItem(skipKey) || 0)) continue;
 
         const t0 = performance.now();
         const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), 4000);
+        const timer = setTimeout(() => ctrl.abort(), 5000);
 
         try {
-          const genConfig = {
-            temperature: 0.0,
-            responseMimeType: "application/json",
-            thinkingConfig: { thinkingBudget: 0 }
-          };
-
-          let r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${mod}:generateContent`, {
+          const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${mod}:generateContent?key=${encodeURIComponent(apiKeyOcrActiva)}`, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-goog-api-key": apiKeyOcrActiva
-            },
-            body: JSON.stringify({ contents: [{ parts }], generationConfig: genConfig }),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
             signal: ctrl.signal
           });
-
-          if (r.status === 400) {
-            delete genConfig.thinkingConfig;
-            r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${mod}:generateContent`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-goog-api-key": apiKeyOcrActiva
-              },
-              body: JSON.stringify({ contents: [{ parts }], generationConfig: genConfig }),
-              signal: ctrl.signal
-            });
-          }
-
           clearTimeout(timer);
           const ms = Math.round(performance.now() - t0);
 
@@ -2661,25 +2670,55 @@
               hintEl.style.color = info ? "#34d399" : "#a1a1aa";
               hintEl.innerText = info ? `OCR ${info.codigo} · ${ms}ms` : `OCR sin etiqueta · ${ms}ms`;
             }
-            return { info, errorCorto: "" };
+            return { info, errorCorto: "", errorDetalle: "" };
           }
+
+          const errTxt = await r.text();
+          let msgGoogle = errTxt.slice(0, 140);
+          try { msgGoogle = JSON.parse(errTxt).error.message || msgGoogle; } catch (eJ) {}
 
           if (r.status === 429 || r.status === 404) {
             sessionStorage.setItem(skipKey, String(Date.now() + 300000));
           }
           ultimoError = `HTTP ${r.status}`;
+          ultimoDetalle = `${mod} -> HTTP ${r.status}: ${msgGoogle}`;
         } catch (err) {
           clearTimeout(timer);
-          ultimoError = err.name === "AbortError" ? "Timeout 4s" : "Sin red";
+          ultimoError = err.name === "AbortError" ? "Timeout 5s" : "Sin red";
+          ultimoDetalle = `${mod} -> ${err.message}`;
         }
       }
     }
 
+    // Respaldo automático vía servidor (Código.gs) si la llamada directa falla
+    if (pinActivo && base64Ocr && base64Ocr.length > 100) {
+      try {
+        const resp = await fetch(obtenerEndpoint(), {
+          method: "POST",
+          redirect: "follow",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ pin: pinActivo, action: "ocrDigitos", base64: base64Ocr })
+        });
+        const d = await resp.json();
+        if (d && d.ok) {
+          const info = d.info ? descomponerCodigoEnRuleta(d.info.codigo) : null;
+          if (hintEl) {
+            hintEl.style.color = info ? "#34d399" : "#a1a1aa";
+            hintEl.innerText = info ? `OCR srv ${info.codigo}` : "OCR sin etiqueta";
+          }
+          return { info, errorCorto: "", errorDetalle: "" };
+        }
+        if (d && d.errorDetalle) ultimoDetalle = d.errorDetalle;
+      } catch (eSrv) {}
+    }
+
     if (hintEl && ultimoError) {
       hintEl.style.color = "#fbbf24";
-      hintEl.innerText = `OCR ${ultimoError}`;
+      hintEl.innerText = `OCR ${ultimoError} (toca aviso)`;
+      hintEl.title = ultimoDetalle;
+      hintEl.onclick = () => alert(ultimoDetalle || ultimoError);
     }
-    return { info: null, errorCorto: ultimoError };
+    return { info: null, errorCorto: ultimoError, errorDetalle: ultimoDetalle };
   }
 
   // ==================== RENDERIZADO DE TARJETAS Y MOVIMIENTO ENTRE CAJAS ====================
@@ -2749,7 +2788,7 @@
 
         let badgeOcr = "";
         if (f.ocrEstado === "leyendo") badgeOcr = `<span class="ocr-badge">🔍 Leyendo...</span>`;
-        else if (f.ocrError) badgeOcr = `<span class="ocr-badge err">⚠️ ${f.ocrError}</span>`;
+        else if (f.ocrError) badgeOcr = `<span class="ocr-badge err cursor-pointer" onclick="alert(this.dataset.err)" data-err="${String(f.ocrErrorDetalle || f.ocrError).replace(/"/g, '&quot;')}">⚠️ ${f.ocrError}</span>`;
 
         const mostrarAvisoBorrosa = f.borrosa && (f.vista === "Abierta" || f.vista === "Potencia");
         const badgeBorrosa = mostrarAvisoBorrosa ? `<span class="blur-badge">⚠️ Posible desenfoque</span>` : "";
