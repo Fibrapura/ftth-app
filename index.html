@@ -2845,27 +2845,164 @@
     }
   }
 
-  async function extraerExifRapido(file) {
-    if (!window.exifr) return { gps: null, timestamp: null };
-    return Promise.race([
-      (async () => {
-        try {
-          const meta = await exifr.parse(file, { gps: true, exif: true });
-          let gps = null;
-          if (meta && typeof meta.latitude === "number" && typeof meta.longitude === "number" && !isNaN(meta.latitude)) {
-            gps = { latitude: meta.latitude, longitude: meta.longitude };
+ function leerExifBinarioJpeg(buf) {
+    const res = { gps: null, timestamp: null, tieneExif: false };
+    try {
+      const view = new DataView(buf);
+      if (view.byteLength < 12 || view.getUint16(0, false) !== 0xFFD8) return res;
+
+      let offset = 2;
+      while (offset + 4 <= view.byteLength) {
+        if (view.getUint8(offset) !== 0xFF) break;
+        while (offset < view.byteLength && view.getUint8(offset) === 0xFF) offset++;
+        if (offset >= view.byteLength) break;
+
+        const marker = view.getUint8(offset);
+        offset++;
+        if (marker === 0xDA || marker === 0xD9) break;
+        if (marker === 0x01 || (marker >= 0xD0 && marker <= 0xD8)) continue;
+
+        if (offset + 2 > view.byteLength) break;
+        const segLen = view.getUint16(offset, false);
+        if (segLen < 2 || offset + segLen > view.byteLength) break;
+
+        if (marker === 0xE1 && segLen >= 16) {
+          const p = offset + 2;
+          if (view.getUint32(p, false) === 0x45786966 && view.getUint16(p + 4, false) === 0x0000) {
+            res.tieneExif = true;
+            const tiffStart = p + 6;
+            const byteOrder = view.getUint16(tiffStart, false);
+            const le = (byteOrder === 0x4949);
+            if (!le && byteOrder !== 0x4D4D) { offset += segLen; continue; }
+
+            const ifd0Pos = tiffStart + view.getUint32(tiffStart + 4, le);
+            if (ifd0Pos + 2 > view.byteLength) { offset += segLen; continue; }
+
+            const numEntries = view.getUint16(ifd0Pos, le);
+            let gpsIfdRel = 0;
+            let exifIfdRel = 0;
+
+            for (let i = 0; i < numEntries; i++) {
+              const ent = ifd0Pos + 2 + i * 12;
+              if (ent + 12 > view.byteLength) break;
+              const tag = view.getUint16(ent, le);
+              if (tag === 0x8825) gpsIfdRel = view.getUint32(ent + 8, le);
+              else if (tag === 0x8769) exifIfdRel = view.getUint32(ent + 8, le);
+            }
+
+            if (exifIfdRel) {
+              const exifPos = tiffStart + exifIfdRel;
+              if (exifPos + 2 <= view.byteLength) {
+                const nExif = view.getUint16(exifPos, le);
+                for (let i = 0; i < nExif; i++) {
+                  const ent = exifPos + 2 + i * 12;
+                  if (ent + 12 > view.byteLength) break;
+                  const tag = view.getUint16(ent, le);
+                  if (tag === 0x9003 || tag === 0x9004) {
+                    const strOff = tiffStart + view.getUint32(ent + 8, le);
+                    if (strOff + 19 <= view.byteLength) {
+                      let s = "";
+                      for (let k = 0; k < 19; k++) s += String.fromCharCode(view.getUint8(strOff + k));
+                      const ts = Date.parse(s.replace(/^(\d{4}):(\d{2}):(\d{2})/, "$1-$2-$3").replace(" ", "T"));
+                      if (!isNaN(ts)) { res.timestamp = ts; break; }
+                    }
+                  }
+                }
+              }
+            }
+
+            if (gpsIfdRel) {
+              const gpsPos = tiffStart + gpsIfdRel;
+              if (gpsPos + 2 <= view.byteLength) {
+                const nGps = view.getUint16(gpsPos, le);
+                let latRef = "N", lngRef = "E", latVal = null, lngVal = null;
+
+                const leerRacionales3 = relOff => {
+                  const base = tiffStart + relOff;
+                  if (base + 24 > view.byteLength) return null;
+                  const r = idx => {
+                    const num = view.getUint32(base + idx * 8, le);
+                    const den = view.getUint32(base + idx * 8 + 4, le);
+                    return den ? num / den : 0;
+                  };
+                  return r(0) + r(1) / 60 + r(2) / 3600;
+                };
+
+                for (let i = 0; i < nGps; i++) {
+                  const ent = gpsPos + 2 + i * 12;
+                  if (ent + 12 > view.byteLength) break;
+                  const tag = view.getUint16(ent, le);
+                  if (tag === 0x0001) latRef = String.fromCharCode(view.getUint8(ent + 8)).toUpperCase();
+                  else if (tag === 0x0002) latVal = leerRacionales3(view.getUint32(ent + 8, le));
+                  else if (tag === 0x0003) lngRef = String.fromCharCode(view.getUint8(ent + 8)).toUpperCase();
+                  else if (tag === 0x0004) lngVal = leerRacionales3(view.getUint32(ent + 8, le));
+                }
+
+                if (latVal !== null && lngVal !== null && !isNaN(latVal) && !isNaN(lngVal) && !(latVal === 0 && lngVal === 0)) {
+                  if (latRef === "S") latVal = -Math.abs(latVal);
+                  if (lngRef === "W") lngVal = -Math.abs(lngVal);
+                  if (Math.abs(latVal) <= 90 && Math.abs(lngVal) <= 180) {
+                    res.gps = { latitude: latVal, longitude: lngVal };
+                  }
+                }
+              }
+            }
+
+            if (res.gps) return res;
           }
-          let timestamp = null;
-          if (meta && (meta.DateTimeOriginal || meta.CreateDate)) {
-            timestamp = new Date(meta.DateTimeOriginal || meta.CreateDate).getTime();
-          }
-          return { gps, timestamp };
-        } catch (e) {
-          return { gps: null, timestamp: null };
         }
-      })(),
-      new Promise(res => setTimeout(() => res({ gps: null, timestamp: null }), 3000))
-    ]);
+        offset += segLen;
+      }
+    } catch (e) {}
+    return res;
+  }
+
+  async function extraerExifRapido(file) {
+    let gps = null;
+    let timestamp = null;
+    let tieneExif = false;
+
+    try {
+      const buf = await file.arrayBuffer();
+
+      // 1º Lector binario nativo completo (sin límite de 64KB)
+      const nativo = leerExifBinarioJpeg(buf);
+      tieneExif = nativo.tieneExif;
+      if (nativo.gps) gps = nativo.gps;
+      if (nativo.timestamp) timestamp = nativo.timestamp;
+
+      // 2º Respaldo con exifr sobre el archivo completo (HEIC / XMP / otros formatos)
+      if ((!gps || !timestamp) && window.exifr) {
+        try {
+          const g = !gps ? await exifr.gps(buf).catch(() => null) : null;
+          if (g && typeof g.latitude === "number" && typeof g.longitude === "number" && !isNaN(g.latitude) && !(g.latitude === 0 && g.longitude === 0)) {
+            gps = { latitude: g.latitude, longitude: g.longitude };
+          }
+          const meta = await exifr.parse(buf, { tiff: true, ifd0: true, exif: true, gps: true, xmp: true, chunked: false }).catch(() => null);
+          if (meta) {
+            if (!gps && typeof meta.latitude === "number" && typeof meta.longitude === "number" && !isNaN(meta.latitude) && !(meta.latitude === 0 && meta.longitude === 0)) {
+              gps = { latitude: meta.latitude, longitude: meta.longitude };
+            }
+            if (!timestamp && (meta.DateTimeOriginal || meta.CreateDate)) {
+              timestamp = new Date(meta.DateTimeOriginal || meta.CreateDate).getTime();
+            }
+          }
+        } catch (eEx) {}
+      }
+
+      // Aviso diagnóstico claro si un archivo llega sin GPS
+      if (!gps && file.lastModified && (Date.now() - file.lastModified > 15000)) {
+        const msg = document.getElementById("msgEstado");
+        if (msg) {
+          msg.style.color = "#fbbf24";
+          msg.innerText = tieneExif
+            ? "⚠️ El archivo tiene datos de cámara pero SIN GPS (en Android entra por ☰ → Almacenamiento interno → DCIM → Camera)."
+            : "⚠️ El archivo no trae metadatos EXIF/GPS (foto de WhatsApp, captura o recortada por la galería).";
+        }
+      }
+    } catch (e) {}
+
+    return { gps, timestamp };
   }
 
   function calcularNitidezCanvas(canvas) {
