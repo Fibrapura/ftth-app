@@ -6,17 +6,14 @@
   <meta name="theme-color" content="#09090b" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>FTTH Studio · Captura & Registro Drive</title>
+  <title>FTTH Studio · Captura & Mapa Red</title>
 
-  <!-- Manifiesto PWA Offline -->
   <link rel="manifest" href="./manifest.json" />
 
-  <!-- Tipografía Técnica: Inter + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -32,10 +29,8 @@
     }
   </script>
 
-  <!-- Librería EXIF -->
   <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 
-  <!-- Mapa interactivo satélite para "¿Dónde estoy?" -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -49,7 +44,6 @@
       --accent: #38bdf8;
       --green-text: #34d399;
       --orange-soft: #fbbf24;
-      --green-soft: #6ee7b7;
       --red: #f87171;
       --text: #fafafa;
       --muted: #a1a1aa;
@@ -68,27 +62,27 @@
       background-image: radial-gradient(at 50% -10%, rgba(56, 189, 248, 0.10) 0px, transparent 55%);
       background-attachment: fixed;
       color: var(--text);
-      padding: 14px 12px 115px 12px;
-      max-width: 600px;
+      padding: 12px 12px 110px 12px;
+      max-width: 620px;
       margin-inline: auto;
       min-height: 100vh;
       letter-spacing: -0.012em;
     }
 
+    /* Barra superior minimalista */
     .top-utility-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 6px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
+      margin-bottom: 10px;
     }
     .util-pill {
       background: var(--surface-elevated);
       border: 1px solid var(--border);
       box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 2px 6px rgba(0, 0, 0, 0.35);
       color: #f4f4f5;
-      padding: 7px 11px;
+      padding: 6px 11px;
       border-radius: 9999px;
       font-size: 12px;
       font-weight: 600;
@@ -96,31 +90,11 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      transition: transform 0.16s, border-color 0.16s, background 0.16s;
+      transition: transform 0.15s, border-color 0.15s, background 0.15s;
       min-height: 34px;
     }
     .util-pill:hover { border-color: var(--border-highlight); background: #222229; }
     .util-pill:active { transform: scale(0.95); }
-
-    details.config-bar {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 12px 14px;
-      border-radius: 16px;
-      margin-bottom: 12px;
-      box-shadow: 0 10px 26px -10px rgba(0, 0, 0, 0.65);
-    }
-    summary {
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 12.5px;
-      color: #d4d4d8;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      list-style: none;
-    }
-    summary::-webkit-details-marker { display: none; }
 
     select, input {
       width: 100%;
@@ -139,6 +113,7 @@
       box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
     }
 
+    /* Pestañas principales: Captura | ¿Dónde estoy? */
     .tabs {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -147,13 +122,13 @@
       padding: 4px;
       border-radius: 14px;
       border: 1px solid var(--border);
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     .tab {
       padding: 10px 12px;
       text-align: center;
       border-radius: 10px;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 13px;
       color: #a1a1aa;
       cursor: pointer;
@@ -163,13 +138,13 @@
     .tab.active {
       background: #27272e;
       color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.14);
     }
 
     .box {
       background: var(--surface);
-      padding: 15px;
+      padding: 14px;
       border-radius: 20px;
       margin-bottom: 14px;
       border: 1px solid var(--border);
@@ -180,8 +155,8 @@
       background: linear-gradient(135deg, rgba(14, 116, 144, 0.34) 0%, #141419 100%);
       border: 1px solid rgba(56, 189, 248, 0.5);
       border-radius: 15px;
-      padding: 13px 15px;
-      margin-bottom: 12px;
+      padding: 12px 14px;
+      margin-bottom: 11px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -194,7 +169,7 @@
       color: #38bdf8;
     }
     .completing-big {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
       color: #ffffff;
       margin-top: 2px;
@@ -205,7 +180,7 @@
       border: 1px solid rgba(255, 255, 255, 0.18);
       color: #ffffff;
       border-radius: 10px;
-      padding: 7px 12px;
+      padding: 6px 11px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
@@ -216,37 +191,41 @@
       border: 1px solid rgba(245, 158, 11, 0.55);
       border-radius: 14px;
       padding: 10px 13px;
-      margin-bottom: 12px;
+      margin-bottom: 11px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 10px;
     }
 
+    /* 4 Botones de cámara (1 toque cámara / mantener pulsado archivos con GPS) */
     .cam-4-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 9px;
     }
     .btn-cam-direct {
       background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
       border: 1px solid rgba(147, 197, 253, 0.42);
       box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.22), 0 6px 14px -4px rgba(30, 64, 175, 0.5);
       color: #ffffff;
-      padding: 11px 4px;
+      padding: 10px 4px;
       border-radius: 15px;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
       text-align: center;
-      transition: transform 0.16s, filter 0.16s, background 0.2s;
+      transition: transform 0.14s, filter 0.15s, background 0.2s;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 3px;
       min-height: 68px;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
     }
     .btn-cam-direct:active { transform: scale(0.94); }
     .btn-cam-direct .cam-icon { font-size: 17px; line-height: 1; }
@@ -266,7 +245,7 @@
       color: #ffffff;
       padding: 12px 10px;
       border-radius: 13px;
-      font-size: 12.5px;
+      font-size: 13px;
       font-weight: 700;
       width: 100%;
       cursor: pointer;
@@ -289,7 +268,7 @@
       transition: transform 0.16s, opacity 0.16s;
     }
     .btn-confirm:active { transform: scale(0.98); }
-    .btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-confirm:disabled { opacity: 0.45; cursor: not-allowed; }
 
     .upload-progress-box {
       margin-top: 12px;
@@ -314,13 +293,14 @@
       transition: width 0.25s ease;
     }
 
+    /* Tarjeta de elemento */
     .element-card {
       background: #0b0b0f;
       border: 1px solid rgba(255, 255, 255, 0.13);
       border-radius: 18px;
       padding: 13px;
       margin-top: 13px;
-      animation: cardAppear 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+      animation: cardAppear 0.2s cubic-bezier(0.22, 1, 0.36, 1);
     }
     @keyframes cardAppear {
       from { opacity: 0; transform: translateY(6px); }
@@ -330,16 +310,17 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       padding-bottom: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 9px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+      flex-wrap: wrap;
     }
 
     .element-title-btn {
       background: #1e1e26;
       border: 1px solid rgba(255, 255, 255, 0.16);
-      padding: 7px 13px;
+      padding: 7px 12px;
       border-radius: 9999px;
       font-size: 13.5px;
       cursor: pointer;
@@ -360,17 +341,46 @@
       background: #1c1c24;
       border: 1px solid rgba(255, 255, 255, 0.14);
       color: #f4f4f5;
-      padding: 6px 11px;
+      padding: 6px 10px;
       border-radius: 9999px;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
     }
+    .pueblo-pill.sin-gps {
+      border-color: rgba(251, 191, 36, 0.8);
+      background: rgba(251, 191, 36, 0.16);
+      color: #fde68a;
+      animation: pulseWarn 1.8s infinite;
+    }
+    @keyframes pulseWarn {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.35); }
+      50% { box-shadow: 0 0 0 5px rgba(251, 191, 36, 0); }
+    }
 
+    .btn-releer-mini {
+      background: #1a1a22;
+      border: 1px solid rgba(56, 189, 248, 0.38);
+      color: #7dd3fc;
+      padding: 4px 8px;
+      border-radius: 9999px;
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      transition: transform 0.14s, background 0.15s;
+    }
+    .btn-releer-mini:hover { background: rgba(56, 189, 248, 0.18); }
+    .btn-releer-mini:active { transform: scale(0.94); }
+
+    /* Ruletas verticales iOS (Números y Vistas) con drag en PC */
     .wheel-drawer {
       background: #07070a;
-      border: 1px solid rgba(56, 189, 248, 0.32);
+      border: 1px solid rgba(56, 189, 248, 0.34);
       border-radius: 15px;
       padding: 11px 10px;
       margin-bottom: 11px;
@@ -398,9 +408,9 @@
       content: "";
       position: absolute;
       left: 2px; right: 2px; top: 32px; height: 32px;
-      background: rgba(56, 189, 248, 0.08);
-      border-top: 1px solid rgba(56, 189, 248, 0.42);
-      border-bottom: 1px solid rgba(56, 189, 248, 0.42);
+      background: rgba(56, 189, 248, 0.09);
+      border-top: 1px solid rgba(56, 189, 248, 0.45);
+      border-bottom: 1px solid rgba(56, 189, 248, 0.45);
       border-radius: 8px;
       pointer-events: none;
     }
@@ -410,9 +420,11 @@
       scroll-snap-type: y mandatory;
       scrollbar-width: none;
       -ms-overflow-style: none;
+      cursor: grab;
       -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%);
       mask-image: linear-gradient(to bottom, transparent 0%, black 28%, black 72%, transparent 100%);
     }
+    .wheel-drum:active { cursor: grabbing; }
     .wheel-drum::-webkit-scrollbar { display: none; }
     .wheel-spacer { height: 32px; }
     .wheel-item {
@@ -421,17 +433,81 @@
       align-items: center;
       justify-content: center;
       scroll-snap-align: center;
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 500;
       color: #71717a;
       cursor: pointer;
       user-select: none;
+      padding: 0 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .wheel-item.selected {
       color: #ffffff;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       font-family: 'JetBrains Mono', 'Inter', sans-serif;
+    }
+
+    /* Ruleta de vista debajo de cada foto */
+    .vista-pill-btn {
+      width: 100%;
+      margin-top: 7px;
+      padding: 6px 9px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: #0c0c10;
+      color: #f4f4f5;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: border-color 0.16s, background 0.16s;
+    }
+    .vista-pill-btn.open {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.14);
+    }
+    .view-wheel-drawer {
+      margin-top: 6px;
+      background: #07070a;
+      border: 1px solid rgba(56, 189, 248, 0.42);
+      border-radius: 12px;
+      padding: 4px 3px;
+    }
+    .view-wheel-drawer .wheel-drum-wrap,
+    .view-wheel-drawer .wheel-drum { height: 84px; }
+    .view-wheel-drawer .wheel-drum-wrap::after { top: 28px; height: 28px; }
+    .view-wheel-drawer .wheel-spacer,
+    .view-wheel-drawer .wheel-item { height: 28px; font-size: 11px; }
+    .view-wheel-drawer .wheel-item.selected { font-size: 11.5px; font-family: 'Inter', sans-serif; }
+
+    /* Chip discreto "Usar de foto con potencia" */
+    .btn-potencia-mini {
+      width: 100%;
+      margin-top: 4px;
+      padding: 3px 6px;
+      border-radius: 7px;
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid rgba(96, 165, 250, 0.25);
+      background: rgba(37, 99, 235, 0.08);
+      color: #93c5fd;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      transition: all 0.15s;
+    }
+    .btn-potencia-mini.active {
+      background: rgba(16, 185, 129, 0.22);
+      border-color: rgba(52, 211, 153, 0.65);
+      color: #a7f3d0;
+      font-weight: 700;
     }
 
     .custom-dd-menu {
@@ -444,7 +520,7 @@
       border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 14px;
       box-shadow: 0 18px 38px -8px rgba(0, 0, 0, 0.9);
-      z-index: 300;
+      z-index: 350;
       max-height: 270px;
       overflow-y: auto;
       text-align: left;
@@ -498,8 +574,8 @@
       color: #f87171;
       border: 1px solid rgba(248, 113, 113, 0.45);
       border-radius: 9999px;
-      width: 27px; height: 27px;
-      font-size: 11.5px; font-weight: 700; cursor: pointer;
+      width: 26px; height: 26px;
+      font-size: 11px; font-weight: 700; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
     }
     .ocr-badge {
@@ -512,29 +588,24 @@
     }
     .ocr-badge.err { color: #fca5a5; border-color: rgba(248, 113, 113, 0.55); cursor: pointer; }
     .blur-badge {
-      position: absolute; bottom: 52px; left: 11px;
+      position: absolute; top: 101px; left: 11px;
       background: rgba(120, 53, 15, 0.92);
       color: #fde68a;
-      font-size: 9.5px; font-weight: 700;
-      padding: 2px 7px; border-radius: 9999px;
+      font-size: 9px; font-weight: 700;
+      padding: 2px 6px; border-radius: 9999px;
       border: 1px solid rgba(251, 191, 36, 0.55);
       pointer-events: none;
     }
 
-    .btn-potencia-toggle {
-      width: 100%; margin-top: 6px; padding: 7px 8px;
-      border-radius: 9px; font-size: 11px; font-weight: 700; cursor: pointer;
-      border: 1px solid rgba(96, 165, 250, 0.35);
-      background: rgba(37, 99, 235, 0.18);
-      color: #bfdbfe;
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 9px;
+      padding-inline: 2px;
     }
-    .btn-potencia-toggle.active {
-      background: rgba(16, 185, 129, 0.25);
-      border-color: rgba(52, 211, 153, 0.65);
-      color: #a7f3d0;
-    }
-
-    .status-line { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 9px; padding-left: 3px; }
+    .status-line { font-size: 12px; font-weight: 600; color: var(--muted); }
     .status-line.ok { color: var(--green-text); }
     .status-line.warn { color: #fbbf24; }
 
@@ -562,6 +633,108 @@
     }
     .small-btn:active { transform: scale(0.96); }
 
+    /* Controles de la pestaña "¿Dónde estoy?" */
+    .map-shell {
+      position: relative;
+      height: 330px;
+      width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: #09090b;
+      margin-bottom: 11px;
+    }
+    .map-crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 24px;
+      height: 24px;
+      pointer-events: none;
+      z-index: 450;
+      opacity: 0.78;
+    }
+    .map-crosshair::before,
+    .map-crosshair::after {
+      content: "";
+      position: absolute;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
+    }
+    .map-crosshair::before { top: 11px; left: 0; width: 24px; height: 2px; }
+    .map-crosshair::after { left: 11px; top: 0; height: 24px; width: 2px; }
+
+    .map-float-bottom {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      z-index: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .map-float-btn {
+      pointer-events: auto;
+      background: rgba(9, 9, 11, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.65);
+      color: #ffffff;
+      padding: 8px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.75);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .map-float-btn:active { transform: scale(0.95); }
+
+    .mode-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      background: #0a0a0e;
+      padding: 3px;
+      border-radius: 11px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      margin-bottom: 10px;
+    }
+    .mode-switch button {
+      padding: 7px 8px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: #a1a1aa;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .mode-switch button.active {
+      background: #1f2937;
+      color: #38bdf8;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .ftth-map-label {
+      background: #09090b !important;
+      color: #38bdf8 !important;
+      border: 1px solid rgba(56, 189, 248, 0.85) !important;
+      border-radius: 6px !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 11px !important;
+      font-weight: 800 !important;
+      padding: 2px 6px !important;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.85) !important;
+    }
+    .ftth-map-label::before { display: none !important; }
+
+    /* Registro Drive (oculto en ⚙️) */
     .drive-registry-list { display: flex; flex-direction: column; gap: 10px; }
     .drive-node-card {
       background: var(--surface);
@@ -611,11 +784,12 @@
       cursor: pointer; border-bottom: 1px solid var(--border);
     }
 
+    /* Modales */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.82);
+      background: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       z-index: 9999;
@@ -630,36 +804,69 @@
       border-radius: 20px;
       padding: 18px;
       width: 100%;
-      max-width: 400px;
+      max-width: 410px;
       max-height: 90vh;
       overflow-y: auto;
     }
-    .zoom-img { max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 12px; }
+
+    /* Visor Zoom con swipe dentro de la misma CTO */
+    .zoom-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      max-width: 100%;
+      max-height: 92vh;
+      position: relative;
+      user-select: none;
+    }
+    .zoom-img {
+      max-width: 94vw;
+      max-height: 78vh;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+    }
+    .zoom-caption {
+      margin-top: 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #d4d4d8;
+      background: rgba(24, 24, 27, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 5px 14px;
+      border-radius: 9999px;
+    }
+    .zoom-nav-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(24, 24, 27, 0.84);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      width: 40px;
+      height: 40px;
+      border-radius: 9999px;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10005;
+    }
     .close-zoom {
-      position: absolute; top: 16px; right: 16px;
+      position: fixed; top: 16px; right: 16px;
       background: #dc2626; color: #fff;
       border: 1px solid rgba(255,255,255,0.22); padding: 8px 15px;
       border-radius: 9999px; font-weight: 700; font-size: 12.5px; cursor: pointer;
+      z-index: 10006;
     }
-
-    /* Etiquetas fijas de rotulaciones sobre el mapa satélite */
-    .ftth-map-label {
-      background: #09090b !important;
-      color: #38bdf8 !important;
-      border: 1px solid rgba(56, 189, 248, 0.8) !important;
-      border-radius: 6px !important;
-      font-family: 'JetBrains Mono', monospace !important;
-      font-size: 11px !important;
-      font-weight: 800 !important;
-      padding: 2px 6px !important;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.85) !important;
-    }
-    .ftth-map-label::before { display: none !important; }
   </style>
 </head>
 <body onclick="cerrarFlotantes()">
 
-  <!-- 0. PANTALLA DE DESBLOQUEO POR PIN -->
+  <!-- 0. DESBLOQUEO POR PIN -->
   <div id="pinModal" class="modal-overlay" style="z-index:10050;">
     <div class="modal-box text-center" onclick="event.stopPropagation()">
       <div class="w-12 h-12 rounded-2xl bg-sky-500/15 border border-sky-400/35 flex items-center justify-center mx-auto mb-3 text-sky-400 text-xl">🔒</div>
@@ -671,46 +878,73 @@
     </div>
   </div>
 
-  <!-- 1. MODAL "¿DÓNDE ESTOY?" + MAPA SATÉLITE CON LAS 4 CAJAS MÁS CERCANAS -->
-  <div id="dondeEstoyModal" class="modal-overlay" onclick="cerrarModalDondeEstoy()">
+  <!-- 1. MODAL DE AJUSTES (SE ABRE CON ⚙️ EN LA ESQUINA SUPERIOR) -->
+  <div id="ajustesModal" class="modal-overlay" onclick="document.getElementById('ajustesModal').style.display='none'">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="flex justify-between items-center mb-3">
-        <div class="flex items-center gap-2">
-          <span class="text-[15.5px] font-extrabold text-sky-400">📍 ¿Dónde estoy?</span>
-          <span id="dePrecisionBadge" class="font-mono text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-white/10">GPS...</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button type="button" class="small-btn !py-1 !px-2.5" onclick="actualizarModalDondeEstoy(true)">🔄</button>
-          <span class="cursor-pointer text-zinc-400 hover:text-white font-bold px-1" onclick="cerrarModalDondeEstoy()">✕</span>
-        </div>
+        <span class="text-[15.5px] font-extrabold text-zinc-100">⚙️ Ajustes y Herramientas</span>
+        <span class="cursor-pointer text-zinc-400 hover:text-white font-bold px-1.5" onclick="document.getElementById('ajustesModal').style.display='none'">✕</span>
       </div>
 
-      <!-- Dirección postal exacta -->
-      <div class="bg-zinc-950 border border-white/10 rounded-2xl p-3 mb-3">
-        <div class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Dirección actual</div>
-        <div id="deDireccionTxt" class="text-[13.5px] font-bold text-zinc-100 mt-1 leading-snug">Obteniendo calle y número...</div>
-        <div class="flex justify-between items-center mt-2 gap-2">
-          <span id="deCoordsTxt" class="font-mono text-[11px] text-zinc-400">--</span>
-          <button type="button" class="small-btn !py-1 !px-2.5 !text-[11px]" onclick="copiarUbicacionActual()">📋 Copiar</button>
+      <!-- Acceso discreto a Registro Drive -->
+      <button type="button" class="w-full mb-3 bg-zinc-900 hover:bg-zinc-800 border border-white/15 rounded-xl p-3 flex justify-between items-center text-left transition" onclick="abrirRegistroDriveDesdeAjustes()">
+        <div>
+          <div class="text-[13px] font-bold text-zinc-100">📂 Registro Drive (Nodos)</div>
+          <div class="text-[11px] text-zinc-400 mt-0.5">Ver fotos ya subidas, mover de carpeta o eliminar</div>
         </div>
+        <span class="text-sky-400 font-bold text-lg">›</span>
+      </button>
+
+      <!-- Compilador masivo .DXF (Solo Admin) -->
+      <div class="bg-zinc-950 border border-white/10 rounded-xl p-3 mb-3">
+        <div class="text-[12px] font-bold text-sky-400 mb-1">📐 Compilador de Planos .DXF (Solo Admin)</div>
+        <div id="resumenDicGpsConfig" class="text-[11px] text-zinc-400 mb-2.5">Cargando estado del diccionario GPS...</div>
+        <input type="file" id="dxfFilesInput" accept=".dxf,.DXF" multiple style="display:none" onchange="compilarArchivosDxfSeleccionados(event)" />
+        <button type="button" class="btn-gal-wide !py-2.5 !text-[12px]" onclick="document.getElementById('dxfFilesInput').click()">
+          📂 Seleccionar archivos .DXF (requiere PIN Admin)
+        </button>
+        <div id="estadoCompiladorDxf" class="text-[11.5px] mt-2 font-semibold text-emerald-400"></div>
       </div>
 
-      <!-- Mapa Google Satélite con las 4 cajas más cercanas y sus rotulaciones -->
-      <div class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">🗺️ Mapa satélite · 4 elementos más cercanos</div>
-      <div id="mapaCercanos" style="height:235px; width:100%; border-radius:14px; overflow:hidden; border:1px solid rgba(255,255,255,0.16); background:#09090b; margin-bottom:12px;"></div>
+      <!-- Enlace /exec y acciones de sesión -->
+      <div class="mb-3">
+        <label class="text-[11px] text-zinc-400 font-medium">Enlace /exec corporativo:</label>
+        <input type="password" id="scriptUrlInput" placeholder="🔒 Enlace /exec" onchange="guardarEndpointPersonalizado()" class="mt-1" />
+      </div>
 
-      <!-- Lista de los 4 elementos cercanos -->
-      <div id="deRadarLista" class="flex flex-col gap-2"></div>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" class="small-btn justify-center !py-2.5" onclick="forzarRecargaPWA()">🔄 Forzar recarga</button>
+        <button type="button" class="small-btn justify-center !py-2.5 !text-red-300 !border-red-500/30" onclick="cerrarSesionPin()">🔒 Bloquear PIN</button>
+      </div>
     </div>
   </div>
 
-  <!-- 2. VISOR DE FOTO EN GRANDE -->
-  <div id="zoomModal" class="modal-overlay" onclick="cerrarZoom()">
-    <button class="close-zoom" onclick="cerrarZoom()">✕ Cerrar</button>
-    <img id="zoomImg" class="zoom-img" src="" onclick="event.stopPropagation()" />
+  <!-- 2. MODAL CONFIRMACIÓN ANTES DE SUBIR A DRIVE -->
+  <div id="confirmarSubidaModal" class="modal-overlay" onclick="document.getElementById('confirmarSubidaModal').style.display='none'">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="text-[15.5px] font-extrabold text-emerald-400 mb-1">☁️ Confirmar subida a Drive</div>
+      <div class="text-[12px] text-zinc-400 mb-3">Revisa el destino antes de subir las fotografías:</div>
+      <div id="listaConfirmarSubida" class="flex flex-col gap-2 mb-3"></div>
+      <div id="avisoBloqueoSubida" style="display:none;" class="bg-red-500/15 border border-red-500/45 text-red-200 text-[12px] font-semibold p-2.5 rounded-xl mb-3"></div>
+      <div class="grid grid-cols-2 gap-2.5">
+        <button type="button" class="btn-gal-wide !py-2.5 !bg-zinc-800 !from-zinc-800 !to-zinc-900 !border-white/15 !shadow-none" onclick="document.getElementById('confirmarSubidaModal').style.display='none'">Cancelar</button>
+        <button type="button" id="btnEjecutarSubidaConfirmada" class="btn-confirm !m-0 !py-2.5" onclick="ejecutarSubidaConfirmada()">OK · Subir</button>
+      </div>
+    </div>
   </div>
 
-  <!-- 3. MODAL CONFIRMACIÓN RESTAURAR PÁGINA -->
+  <!-- 3. VISOR DE FOTO EN GRANDE CON SWIPE (SOLO MISMA CTO) + PIE DE VISTA -->
+  <div id="zoomModal" class="modal-overlay" onclick="cerrarZoom()" ontouchstart="zoomTouchStart(event)" ontouchend="zoomTouchEnd(event)">
+    <button class="close-zoom" onclick="cerrarZoom()">✕ Cerrar</button>
+    <button id="zoomPrevBtn" class="zoom-nav-btn left-3" style="display:none;" onclick="event.stopPropagation(); navegarZoom(-1)">‹</button>
+    <div class="zoom-stage" onclick="event.stopPropagation()">
+      <img id="zoomImg" class="zoom-img" src="" />
+      <div id="zoomCaption" class="zoom-caption" style="display:none;"></div>
+    </div>
+    <button id="zoomNextBtn" class="zoom-nav-btn right-3" style="display:none;" onclick="event.stopPropagation(); navegarZoom(1)">›</button>
+  </div>
+
+  <!-- 4. MODAL CONFIRMACIÓN RESTAURAR PÁGINA -->
   <div id="confirmarRestaurarModal" class="modal-overlay" onclick="document.getElementById('confirmarRestaurarModal').style.display='none'">
     <div class="modal-box text-center" onclick="event.stopPropagation()">
       <div class="w-11 h-11 rounded-full bg-red-500/15 border border-red-500/35 flex items-center justify-center mx-auto mb-3 text-red-400 text-lg">↺</div>
@@ -724,7 +958,7 @@
     </div>
   </div>
 
-  <!-- 4. MODAL HISTORIAL DE SEGURIDAD (ÚLTIMOS 5 ESTADOS) -->
+  <!-- 5. MODAL HISTORIAL DE SEGURIDAD (ÚLTIMOS 5 ESTADOS) -->
   <div id="historialModal" class="modal-overlay" onclick="document.getElementById('historialModal').style.display='none'">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="flex justify-between items-center mb-2">
@@ -736,7 +970,7 @@
     </div>
   </div>
 
-  <!-- 5. MODAL REGISTRO DE POTENCIA (5 OPCIONES) -->
+  <!-- 6. MODAL REGISTRO DE POTENCIA (5 OPCIONES) -->
   <div id="potenciaModal" class="modal-overlay" onclick="document.getElementById('potenciaModal').style.display='none'">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="text-[15px] font-bold text-zinc-100 mb-3 flex items-center gap-2">
@@ -744,7 +978,7 @@
       </div>
       <div class="flex flex-col gap-2.5">
         <button class="btn-cam-direct !min-h-[46px] !text-[13px]" onclick="elegirOpcionPotencia('HACER_FOTO')">📷 Hacer foto de Potencia</button>
-        <button class="btn-gal-wide !py-3 !text-[13px]" onclick="elegirOpcionPotencia('SUBIR_GALERIA')">🖼️ Subir de galería</button>
+        <button class="btn-gal-wide !py-3 !text-[13px]" onclick="elegirOpcionPotencia('SUBIR_ARCHIVO')">📂 Elegir de archivos (con GPS)</button>
         <button id="btnPotUsarAbierta" class="btn-cam-direct !min-h-[44px] !text-[12.5px] !bg-zinc-900 !from-zinc-800 !to-zinc-900 !border-white/15 !shadow-none" onclick="elegirOpcionPotencia('USAR_ABIERTA')">🔗 Usar foto Abierta ("Abierta con potencia")</button>
         <button id="btnPotUsarCerrada" class="btn-cam-direct !min-h-[44px] !text-[12.5px] !bg-zinc-900 !from-zinc-800 !to-zinc-900 !border-white/15 !shadow-none" onclick="elegirOpcionPotencia('USAR_CERRADA')">🔗 Usar foto Cerrada ("Cerrada con potencia")</button>
         <button class="btn-cam-direct !min-h-[40px] !text-[12px] !bg-transparent !from-transparent !to-transparent !border-white/15 !text-zinc-400 !shadow-none" onclick="elegirOpcionPotencia('SIN_POTENCIA')">Dejar sin foto de potencia</button>
@@ -752,19 +986,19 @@
     </div>
   </div>
 
-  <!-- 6. VISOR DE FOTO YA EXISTENTE EN DRIVE -->
+  <!-- 7. VISOR DE FOTO YA EXISTENTE EN DRIVE -->
   <div id="verDriveModal" class="modal-overlay" onclick="document.getElementById('verDriveModal').style.display='none'">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="text-[14px] font-bold text-sky-400 mb-2.5">Fotografía actual en Drive</div>
       <div class="bg-zinc-950 p-2.5 rounded-2xl border border-white/10 text-center">
-        <img id="imgDriveExistenteModal" src="" class="w-full max-h-[300px] object-contain rounded-xl cursor-zoom-in" onclick="abrirZoom(this.src)" />
+        <img id="imgDriveExistenteModal" src="" class="w-full max-h-[300px] object-contain rounded-xl cursor-zoom-in" onclick="abrirZoomSimple(this.src, document.getElementById('txtNombreDriveModal').innerText)" />
         <div id="txtNombreDriveModal" class="text-[11.5px] text-zinc-400 mt-2 font-mono">Cargando...</div>
         <a id="btnIrDriveModal" href="#" target="_blank" class="small-btn mt-2.5">📂 Abrir en Google Drive</a>
       </div>
     </div>
   </div>
 
-  <!-- 7. MODAL MOVER DE CARPETA EN DRIVE -->
+  <!-- 8. MODAL MOVER DE CARPETA EN DRIVE -->
   <div id="moverFotoModal" class="modal-overlay">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="text-[15px] font-bold mb-3 text-sky-400">Mover fotografía en Drive</div>
@@ -807,7 +1041,7 @@
       </div>
       <div id="cajaColisionMover" style="display:none;" class="bg-zinc-950 border border-amber-500/40 rounded-xl p-2.5 mt-2.5">
         <div id="textoColisionMover" class="text-[11.5px] text-amber-300 mb-2"></div>
-        <img id="imgColisionMover" src="" class="w-full h-[120px] object-cover rounded-lg cursor-zoom-in" onclick="abrirZoom(this.src)" />
+        <img id="imgColisionMover" src="" class="w-full h-[120px] object-cover rounded-lg cursor-zoom-in" onclick="abrirZoomSimple(this.src, 'Foto en Drive')" />
         <div class="flex justify-between items-center mt-2">
           <span class="text-[10.5px] text-zinc-400">Foto actual en Drive</span>
           <a id="linkDriveColision" href="#" target="_blank" class="small-btn">📂 Drive</a>
@@ -820,53 +1054,27 @@
     </div>
   </div>
 
-  <!-- BARRA SUPERIOR -->
+  <!-- BARRA SUPERIOR MINIMALISTA -->
   <div class="top-utility-bar">
-    <div class="flex gap-1.5 items-center">
-      <button type="button" class="util-pill" onclick="abrirModalHistorial()">
-        <span class="text-sky-400">🕒</span>
-        <span class="font-mono text-[11px]"><span id="contadorHistorial">0</span>/5</span>
-      </button>
-      <button type="button" class="util-pill !border-sky-400/40 !bg-sky-500/15 !text-sky-200" onclick="abrirModalDondeEstoy()">
-        <span>📍 ¿Dónde estoy?</span>
-      </button>
-    </div>
+    <button type="button" class="util-pill" onclick="event.stopPropagation(); abrirModalHistorial()">
+      <span class="text-sky-400">🕒</span>
+      <span class="font-mono text-[11px]"><span id="contadorHistorial">0</span>/5</span>
+    </button>
 
     <div class="flex gap-1.5 items-center">
-      <button type="button" id="btnRestaurarEscondido" class="util-pill !text-red-300 !border-red-500/35 !bg-red-500/10" style="display:none;" onclick="pedirConfirmacionRestaurarPagina()">
+      <button type="button" id="btnRestaurarEscondido" class="util-pill !text-red-300 !border-red-500/35 !bg-red-500/10" style="display:none;" onclick="event.stopPropagation(); pedirConfirmacionRestaurarPagina()">
         ↺ Restaurar
       </button>
-      <button type="button" class="util-pill" onclick="document.getElementById('configBox').open = !document.getElementById('configBox').open">
+      <button type="button" class="util-pill" onclick="event.stopPropagation(); abrirModalAjustes()">
         <span>⚙️</span> <span id="badgeEstadoConexion">Drive</span>
       </button>
     </div>
   </div>
 
-  <!-- PANEL DE CONFIGURACIÓN + COMPILADOR MASIVO DE PLANOS .DXF (SOLO ADMIN) -->
-  <details class="config-bar" id="configBox">
-    <summary><span>⚙️ Ajustes, PIN y Compilador de Planos .DXF</span></summary>
-    <div class="mt-3 flex flex-col gap-3">
-      <div class="bg-zinc-950 border border-white/10 rounded-xl p-3">
-        <div class="text-[12px] font-bold text-sky-400 mb-1">📐 Compilador de Planos .DXF a Mapa GPS (Solo Admin)</div>
-        <div id="resumenDicGpsConfig" class="text-[11px] text-zinc-400 mb-2.5">Cargando estado del diccionario GPS...</div>
-        <input type="file" id="dxfFilesInput" accept=".dxf,.DXF" multiple style="display:none" onchange="compilarArchivosDxfSeleccionados(event)" />
-        <button type="button" class="btn-gal-wide !py-2.5 !text-[12px]" onclick="document.getElementById('dxfFilesInput').click()">
-          📂 Seleccionar archivos .DXF (requiere PIN Admin)
-        </button>
-        <div id="estadoCompiladorDxf" class="text-[11.5px] mt-2 font-semibold text-emerald-400"></div>
-      </div>
-
-      <div class="flex gap-2 items-center">
-        <input type="password" id="scriptUrlInput" placeholder="🔒 Enlace /exec corporativo" onchange="guardarEndpointPersonalizado()" class="flex-1" />
-        <button type="button" class="small-btn !py-2.5 !text-red-300 !border-red-500/30" onclick="cerrarSesionPin()">🔒 Bloquear PIN</button>
-      </div>
-    </div>
-  </details>
-
-  <!-- PESTAÑAS PRINCIPALES -->
+  <!-- PESTAÑAS PRINCIPALES: CAPTURA | ¿DÓNDE ESTOY? -->
   <div class="tabs">
-    <div class="tab active" id="tabRafaga" onclick="cambiarTab('rafaga')">📸 Captura de Campo</div>
-    <div class="tab" id="tabEstado" onclick="cambiarTab('estado')">📂 Registro Drive</div>
+    <div class="tab active" id="tabRafaga" onclick="cambiarTab('rafaga')">📸 Captura</div>
+    <div class="tab" id="tabDonde" onclick="cambiarTab('donde')">📍 ¿Dónde estoy?</div>
   </div>
 
   <!-- ==================== PESTAÑA 1: CAPTURA DE CAMPO ==================== -->
@@ -888,7 +1096,6 @@
       <button type="button" class="completing-exit" onclick="salirModoCompletar()">✕ Salir</button>
     </div>
 
-    <!-- Indicador de precisión GPS y estado OCR -->
     <div class="flex justify-between items-center mb-2.5 px-1">
       <span id="gpsLivePill" class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-400">
         <span id="gpsLiveDot" class="w-2 h-2 rounded-full bg-zinc-500 inline-block"></span>
@@ -899,41 +1106,40 @@
 
     <!-- Inputs ocultos -->
     <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="archivosSeleccionados(event, 'CAMARA')" />
-    <input type="file" id="galGpsInput" accept="*/*" multiple style="display:none" onchange="archivosSeleccionados(event, 'GALERIA_GPS')" />
-    <input type="file" id="potGalInput" accept="image/*" style="display:none" onchange="archivoPotenciaDesdeGaleria(event)" />
+    <input type="file" id="vistaFileInput" accept="*/*" style="display:none" onchange="archivosSeleccionados(event, 'ARCHIVO_VISTA')" />
+    <input type="file" id="paqueteInput" accept="*/*" multiple style="display:none" onchange="archivosSeleccionados(event, 'PAQUETE')" />
 
-    <!-- 4 BOTONES DE CÁMARA -->
+    <!-- 4 BOTONES: 1 TOQUE = CÁMARA | MANTENER PULSADO = ARCHIVOS (CON GPS) -->
     <div class="cam-4-grid">
-      <button id="btnTop_Abierta" class="btn-cam-direct" onclick="dispararCamaraConVista('Abierta')">
+      <button id="btnTop_Abierta" class="btn-cam-direct" data-vista="Abierta" oncontextmenu="return false">
         <span class="cam-icon" id="icoTop_Abierta">📷</span>
         <span>Abierta</span>
         <span class="cam-sub" id="subTop_Abierta"></span>
       </button>
-      <button id="btnTop_Cerrada" class="btn-cam-direct" onclick="dispararCamaraConVista('Cerrada')">
+      <button id="btnTop_Cerrada" class="btn-cam-direct" data-vista="Cerrada" oncontextmenu="return false">
         <span class="cam-icon" id="icoTop_Cerrada">📷</span>
         <span>Cerrada</span>
         <span class="cam-sub" id="subTop_Cerrada"></span>
       </button>
-      <button id="btnTop_Potencia" class="btn-cam-direct" onclick="abrirMenuBotonPotencia()">
+      <button id="btnTop_Potencia" class="btn-cam-direct" data-vista="Potencia" oncontextmenu="return false">
         <span class="cam-icon" id="icoTop_Potencia">⚡</span>
         <span>Potencia</span>
         <span class="cam-sub" id="subTop_Potencia"></span>
       </button>
-      <button id="btnTop_Panorámica" class="btn-cam-direct" onclick="dispararCamaraConVista('Panorámica')">
+      <button id="btnTop_Panorámica" class="btn-cam-direct" data-vista="Panorámica" oncontextmenu="return false">
         <span class="cam-icon" id="icoTop_Panorámica">📷</span>
         <span>Panorámica</span>
         <span class="cam-sub" id="subTop_Panorámica"></span>
       </button>
     </div>
 
-    <!-- BOTÓN ÚNICO PARA SUBIR FOTOS DESDE MÓVIL O PC CONSERVANDO GPS -->
-    <button class="btn-gal-wide" onclick="document.getElementById('galGpsInput').click()">
-      📂 Añadir fotos desde móvil o PC (con GPS)
+    <!-- BOTÓN PAQUETE DE FOTOS -->
+    <button class="btn-gal-wide" onclick="document.getElementById('paqueteInput').click()">
+      📂 Añadir paquete de fotos
     </button>
 
     <div id="contenedorTarjetas"></div>
 
-    <!-- Barra de progreso de subida foto a foto -->
     <div id="barraProgresoSubida" style="display:none;" class="upload-progress-box">
       <div class="flex justify-between items-center text-[12px] font-bold text-sky-300">
         <span id="textoProgresoSubida">Subiendo foto 1 de 4...</span>
@@ -946,14 +1152,59 @@
 
     <div id="msgEstado" class="mt-3 text-center font-semibold text-[13px]"></div>
 
-    <button id="btnSubirTodas" class="btn-confirm" style="display:none;" onclick="subirTodoADrive()">
+    <button id="btnSubirTodas" class="btn-confirm" style="display:none;" onclick="abrirConfirmacionSubida()">
       ✅ Subir a Google Drive
     </button>
   </div>
 
-  <!-- ==================== PESTAÑA 2: REGISTRO DRIVE POR NODOS ==================== -->
+  <!-- ==================== PESTAÑA 2: ¿DÓNDE ESTOY? (MAPA SATÉLITE COMPLETO) ==================== -->
+  <div id="vistaDonde" class="box" style="display:none;">
+    <!-- Buscador de dirección o calle -->
+    <div class="flex gap-2 mb-2.5">
+      <input type="text" id="deBuscarDirInput" placeholder="🔍 Buscar dirección o calle (ej. Calle Real, Vera)..." onkeydown="if(event.key==='Enter') buscarDireccionEnMapa()" />
+      <button type="button" class="small-btn !bg-sky-600 !border-none !text-white !px-3.5 shrink-0" onclick="buscarDireccionEnMapa()">Ir</button>
+    </div>
+
+    <!-- Dirección actual / punto elegido -->
+    <div class="bg-zinc-950 border border-white/10 rounded-xl px-3 py-2.5 mb-2.5">
+      <div class="flex justify-between items-center gap-2">
+        <span id="deEtiquetaPunto" class="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Tu posición actual</span>
+        <span id="dePrecisionBadge" class="font-mono text-[10.5px] font-bold px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-white/10">GPS...</span>
+      </div>
+      <div id="deDireccionTxt" class="text-[13px] font-bold text-zinc-100 mt-1 leading-snug">Obteniendo calle y número...</div>
+      <div class="flex justify-between items-center mt-1.5 gap-2">
+        <span id="deCoordsTxt" class="font-mono text-[11px] text-zinc-400">--</span>
+        <button type="button" class="small-btn !py-1 !px-2.5 !text-[11px]" onclick="copiarUbicacionActual()">📋 Copiar</button>
+      </div>
+    </div>
+
+    <!-- Interruptor: 4 cercanas vs Todo el nodo -->
+    <div class="mode-switch">
+      <button type="button" id="btnModo4Cercanas" class="active" onclick="cambiarModoMapaCercanos('4')">🎯 4 cercanas</button>
+      <button type="button" id="btnModoTodoNodo" onclick="cambiarModoMapaCercanos('NODO')">🕸️ Todo el nodo</button>
+    </div>
+
+    <!-- Mapa satélite grande con mira central y botones flotantes -->
+    <div class="map-shell">
+      <div id="mapaCercanos" style="height:100%; width:100%;"></div>
+      <div class="map-crosshair" title="Centro del mapa"></div>
+      <div class="map-float-bottom">
+        <button type="button" class="map-float-btn" onclick="buscarCtosEnCentroMapa()">📍 CTOs cercanas aquí</button>
+        <button type="button" class="map-float-btn !border-emerald-400/65" onclick="centrarMapaEnMi(true)">🎯 Centrar en mí</button>
+      </div>
+    </div>
+
+    <div id="deSubtituloLista" class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2 px-1">Elementos cercanos</div>
+    <div id="deRadarLista" class="flex flex-col gap-2"></div>
+  </div>
+
+  <!-- ==================== VISTA OCULTA: REGISTRO DRIVE (ACCESO DESDE ⚙️) ==================== -->
   <div id="vistaEstado" style="display:none;">
     <div class="box !p-3.5">
+      <div class="flex justify-between items-center mb-2.5">
+        <button type="button" class="small-btn !bg-zinc-900 !text-sky-300" onclick="cambiarTab('rafaga')">← Volver a Captura</button>
+        <span class="text-[12.5px] font-bold text-zinc-300">📂 Registro Drive</span>
+      </div>
       <div class="flex justify-between items-center gap-2">
         <div class="relative flex-1">
           <button type="button" class="pueblo-pill w-full text-left !py-2.5 !px-3.5 !rounded-xl !text-zinc-100" onclick="abrirMenuPueblo(event, 'menuEstadoPueblo', 'ESTADO_RED')">
@@ -1034,6 +1285,7 @@
   let bloquesCajas = [];
   let objectUrlCache = new Map();
   let ruletaAbiertaId = null;
+  let ruletaVistaAbiertaKey = null;
   let nodosAbiertosRegistro = new Set();
   let modoCompletando = null;
   let vistaCamaraPendiente = "Abierta";
@@ -1045,9 +1297,19 @@
   let diccionarioGpsGlobal = { actualizado: null, porPueblo: {} };
   let contextoMover = null;
   let subiendoActualmente = false;
-  let ultimaDireccionTexto = "";
+
+  // Estado Pestaña 2 "¿Dónde estoy?"
   let mapaLeaflet = null;
   let capaMarcadoresMapa = null;
+  let modoMapaCercanos = "4"; // "4" o "NODO"
+  let puntoMapaActivo = { lat: null, lng: null, esMio: true, etiqueta: "Tu posición actual", direccion: "" };
+
+  // Estado Visor Zoom (Swipe dentro de la misma CTO)
+  let zoomEstado = { lista: [], idx: 0, touchX: 0 };
+
+  // Cola OCR estrictamente secuencial (1 en 1 para evitar HTTP 429)
+  let colaOcrSecuencial = [];
+  let procesandoColaOcr = false;
 
   // ==================== MOTOR INDEXEDDB CON BLOBS NATIVOS (BAJA RAM) ====================
   function abrirDB() {
@@ -1132,8 +1394,9 @@
   function serializarBloquesSinBinarios(listaBloques) {
     return (listaBloques || []).map(b => ({
       id: b.id,
-      provincia: b.provincia,
-      pueblo: b.pueblo,
+      provincia: b.provincia || "",
+      pueblo: b.pueblo || "",
+      sinGps: Boolean(b.sinGps),
       tipo: b.tipo,
       numNodo: b.numNodo,
       numCaja: b.numCaja,
@@ -1146,8 +1409,8 @@
         lat: f.lat,
         lng: f.lng,
         timestamp: f.timestamp,
-        provincia: f.provincia,
-        pueblo: f.pueblo,
+        provincia: f.provincia || "",
+        pueblo: f.pueblo || "",
         vista: f.vista,
         usarParaPotencia: Boolean(f.usarParaPotencia),
         ocrEstado: f.ocrEstado === "leyendo" ? "pendiente" : f.ocrEstado,
@@ -1203,10 +1466,12 @@
     } catch (e) {}
   }
 
-  // ==================== ARRANQUE, PWA, PIN Y BOTÓN ATRÁS TRIPLE ====================
+  // ==================== ARRANQUE, PWA, PULSACIÓN LARGA, PIN Y ATRÁS TRIPLE ====================
   window.onload = async () => {
     registrarServiceWorkerPWA();
     activarTrampaBotonAtrasTriple();
+    vincularBotonesCamaraPulsacionLarga();
+    vincularTecladoZoomPC();
 
     let savedUrl = localStorage.getItem("ftth_script_url") || "";
     if (!savedUrl || savedUrl.includes(URL_ANTIGUA_ELIMINADA)) {
@@ -1234,6 +1499,58 @@
     }
   }
 
+  function vincularBotonesCamaraPulsacionLarga() {
+    document.querySelectorAll(".btn-cam-direct[data-vista]").forEach(btn => {
+      const vista = btn.dataset.vista;
+      let tDown = 0;
+      let timerCue = null;
+      let activo = false;
+
+      const limpiar = () => {
+        if (timerCue) { clearTimeout(timerCue); timerCue = null; }
+        btn.style.filter = "";
+        activo = false;
+      };
+
+      btn.addEventListener("pointerdown", e => {
+        if (e.button && e.button !== 0) return;
+        e.stopPropagation();
+        tDown = Date.now();
+        activo = true;
+        timerCue = setTimeout(() => {
+          vibrarTick(35);
+          btn.style.filter = "brightness(1.25)";
+        }, 420);
+      });
+
+      btn.addEventListener("pointerup", e => {
+        e.stopPropagation();
+        if (!activo) return;
+        const duracion = Date.now() - tDown;
+        limpiar();
+        if (duracion >= 420) {
+          dispararArchivoConVista(vista);
+        } else {
+          if (vista === "Potencia") abrirMenuBotonPotencia();
+          else dispararCamaraConVista(vista);
+        }
+      });
+
+      btn.addEventListener("pointerleave", limpiar);
+      btn.addEventListener("pointercancel", limpiar);
+    });
+  }
+
+  function vincularTecladoZoomPC() {
+    window.addEventListener("keydown", e => {
+      const zModal = document.getElementById("zoomModal");
+      if (!zModal || zModal.style.display !== "flex") return;
+      if (e.key === "ArrowLeft") navegarZoom(-1);
+      else if (e.key === "ArrowRight") navegarZoom(1);
+      else if (e.key === "Escape") cerrarZoom();
+    });
+  }
+
   function activarTrampaBotonAtrasTriple() {
     try {
       for (let i = 0; i < 3; i++) {
@@ -1242,7 +1559,7 @@
       window.addEventListener("popstate", () => {
         window.history.pushState({ ftthStay: Date.now() }, "", window.location.href);
 
-        const modales = ["zoomModal", "dondeEstoyModal", "confirmarRestaurarModal", "historialModal", "potenciaModal", "verDriveModal", "moverFotoModal"];
+        const modales = ["zoomModal", "ajustesModal", "confirmarSubidaModal", "confirmarRestaurarModal", "historialModal", "potenciaModal", "verDriveModal", "moverFotoModal"];
         for (const mId of modales) {
           const el = document.getElementById(mId);
           if (el && el.style.display === "flex") {
@@ -1250,12 +1567,13 @@
             return;
           }
         }
-        if (ruletaAbiertaId !== null) {
+        if (ruletaAbiertaId !== null || ruletaVistaAbiertaKey !== null) {
           ruletaAbiertaId = null;
+          ruletaVistaAbiertaKey = null;
           renderTarjetas();
           return;
         }
-        if (document.getElementById("vistaEstado").style.display !== "none") {
+        if (document.getElementById("vistaRafaga").style.display === "none") {
           cambiarTab("rafaga");
           return;
         }
@@ -1280,6 +1598,31 @@
     verificarConexionYSincronizarSilencioso();
   }
 
+  function abrirModalAjustes() {
+    cerrarFlotantes();
+    actualizarResumenDicGpsUI();
+    document.getElementById("ajustesModal").style.display = "flex";
+  }
+
+  function abrirRegistroDriveDesdeAjustes() {
+    document.getElementById("ajustesModal").style.display = "none";
+    cambiarTab("estado");
+  }
+
+  async function forzarRecargaPWA() {
+    try {
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      if ("serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+    } catch (e) {}
+    window.location.reload(true);
+  }
+
   function mostrarModalPin() {
     document.getElementById("pinErrorMsg").style.display = "none";
     document.getElementById("pinInput").value = "";
@@ -1292,7 +1635,7 @@
     localStorage.removeItem("ftth_ocr_apikey");
     pinActivo = "";
     apiKeyOcrActiva = "";
-    document.getElementById("configBox").open = false;
+    document.getElementById("ajustesModal").style.display = "none";
     mostrarModalPin();
   }
 
@@ -1410,6 +1753,7 @@
   }
 
   async function abrirModalHistorial() {
+    cerrarFlotantes();
     const hist = (await dbGet("historial_5")) || [];
     const cont = document.getElementById("listaSnapshotsHistorial");
     if (hist.length === 0) {
@@ -1439,6 +1783,7 @@
     }
     bloquesCajas = await hidratarBloquesConBlobs(found.bloques);
     ruletaAbiertaId = null;
+    ruletaVistaAbiertaKey = null;
     document.getElementById("historialModal").style.display = "none";
     vibrarTick(20);
     renderTarjetas();
@@ -1446,6 +1791,7 @@
   }
 
   function pedirConfirmacionRestaurarPagina() {
+    cerrarFlotantes();
     document.getElementById("confirmarRestaurarModal").style.display = "flex";
   }
 
@@ -1454,6 +1800,7 @@
     await guardarEstadoEnHistorialDB("Antes de restaurar página");
     bloquesCajas = [];
     ruletaAbiertaId = null;
+    ruletaVistaAbiertaKey = null;
     modoCompletando = null;
     document.getElementById("bannerCompletandoCaja").style.display = "none";
     document.getElementById("msgEstado").innerHTML = "";
@@ -1587,7 +1934,7 @@
     return f ? f.provincia : "Almería";
   }
 
-  // ==================== SEGUIMIENTO GPS EN VIVO + SEMÁFORO DE PRECISIÓN ====================
+  // ==================== SEGUIMIENTO GPS EN VIVO ====================
   function iniciarSeguimientoGpsVivo() {
     const actualizarPosicion = pos => {
       const lat = pos.coords.latitude;
@@ -1620,7 +1967,8 @@
 
       if (cambioPueblo) {
         seleccionPuebloEstado = { provincia: gpsDispositivo.provincia, pueblo: gpsDispositivo.pueblo };
-        document.getElementById("txtEstadoPueblo").innerText = `📍 ${gpsDispositivo.pueblo} (${gpsDispositivo.provincia})`;
+        const tEst = document.getElementById("txtEstadoPueblo");
+        if (tEst) tEst.innerText = `📍 ${gpsDispositivo.pueblo} (${gpsDispositivo.provincia})`;
         precargarRegistroSilencioso(gpsDispositivo.provincia, gpsDispositivo.pueblo);
       }
     };
@@ -1683,7 +2031,7 @@
     return { ...(pp["General"] || {}), ...(pp[pueblo] || {}) };
   }
 
-  function buscarElementosCercanosEnDiccionario(lat, lng, puebloPreferente, radioMaxMetros = 2000, limite = 4) {
+  function buscarElementosCercanosEnDiccionario(lat, lng, puebloPreferente, radioMaxMetros = 5000, limite = 4) {
     if (!lat || !lng) return [];
     const pp = (diccionarioGpsGlobal && diccionarioGpsGlobal.porPueblo) || {};
     const resultados = [];
@@ -1694,14 +2042,15 @@
         if (!pt || !pt.lat || !pt.lng) return;
         const dist = distanciaMetros(lat, lng, pt.lat, pt.lng);
         if (dist <= radioMaxMetros) {
+          const desc = descomponerCodigoEnRuleta(cod);
           resultados.push({
             codigo: cod,
             pueblo: nombrePueblo,
             provincia: obtenerProvinciaDePueblo(nombrePueblo),
             lat: pt.lat,
             lng: pt.lng,
-            tipo: pt.tipo || "CTO",
-            nodo: pt.nodo || "Nodo 01",
+            tipo: pt.tipo || (desc ? desc.tipo : "CTO"),
+            nodo: pt.nodo || (desc ? desc.nodo : "Nodo 01"),
             dist: Math.round(dist)
           });
         }
@@ -1729,6 +2078,32 @@
       }
     }
     return unicos;
+  }
+
+  function obtenerElementosDeMismoNodo(pueblo, nodoObjetivo, latRef, lngRef) {
+    const pp = (diccionarioGpsGlobal && diccionarioGpsGlobal.porPueblo) || {};
+    const mapa = pp[pueblo] || {};
+    const lista = [];
+    Object.keys(mapa).forEach(cod => {
+      const pt = mapa[cod];
+      if (!pt || !pt.lat || !pt.lng) return;
+      const desc = descomponerCodigoEnRuleta(cod);
+      const nodoPt = pt.nodo || (desc ? desc.nodo : "");
+      if (nodoPt === nodoObjetivo) {
+        lista.push({
+          codigo: cod,
+          pueblo,
+          provincia: obtenerProvinciaDePueblo(pueblo),
+          lat: pt.lat,
+          lng: pt.lng,
+          tipo: pt.tipo || (desc ? desc.tipo : "CTO"),
+          nodo: nodoPt,
+          dist: (latRef && lngRef) ? Math.round(distanciaMetros(latRef, lngRef, pt.lat, pt.lng)) : 0
+        });
+      }
+    });
+    lista.sort((a, b) => a.dist - b.dist);
+    return lista;
   }
 
   // ==================== COMPILADOR MASIVO DE ARCHIVOS .DXF (SOLO ADMIN) ====================
@@ -1896,74 +2271,31 @@
     }
   }
 
-  // ==================== MODAL "📍 ¿DÓNDE ESTOY?" + MAPA SATÉLITE 4 ELEMENTOS ====================
-  function abrirModalDondeEstoy() {
-    cerrarFlotantes();
-    document.getElementById("dondeEstoyModal").style.display = "flex";
-    actualizarModalDondeEstoy(false);
-  }
-
-  function cerrarModalDondeEstoy() {
-    document.getElementById("dondeEstoyModal").style.display = "none";
-  }
-
-  function renderizarMapaCercanosLeaflet(lat, lng, cercanos, regPueblo) {
+  // ==================== PESTAÑA 2: "¿DÓNDE ESTOY?" (MAPA SATÉLITE COMPLETO) ====================
+  function inicializarMapaDondeSiHaceFalta() {
     if (typeof L === "undefined") return;
-    const cont = document.getElementById("mapaCercanos");
-    if (!cont) return;
-
     if (!mapaLeaflet) {
       mapaLeaflet = L.map("mapaCercanos", { zoomControl: false, attributionControl: false });
       L.tileLayer("https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}", { maxZoom: 21 }).addTo(mapaLeaflet);
       capaMarcadoresMapa = L.layerGroup().addTo(mapaLeaflet);
+      mapaLeaflet.setView([gpsDispositivo.lat || 37.245, gpsDispositivo.lng || -1.868], 17);
     }
-
-    capaMarcadoresMapa.clearLayers();
-    const puntos = [[lat, lng]];
-
-    // Tu posición GPS actual (punto azul)
-    L.circleMarker([lat, lng], {
-      radius: 7, color: "#ffffff", weight: 2.5, fillColor: "#38bdf8", fillOpacity: 1
-    }).bindTooltip("Tú", { direction: "bottom" }).addTo(capaMarcadoresMapa);
-
-    // Las 4 cajas más cercanas con su rotulación visible permanente
-    cercanos.forEach(c => {
-      puntos.push([c.lat, c.lng]);
-      const est = regPueblo[c.codigo];
-      const color = (est && est.completo) ? "#10b981" : (est && est.faltan && est.faltan.length ? "#f59e0b" : "#ef4444");
-      const mapsPinUrl = `https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}`;
-
-      L.circleMarker([c.lat, c.lng], {
-        radius: 7, color: "#09090b", weight: 2, fillColor: color, fillOpacity: 1
-      })
-        .bindTooltip(`${c.codigo} (${c.dist}m)`, {
-          permanent: true,
-          direction: "top",
-          offset: [0, -8],
-          className: "ftth-map-label"
-        })
-        .on("click", () => window.open(mapsPinUrl, "_blank"))
-        .addTo(capaMarcadoresMapa);
-    });
-
-    setTimeout(() => {
-      mapaLeaflet.invalidateSize();
-      if (puntos.length > 1) {
-        mapaLeaflet.fitBounds(puntos, { padding: [36, 36], maxZoom: 19 });
-      } else {
-        mapaLeaflet.setView([lat, lng], 18);
-      }
-    }, 120);
   }
 
-  async function actualizarModalDondeEstoy(forzarLecturaGps) {
-    const dirEl = document.getElementById("deDireccionTxt");
-    const coordsEl = document.getElementById("deCoordsTxt");
-    const accEl = document.getElementById("dePrecisionBadge");
-    const radarEl = document.getElementById("deRadarLista");
+  async function abrirVistaDondeEstoy() {
+    inicializarMapaDondeSiHaceFalta();
+    setTimeout(() => { if (mapaLeaflet) mapaLeaflet.invalidateSize(); }, 80);
+    if (!puntoMapaActivo.lat) {
+      await centrarMapaEnMi(false);
+    } else {
+      await actualizarMapaYRadarParaPunto(puntoMapaActivo.lat, puntoMapaActivo.lng, puntoMapaActivo.esMio, false);
+    }
+  }
 
+  async function centrarMapaEnMi(forzarLecturaGps) {
+    inicializarMapaDondeSiHaceFalta();
     if (forzarLecturaGps && navigator.geolocation) {
-      dirEl.innerText = "Refrescando GPS de alta precisión...";
+      document.getElementById("deDireccionTxt").innerText = "Refrescando GPS de alta precisión...";
       await new Promise(resolve => {
         navigator.geolocation.getCurrentPosition(pos => {
           const loc = resolverPuebloPorCoordenadas(pos.coords.latitude, pos.coords.longitude);
@@ -1980,30 +2312,159 @@
     }
 
     if (!gpsDispositivo.lat || !gpsDispositivo.lng) {
-      accEl.innerText = "Sin GPS";
-      dirEl.innerText = "Activa la ubicación del dispositivo para detectar tu calle y las cajas cercanas.";
-      coordsEl.innerText = "--";
-      radarEl.innerHTML = `<div class="text-[12px] text-zinc-400 bg-zinc-900/70 p-3 rounded-xl">Esperando coordenadas GPS...</div>`;
+      document.getElementById("dePrecisionBadge").innerText = "Sin GPS";
+      document.getElementById("deDireccionTxt").innerText = "Activa la ubicación o busca una calle arriba para explorar el mapa.";
+      document.getElementById("deCoordsTxt").innerText = "--";
+      document.getElementById("deRadarLista").innerHTML = `<div class="text-[12px] text-zinc-400 bg-zinc-900/70 p-3 rounded-xl">Sin señal GPS. Puedes mover el mapa y pulsar «📍 CTOs cercanas aquí».</div>`;
       return;
     }
 
-    const lat = gpsDispositivo.lat;
-    const lng = gpsDispositivo.lng;
-    const acc = gpsDispositivo.acc || 0;
-    accEl.innerText = `±${acc}m`;
-    accEl.style.color = acc <= 12 ? "#34d399" : (acc <= 30 ? "#fbbf24" : "#f87171");
-    coordsEl.innerText = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    vibrarTick(15);
+    await actualizarMapaYRadarParaPunto(gpsDispositivo.lat, gpsDispositivo.lng, true, true);
+  }
 
-    const cercanos = buscarElementosCercanosEnDiccionario(lat, lng, gpsDispositivo.pueblo, 5000, 4);
-    const keyReg = `${gpsDispositivo.provincia}|${gpsDispositivo.pueblo}`;
+  async function buscarDireccionEnMapa() {
+    const q = (document.getElementById("deBuscarDirInput").value || "").trim();
+    if (!q) return;
+    const dirEl = document.getElementById("deDireccionTxt");
+    dirEl.innerText = `Buscando "${q}"...`;
+
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 5000);
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=es&q=${encodeURIComponent(q)}`, {
+        headers: { "Accept-Language": "es" },
+        signal: ctrl.signal
+      });
+      clearTimeout(t);
+      const res = await r.json();
+      if (!res || res.length === 0) {
+        dirEl.innerText = `No se encontró "${q}". Prueba con calle y pueblo.`;
+        return;
+      }
+      const lat = parseFloat(res[0].lat);
+      const lng = parseFloat(res[0].lon);
+      vibrarTick(20);
+      await actualizarMapaYRadarParaPunto(lat, lng, false, true);
+    } catch (e) {
+      dirEl.innerText = "Sin red para buscar direcciones.";
+    }
+  }
+
+  async function buscarCtosEnCentroMapa() {
+    if (!mapaLeaflet) return;
+    const c = mapaLeaflet.getCenter();
+    vibrarTick(18);
+    await actualizarMapaYRadarParaPunto(c.lat, c.lng, false, false);
+  }
+
+  async function cambiarModoMapaCercanos(modo) {
+    modoMapaCercanos = modo;
+    document.getElementById("btnModo4Cercanas").classList.toggle("active", modo === "4");
+    document.getElementById("btnModoTodoNodo").classList.toggle("active", modo === "NODO");
+    vibrarTick(12);
+    if (puntoMapaActivo.lat && puntoMapaActivo.lng) {
+      await actualizarMapaYRadarParaPunto(puntoMapaActivo.lat, puntoMapaActivo.lng, puntoMapaActivo.esMio, true);
+    }
+  }
+
+  function renderizarMapaCercanosLeaflet(lat, lng, esMio, elementos, regPueblo, ajustarVista) {
+    inicializarMapaDondeSiHaceFalta();
+    if (!mapaLeaflet || !capaMarcadoresMapa) return;
+
+    capaMarcadoresMapa.clearLayers();
+    const puntos = [[lat, lng]];
+
+    // Marcador del usuario (azul) o del punto consultado en el mapa (violeta)
+    if (gpsDispositivo.lat && gpsDispositivo.lng) {
+      L.circleMarker([gpsDispositivo.lat, gpsDispositivo.lng], {
+        radius: 7, color: "#ffffff", weight: 2.5, fillColor: "#38bdf8", fillOpacity: 1
+      }).bindTooltip("Tú", { direction: "bottom" }).addTo(capaMarcadoresMapa);
+    }
+
+    if (!esMio) {
+      L.circleMarker([lat, lng], {
+        radius: 6, color: "#ffffff", weight: 2, fillColor: "#a855f7", fillOpacity: 1
+      }).bindTooltip("Punto buscado", { direction: "bottom" }).addTo(capaMarcadoresMapa);
+    }
+
+    elementos.forEach(c => {
+      puntos.push([c.lat, c.lng]);
+      const est = regPueblo[c.codigo];
+      const color = (est && est.completo) ? "#10b981" : (est && est.faltan && est.faltan.length ? "#f59e0b" : "#ef4444");
+      const mapsPinUrl = `https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}`;
+
+      L.circleMarker([c.lat, c.lng], {
+        radius: 7, color: "#09090b", weight: 2, fillColor: color, fillOpacity: 1
+      })
+        .bindTooltip(modoMapaCercanos === "NODO" ? c.codigo : `${c.codigo} (${c.dist}m)`, {
+          permanent: true,
+          direction: "top",
+          offset: [0, -8],
+          className: "ftth-map-label"
+        })
+        .on("click", () => window.open(mapsPinUrl, "_blank"))
+        .addTo(capaMarcadoresMapa);
+    });
+
+    setTimeout(() => {
+      mapaLeaflet.invalidateSize();
+      if (ajustarVista) {
+        if (puntos.length > 1) {
+          mapaLeaflet.fitBounds(puntos, { padding: [38, 38], maxZoom: 19 });
+        } else {
+          mapaLeaflet.setView([lat, lng], 18);
+        }
+      }
+    }, 100);
+  }
+
+  async function actualizarMapaYRadarParaPunto(lat, lng, esMio, ajustarVista) {
+    const loc = resolverPuebloPorCoordenadas(lat, lng);
+    const puebloRef = loc ? loc.pueblo : gpsDispositivo.pueblo;
+    const provRef = loc ? loc.provincia : gpsDispositivo.provincia;
+
+    puntoMapaActivo = {
+      lat, lng, esMio,
+      etiqueta: esMio ? "Tu posición actual" : "Punto seleccionado en el mapa",
+      direccion: ""
+    };
+
+    document.getElementById("deEtiquetaPunto").innerText = puntoMapaActivo.etiqueta;
+    const accEl = document.getElementById("dePrecisionBadge");
+    if (esMio && gpsDispositivo.acc) {
+      accEl.innerText = `±${gpsDispositivo.acc}m`;
+      accEl.style.color = gpsDispositivo.acc <= 12 ? "#34d399" : (gpsDispositivo.acc <= 30 ? "#fbbf24" : "#f87171");
+    } else {
+      accEl.innerText = puebloRef || "Mapa";
+      accEl.style.color = "#c084fc";
+    }
+    document.getElementById("deCoordsTxt").innerText = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+    let elementosMostrar = buscarElementosCercanosEnDiccionario(lat, lng, puebloRef, 5000, 4);
+    let subtitulo = "4 elementos más cercanos";
+
+    if (modoMapaCercanos === "NODO" && elementosMostrar.length > 0) {
+      const ref = elementosMostrar[0];
+      const todosNodo = obtenerElementosDeMismoNodo(ref.pueblo, ref.nodo, lat, lng);
+      if (todosNodo.length > 0) {
+        elementosMostrar = todosNodo;
+        subtitulo = `${ref.nodo} completo (${todosNodo.length} elementos · ${ref.pueblo})`;
+      }
+    }
+
+    document.getElementById("deSubtituloLista").innerText = subtitulo;
+
+    const keyReg = `${provRef}|${puebloRef}`;
     const regPueblo = (cacheRegistroPorPueblo[keyReg] && cacheRegistroPorPueblo[keyReg].elementos) || {};
 
-    renderizarMapaCercanosLeaflet(lat, lng, cercanos, regPueblo);
+    renderizarMapaCercanosLeaflet(lat, lng, esMio, elementosMostrar, regPueblo, ajustarVista);
 
-    if (cercanos.length === 0) {
-      radarEl.innerHTML = `<div class="text-[12px] text-zinc-400 bg-zinc-900/70 p-3 rounded-xl border border-white/10">No hay elementos del plano compilados a menos de 5 km. Carga tus .DXF en ⚙️ Ajustes.</div>`;
+    const radarEl = document.getElementById("deRadarLista");
+    if (elementosMostrar.length === 0) {
+      radarEl.innerHTML = `<div class="text-[12px] text-zinc-400 bg-zinc-900/70 p-3 rounded-xl border border-white/10">No hay elementos del plano compilados a menos de 5 km de este punto. Carga tus .DXF en ⚙️ Ajustes.</div>`;
     } else {
-      radarEl.innerHTML = cercanos.map((c, idx) => {
+      radarEl.innerHTML = elementosMostrar.map((c, idx) => {
         const desc = descomponerCodigoEnRuleta(c.codigo);
         const tit = desc ? construirCodigoYTitulo(desc.tipo, desc.numNodo, desc.numCaja, c.pueblo).tituloHtml : c.codigo;
         const est = regPueblo[c.codigo];
@@ -2011,7 +2472,7 @@
         if (est && est.completo) badgeDrive = `<span class="text-emerald-400">🟢 Completo</span>`;
         else if (est && est.faltan && est.faltan.length) badgeDrive = `<span class="text-amber-300">🟠 Falta ${est.faltan.join(", ").toLowerCase()}</span>`;
 
-        // Solo pin exacto en Google Maps (sin crear ruta)
+        // Solo posición en Google Maps (sin crear ruta)
         const mapsPinUrl = `https://www.google.com/maps/search/?api=1&query=${c.lat},${c.lng}`;
         return `
           <div class="bg-zinc-950 border ${idx === 0 ? 'border-sky-400/50' : 'border-white/10'} rounded-xl p-2.5 flex justify-between items-center gap-2">
@@ -2020,13 +2481,14 @@
               <div class="text-[11px] mt-0.5">${badgeDrive} · <span class="text-zinc-500">${c.pueblo}</span></div>
             </div>
             <div class="flex gap-1.5 shrink-0">
-              <a href="${mapsPinUrl}" target="_blank" class="small-btn !px-2.5 !py-1.5" title="Ver posición en Google Maps">📍 Mapa</a>
+              <a href="${mapsPinUrl}" target="_blank" class="small-btn !px-2.5 !py-1.5" title="Ver pin en Google Maps">📍 Mapa</a>
               <button type="button" class="small-btn !bg-sky-600 !border-none !text-white !px-2.5 !py-1.5" onclick="usarCajaDesdeRadar('${c.provincia}', '${c.pueblo}', '${c.codigo}')">Usar</button>
             </div>
           </div>`;
       }).join("");
     }
 
+    const dirEl = document.getElementById("deDireccionTxt");
     dirEl.innerText = "Consultando calle y número...";
     try {
       const ctrl = new AbortController();
@@ -2040,25 +2502,25 @@
       const a = d.address || {};
       const calle = a.road || a.pedestrian || a.residential || a.path || a.neighbourhood || "";
       const num = a.house_number ? `, ${a.house_number}` : "";
-      const locNombre = a.town || a.city || a.village || gpsDispositivo.pueblo;
-      ultimaDireccionTexto = calle ? `${calle}${num} · ${locNombre}` : (d.display_name || `${gpsDispositivo.pueblo} (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
-      dirEl.innerText = ultimaDireccionTexto;
+      const locNombre = a.town || a.city || a.village || puebloRef || "";
+      puntoMapaActivo.direccion = calle ? `${calle}${num} · ${locNombre}` : (d.display_name || `${puebloRef} (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
+      dirEl.innerText = puntoMapaActivo.direccion;
     } catch (e) {
-      ultimaDireccionTexto = `${gpsDispositivo.pueblo} (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
-      dirEl.innerText = `${gpsDispositivo.pueblo} (sin red para callejero)`;
+      puntoMapaActivo.direccion = `${puebloRef || "Ubicación"} (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+      dirEl.innerText = `${puebloRef || "Punto"} (sin red para callejero)`;
     }
   }
 
   async function copiarUbicacionActual() {
-    if (!gpsDispositivo.lat || !gpsDispositivo.lng) return;
-    const texto = `${ultimaDireccionTexto || gpsDispositivo.pueblo}\nhttps://maps.google.com/?q=${gpsDispositivo.lat},${gpsDispositivo.lng}`;
+    if (!puntoMapaActivo.lat || !puntoMapaActivo.lng) return;
+    const texto = `${puntoMapaActivo.direccion || "Ubicación"}\nhttps://www.google.com/maps/search/?api=1&query=${puntoMapaActivo.lat},${puntoMapaActivo.lng}`;
     try {
       await navigator.clipboard.writeText(texto);
       vibrarTick(20);
       const el = document.getElementById("deDireccionTxt");
       const prev = el.innerText;
       el.innerText = "✅ Ubicación copiada al portapapeles";
-      setTimeout(() => { el.innerText = prev; }, 1600);
+      setTimeout(() => { el.innerText = prev; }, 1500);
     } catch (e) {
       prompt("Copia esta ubicación:", texto);
     }
@@ -2067,7 +2529,6 @@
   async function usarCajaDesdeRadar(provincia, pueblo, codigo) {
     const desc = descomponerCodigoEnRuleta(codigo);
     if (!desc) return;
-    cerrarModalDondeEstoy();
     cambiarTab("rafaga");
 
     let ultimo = bloquesCajas[bloquesCajas.length - 1];
@@ -2076,6 +2537,7 @@
         id: "b_" + Date.now(),
         provincia,
         pueblo,
+        sinGps: false,
         tipo: desc.tipo,
         numNodo: desc.numNodo,
         numCaja: desc.numCaja,
@@ -2088,6 +2550,7 @@
     } else {
       ultimo.provincia = provincia;
       ultimo.pueblo = pueblo;
+      ultimo.sinGps = false;
       ultimo.tipo = desc.tipo;
       ultimo.numNodo = desc.numNodo;
       ultimo.numCaja = desc.numCaja;
@@ -2102,14 +2565,19 @@
   }
 
   // === PEGAR AQUÍ EL BLOQUE 3 DE 3 ===
-  // ==================== PESTAÑAS, ZOOM Y SELECTOR DE PUEBLOS ====================
+  // ==================== PESTAÑAS, ZOOM CON SWIPE POR CTO Y SELECTOR DE PUEBLOS ====================
   function cambiarTab(tab) {
+    cerrarFlotantes();
     document.getElementById("vistaRafaga").style.display = tab === "rafaga" ? "block" : "none";
+    document.getElementById("vistaDonde").style.display = tab === "donde" ? "block" : "none";
     document.getElementById("vistaEstado").style.display = tab === "estado" ? "block" : "none";
-    document.getElementById("tabRafaga").classList.toggle("active", tab === "rafaga");
-    document.getElementById("tabEstado").classList.toggle("active", tab === "estado");
 
-    if (tab === "estado") {
+    document.getElementById("tabRafaga").classList.toggle("active", tab === "rafaga");
+    document.getElementById("tabDonde").classList.toggle("active", tab === "donde");
+
+    if (tab === "donde") {
+      abrirVistaDondeEstoy();
+    } else if (tab === "estado") {
       const key = `${seleccionPuebloEstado.provincia}|${seleccionPuebloEstado.pueblo}`;
       if (cacheRegistroPorPueblo[key]) {
         datosRegistroActual = cacheRegistroPorPueblo[key];
@@ -2120,25 +2588,93 @@
     }
   }
 
-  function abrirZoom(src) {
+  function abrirZoomDeBloque(bloqueId, fotoId) {
+    const b = bloquesCajas.find(x => x.id === bloqueId);
+    if (!b || !b.fotos || b.fotos.length === 0) return;
+    const infoTit = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
+
+    zoomEstado.lista = b.fotos.map(f => {
+      const vistaTxt = (b.tipo === "CTO" && f.usarParaPotencia && (f.vista === "Abierta" || f.vista === "Cerrada"))
+        ? `${f.vista} con potencia`
+        : f.vista;
+      return {
+        src: f.preview,
+        caption: `${infoTit.tipoTexto} ${infoTit.codigo} · ${vistaTxt}`
+      };
+    });
+
+    zoomEstado.idx = Math.max(0, b.fotos.findIndex(f => f.id === fotoId));
+    mostrarFotoZoomActual();
+  }
+
+  function abrirZoomSimple(src, caption) {
     if (!src) return;
-    document.getElementById("zoomImg").src = src;
+    zoomEstado.lista = [{ src, caption: caption || "" }];
+    zoomEstado.idx = 0;
+    mostrarFotoZoomActual();
+  }
+
+  function mostrarFotoZoomActual() {
+    const item = zoomEstado.lista[zoomEstado.idx];
+    if (!item) return;
+    document.getElementById("zoomImg").src = item.src;
+
+    const capEl = document.getElementById("zoomCaption");
+    const total = zoomEstado.lista.length;
+    if (item.caption || total > 1) {
+      capEl.innerText = total > 1 ? `${item.caption}  (${zoomEstado.idx + 1}/${total})` : item.caption;
+      capEl.style.display = "block";
+    } else {
+      capEl.style.display = "none";
+    }
+
+    document.getElementById("zoomPrevBtn").style.display = total > 1 ? "flex" : "none";
+    document.getElementById("zoomNextBtn").style.display = total > 1 ? "flex" : "none";
     document.getElementById("zoomModal").style.display = "flex";
+  }
+
+  function navegarZoom(delta) {
+    const total = zoomEstado.lista.length;
+    if (total <= 1) return;
+    zoomEstado.idx = (zoomEstado.idx + delta + total) % total;
+    vibrarTick(8);
+    mostrarFotoZoomActual();
+  }
+
+  function zoomTouchStart(e) {
+    if (e.touches && e.touches.length === 1) {
+      zoomEstado.touchX = e.touches[0].clientX;
+    }
+  }
+
+  function zoomTouchEnd(e) {
+    if (!e.changedTouches || e.changedTouches.length !== 1) return;
+    const dx = e.changedTouches[0].clientX - zoomEstado.touchX;
+    if (Math.abs(dx) > 45) {
+      navegarZoom(dx < 0 ? 1 : -1);
+    }
   }
 
   function cerrarZoom() {
     document.getElementById("zoomModal").style.display = "none";
   }
 
+  // Tocar cualquier parte fuera cierra menús y confirma/cierra las ruletas abiertas
   function cerrarFlotantes() {
     document.querySelectorAll(".dots-menu, .custom-dd-menu").forEach(m => m.style.display = "none");
+    if (ruletaAbiertaId !== null || ruletaVistaAbiertaKey !== null) {
+      ruletaAbiertaId = null;
+      ruletaVistaAbiertaKey = null;
+      renderTarjetas();
+      persistirSesionActiva();
+    }
   }
 
   function abrirMenuPueblo(ev, menuId, modo, bloqueId) {
     ev.stopPropagation();
     const menu = document.getElementById(menuId);
     const abierto = menu.style.display === "block";
-    cerrarFlotantes();
+    document.querySelectorAll(".dots-menu, .custom-dd-menu").forEach(m => m.style.display = "none");
     if (abierto) return;
     mostrarProvinciasEnMenu(menuId, modo, bloqueId);
     menu.style.display = "block";
@@ -2178,8 +2714,7 @@
       if (b) {
         b.provincia = provincia;
         b.pueblo = pueblo;
-        gpsDispositivo.provincia = provincia;
-        gpsDispositivo.pueblo = pueblo;
+        b.sinGps = false;
         precargarRegistroSilencioso(provincia, pueblo);
         renderTarjetas();
         await persistirSesionActiva();
@@ -2249,10 +2784,15 @@
     actualizarBotonesSuperioresVerde();
   }
 
-  // ==================== CAPTURA + EXIF GPS 3s + DETECTOR BORROSO + OCR MULTI-MOTOR ====================
+  // ==================== CAPTURA + GPS ESTRICTO + COMPRESIÓN WHATSAPP + OCR 1 A 1 ====================
   function dispararCamaraConVista(vista) {
     vistaCamaraPendiente = vista;
     document.getElementById("camInput").click();
+  }
+
+  function dispararArchivoConVista(vista) {
+    vistaCamaraPendiente = vista;
+    document.getElementById("vistaFileInput").click();
   }
 
   function abrirMenuBotonPotencia() {
@@ -2273,8 +2813,8 @@
       dispararCamaraConVista("Potencia");
       return;
     }
-    if (opcion === "SUBIR_GALERIA") {
-      document.getElementById("potGalInput").click();
+    if (opcion === "SUBIR_ARCHIVO") {
+      dispararArchivoConVista("Potencia");
       return;
     }
     if (!ultimoBloque) return alert("Carga primero una foto en la caja.");
@@ -2303,11 +2843,6 @@
       renderTarjetas();
       persistirSesionActiva();
     }
-  }
-
-  async function archivoPotenciaDesdeGaleria(e) {
-    vistaCamaraPendiente = "Potencia";
-    await archivosSeleccionados(e, "CAMARA");
   }
 
   async function extraerExifRapido(file) {
@@ -2366,19 +2901,21 @@
     }
   }
 
+  // Compresión tipo WhatsApp: lado máximo 1280px a calidad 0.72 (~150-220 KB, nítida y rápida)
   function procesarImagenABlobsYMetrica(file) {
     return new Promise(resolve => {
       const objUrl = URL.createObjectURL(file);
       const img = new Image();
       img.onload = () => {
+        const maxDim = Math.max(img.width, img.height);
         const cDrive = document.createElement("canvas");
-        const scaleD = img.width > 1600 ? 1600 / img.width : 1;
+        const scaleD = maxDim > 1280 ? 1280 / maxDim : 1;
         cDrive.width = Math.round(img.width * scaleD);
         cDrive.height = Math.round(img.height * scaleD);
         cDrive.getContext("2d").drawImage(img, 0, 0, cDrive.width, cDrive.height);
 
         const cOcr = document.createElement("canvas");
-        const scaleO = img.width > 800 ? 800 / img.width : 1;
+        const scaleO = maxDim > 900 ? 900 / maxDim : 1;
         cOcr.width = Math.round(img.width * scaleO);
         cOcr.height = Math.round(img.height * scaleO);
         const ctxOcr = cOcr.getContext("2d");
@@ -2396,7 +2933,7 @@
               borrosa: varianzaNitidez < 52
             });
           }, "image/jpeg", 0.76);
-        }, "image/jpeg", 0.82);
+        }, "image/jpeg", 0.72);
       };
       img.onerror = () => {
         URL.revokeObjectURL(objUrl);
@@ -2411,14 +2948,13 @@
     if (!files.length) return;
     e.target.value = "";
     document.getElementById("msgEstado").innerHTML = "";
-    const esGaleria = (origen === "GALERIA" || origen === "GALERIA_GPS");
+
+    const esCamara = (origen === "CAMARA");
+    const esPaquete = (origen === "PAQUETE");
 
     const nuevasFotos = [];
     for (const file of files) {
-      let lat = gpsDispositivo.lat;
-      let lng = gpsDispositivo.lng;
-      let provincia = gpsDispositivo.provincia || "Murcia";
-      let pueblo = gpsDispositivo.pueblo || "Águilas";
+      let lat = null, lng = null, provincia = "", pueblo = "", tieneGpsExif = false;
       let timestamp = file.lastModified || Date.now();
 
       const [exifData, proc] = await Promise.all([
@@ -2429,25 +2965,23 @@
 
       if (exifData.timestamp) timestamp = exifData.timestamp;
 
-      let gpsOrigen = "MOVIL";
+      // REGLA ESTRICTA DE GPS: Cámara usa GPS móvil; Archivos/Paquetes usan SOLO GPS EXIF del archivo
       if (exifData.gps && exifData.gps.latitude && exifData.gps.longitude) {
         lat = exifData.gps.latitude;
         lng = exifData.gps.longitude;
-        gpsOrigen = "EXIF";
+        tieneGpsExif = true;
         const loc = resolverPuebloPorCoordenadas(lat, lng);
         if (loc) {
           provincia = loc.provincia;
           pueblo = loc.pueblo;
         }
-      } else if (!lat || !lng) {
-        gpsOrigen = "SIN_GPS";
-      }
-
-      const hintGps = document.getElementById("gpsLiveText");
-      if (hintGps && esGaleria) {
-        hintGps.innerText = gpsOrigen === "EXIF"
-          ? `📍 GPS leído de la foto · ${pueblo}`
-          : `⚠️ Foto sin GPS EXIF (en Android elige desde DCIM/Camera)`;
+      } else if (esCamara) {
+        lat = gpsDispositivo.lat;
+        lng = gpsDispositivo.lng;
+        if (gpsDispositivo.lat && gpsDispositivo.lng) {
+          provincia = gpsDispositivo.provincia || "";
+          pueblo = gpsDispositivo.pueblo || "";
+        }
       }
 
       const id = "f_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
@@ -2460,7 +2994,8 @@
         preview,
         lat, lng, timestamp,
         provincia, pueblo,
-        vista: esGaleria ? "Abierta" : vistaCamaraPendiente,
+        tieneGpsExif,
+        vista: esPaquete ? "" : vistaCamaraPendiente,
         usarParaPotencia: false,
         ocrEstado: "pendiente",
         ocrError: "",
@@ -2473,13 +3008,15 @@
 
     nuevasFotos.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
+    const bloquesNuevosEnPaquete = new Set();
+
     nuevasFotos.forEach(foto => {
       let bloqueDestino = bloquesCajas[bloquesCajas.length - 1];
       let crearNuevoBloque = false;
 
       if (!bloqueDestino) {
         crearNuevoBloque = true;
-      } else if (esGaleria && !modoCompletando) {
+      } else if (esPaquete && !modoCompletando) {
         const ultimaFoto = bloqueDestino.fotos[bloqueDestino.fotos.length - 1];
         if (ultimaFoto) {
           const difMinutos = Math.abs((foto.timestamp || 0) - (ultimaFoto.timestamp || 0)) / 60000;
@@ -2496,8 +3033,9 @@
       if (crearNuevoBloque) {
         bloqueDestino = {
           id: "b_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
-          provincia: foto.provincia || "Murcia",
-          pueblo: foto.pueblo || "Águilas",
+          provincia: modoCompletando ? (seleccionPuebloEstado.provincia || "") : (foto.provincia || ""),
+          pueblo: modoCompletando ? (seleccionPuebloEstado.pueblo || "") : (foto.pueblo || ""),
+          sinGps: !modoCompletando && !foto.pueblo,
           tipo: modoCompletando ? modoCompletando.tipo : "CTO",
           numNodo: modoCompletando ? modoCompletando.numNodo : Math.max(1, ultimoNodoFijo),
           numCaja: modoCompletando ? modoCompletando.numCaja : 1,
@@ -2507,15 +3045,17 @@
           fotos: []
         };
         bloquesCajas.push(bloqueDestino);
+        if (esPaquete) bloquesNuevosEnPaquete.add(bloqueDestino.id);
+      } else {
+        // Si esta foto sí trae GPS EXIF de archivo y la caja estaba sin GPS, rellena el pueblo
+        if (foto.pueblo && (bloqueDestino.sinGps || !bloqueDestino.pueblo)) {
+          bloqueDestino.pueblo = foto.pueblo;
+          bloqueDestino.provincia = foto.provincia;
+          bloqueDestino.sinGps = false;
+        }
       }
 
-      if (esGaleria) {
-        const vistasDrive = (modoCompletando && modoCompletando.vistasEnDrive) ? modoCompletando.vistasEnDrive : {};
-        const ocupadas = bloqueDestino.fotos.map(x => x.vista);
-        foto.vista = ORDEN_VISTAS_CTO.find(v => !ocupadas.includes(v) && !vistasDrive[v])
-          || ORDEN_VISTAS_CTO.find(v => !ocupadas.includes(v))
-          || "Panorámica";
-      } else {
+      if (!esPaquete) {
         const idxExistente = bloqueDestino.fotos.findIndex(x => x.vista === foto.vista);
         if (idxExistente !== -1) bloqueDestino.fotos.splice(idxExistente, 1);
       }
@@ -2523,21 +3063,50 @@
       bloqueDestino.fotos.push(foto);
     });
 
+    // Asignación inteligente de vistas en paquetes según el orden real de campo:
+    // 1 foto -> Cerrada | 2 -> Abierta, Cerrada | 3 -> Abierta, Cerrada, Panorámica | 4 -> Abierta, Cerrada, Potencia, Panorámica
+    if (esPaquete) {
+      bloquesCajas.forEach(b => {
+        const sinVista = b.fotos.filter(f => !f.vista);
+        if (sinVista.length === 0) return;
+
+        if (bloquesNuevosEnPaquete.has(b.id) && !modoCompletando && sinVista.length === b.fotos.length) {
+          const n = b.fotos.length;
+          let secuencia = ["Cerrada"];
+          if (n === 2) secuencia = ["Abierta", "Cerrada"];
+          else if (n === 3) secuencia = ["Abierta", "Cerrada", "Panorámica"];
+          else if (n >= 4) secuencia = ["Abierta", "Cerrada", "Potencia", "Panorámica"];
+
+          b.fotos.forEach((f, idx) => {
+            f.vista = secuencia[idx] || "Panorámica";
+          });
+        } else {
+          const vistasDrive = (modoCompletando && modoCompletando.vistasEnDrive) ? modoCompletando.vistasEnDrive : {};
+          const ordenRelleno = ["Abierta", "Cerrada", "Panorámica", "Potencia"];
+          sinVista.forEach(f => {
+            const ocupadas = b.fotos.map(x => x.vista).filter(Boolean);
+            f.vista = ordenRelleno.find(v => !ocupadas.includes(v) && !vistasDrive[v])
+              || ordenRelleno.find(v => !ocupadas.includes(v))
+              || "Panorámica";
+          });
+        }
+      });
+    }
+
     renderTarjetas();
     await persistirSesionActiva();
     await guardarEstadoEnHistorialDB("Auto-guardado");
-    dispararCruceGpsYOcrEnParalelo();
+    dispararCruceGpsYOcrSecuencial();
   }
 
-  function dispararCruceGpsYOcrEnParalelo() {
+  function dispararCruceGpsYOcrSecuencial() {
     bloquesCajas.forEach(bloque => {
       if (bloque.bloqueadoPorCompletar || bloque.editadoManualmente) {
         bloque.fotos.forEach(f => f.ocrEstado = "listo");
-        renderTarjetas();
         return;
       }
 
-      // 1º Cruce instantáneo con el mapa .DXF mediante GPS
+      // 1º Cruce instantáneo con diccionario .DXF mediante GPS (0,01s)
       const fotoConGps = bloque.fotos.find(f => f.lat && f.lng);
       if (!bloque.codigoYaDetectadoPorOcr && fotoConGps) {
         const masCercano = buscarElementosCercanosEnDiccionario(fotoConGps.lat, fotoConGps.lng, bloque.pueblo, 45, 1)[0];
@@ -2549,22 +3118,76 @@
             bloque.numCaja = desc.numCaja;
             bloque.pueblo = masCercano.pueblo;
             bloque.provincia = masCercano.provincia;
+            bloque.sinGps = false;
             ultimoNodoFijo = desc.numNodo;
             localStorage.setItem("ftth_last_nodo_num", String(ultimoNodoFijo));
             vibrarTick(14);
-            renderTarjetas();
           }
         }
       }
 
-      // 2º Lectura OCR directa en paralelo (prioridad Cerrada -> Abierta -> resto)
-      const pendientes = bloque.fotos.filter(f => f.ocrEstado === "pendiente");
-      pendientes.sort((a, b) => {
-        const peso = v => (v === "Cerrada" ? 1 : v === "Abierta" ? 2 : 3);
-        return peso(a.vista) - peso(b.vista);
-      });
+      // 2º Encolar fotos pendientes para lectura OCR secuencial (1 en 1)
+      encolarOcrBloque(bloque, false);
+    });
 
-      pendientes.forEach(async foto => {
+    renderTarjetas();
+    verificarDuplicadosEnSegundoPlano();
+  }
+
+  function releerCodigoBloque(bloqueId) {
+    const b = bloquesCajas.find(x => x.id === bloqueId);
+    if (!b || !b.fotos || b.fotos.length === 0) return;
+    b.codigoYaDetectadoPorOcr = false;
+    b.editadoManualmente = false;
+    b.bloqueadoPorCompletar = false;
+    b.fotos.forEach(f => {
+      f.ocrEstado = "pendiente";
+      f.ocrError = "";
+      f.ocrErrorDetalle = "";
+    });
+    vibrarTick(18);
+    encolarOcrBloque(b, true);
+    renderTarjetas();
+  }
+
+  function encolarOcrBloque(bloque, forzar) {
+    if (!forzar && (bloque.bloqueadoPorCompletar || bloque.editadoManualmente || bloque.codigoYaDetectadoPorOcr)) {
+      bloque.fotos.forEach(f => f.ocrEstado = "listo");
+      return;
+    }
+
+    const pendientes = bloque.fotos.filter(f => f.ocrEstado === "pendiente");
+    pendientes.sort((a, b) => {
+      const peso = v => (v === "Cerrada" ? 1 : v === "Abierta" ? 2 : v === "Panorámica" ? 3 : 4);
+      return peso(a.vista) - peso(b.vista);
+    });
+
+    pendientes.forEach(f => {
+      const yaEnCola = colaOcrSecuencial.some(item => item.bloqueId === bloque.id && item.fotoId === f.id);
+      if (!yaEnCola) colaOcrSecuencial.push({ bloqueId: bloque.id, fotoId: f.id });
+    });
+
+    procesarSiguienteOcrEnCola();
+  }
+
+  async function procesarSiguienteOcrEnCola() {
+    if (procesandoColaOcr) return;
+    procesandoColaOcr = true;
+
+    try {
+      while (colaOcrSecuencial.length > 0) {
+        const tarea = colaOcrSecuencial.shift();
+        const bloque = bloquesCajas.find(b => b.id === tarea.bloqueId);
+        if (!bloque) continue;
+        const foto = bloque.fotos.find(f => f.id === tarea.fotoId);
+        if (!foto) continue;
+
+        // Cortocircuito: si otra foto de la misma CTO ya leyó el código, no gastar cuota ni saturar API
+        if (bloque.codigoYaDetectadoPorOcr || bloque.editadoManualmente || bloque.bloqueadoPorCompletar) {
+          foto.ocrEstado = "listo";
+          continue;
+        }
+
         foto.ocrEstado = "leyendo";
         foto.ocrError = "";
         foto.ocrErrorDetalle = "";
@@ -2574,8 +3197,9 @@
         if (!rec || (!rec.blobOcr && !rec.blobDrive)) {
           foto.ocrEstado = "listo";
           renderTarjetas();
-          return;
+          continue;
         }
+
         const b64Ocr = await blobABase64Puro(rec.blobOcr || rec.blobDrive);
         const resOcr = await leerCodigoOcrDirecto(b64Ocr);
         foto.ocrEstado = "listo";
@@ -2587,6 +3211,7 @@
           bloque.numNodo = resOcr.info.numNodo;
           bloque.numCaja = resOcr.info.numCaja;
           bloque.codigoYaDetectadoPorOcr = true;
+          bloque.fotos.forEach(fx => { if (fx.ocrEstado === "pendiente") fx.ocrEstado = "listo"; });
           ultimoNodoFijo = resOcr.info.numNodo;
           localStorage.setItem("ftth_last_nodo_num", String(ultimoNodoFijo));
           vibrarTick(25);
@@ -2595,9 +3220,14 @@
           verificarDuplicadosEnSegundoPlano();
         }
         renderTarjetas();
-      });
-    });
-    verificarDuplicadosEnSegundoPlano();
+
+        if (colaOcrSecuencial.length > 0) {
+          await new Promise(r => setTimeout(r, 420));
+        }
+      }
+    } finally {
+      procesandoColaOcr = false;
+    }
   }
 
   async function leerCodigoOcrDirecto(base64Ocr) {
@@ -2605,13 +3235,14 @@
     let ultimoError = "";
     let ultimoDetalle = "";
     const key = String(apiKeyOcrActiva || "").trim();
+    const esOcrSpace = key && !key.startsWith("AQ.") && !key.startsWith("AIza");
 
     if (key && base64Ocr && base64Ocr.length > 100) {
-      // VÍA 1: OCR.SPACE DIRECTO (Claves K8...)
-      if (!key.startsWith("AQ.") && !key.startsWith("AIza")) {
+      // VÍA 1: OCR.SPACE DIRECTO (Nunca llama a respaldo en Código.gs para evitar bloqueo E580 de IP compartida)
+      if (esOcrSpace) {
         const t0 = performance.now();
         const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), 6000);
+        const timer = setTimeout(() => ctrl.abort(), 7000);
         try {
           const fd = new FormData();
           fd.append("apikey", key);
@@ -2643,16 +3274,17 @@
             ultimoError = "OCR.space";
             ultimoDetalle = String(d.ErrorMessage || "Error procesando imagen");
           } else {
+            const txtErr = await r.text().catch(() => "");
             ultimoError = `HTTP ${r.status}`;
-            ultimoDetalle = `OCR.space HTTP ${r.status}`;
+            ultimoDetalle = `OCR.space HTTP ${r.status}: ${txtErr.slice(0, 160)}`;
           }
         } catch (err) {
           clearTimeout(timer);
-          ultimoError = err.name === "AbortError" ? "Timeout 6s" : "Sin red";
+          ultimoError = err.name === "AbortError" ? "Timeout 7s" : "Sin red";
           ultimoDetalle = `OCR.space -> ${err.message}`;
         }
       } else {
-        // VÍA 2: GEMINI DIRECTO (Vertex si empieza por AQ. | AI Studio si empieza por AIza)
+        // VÍA 2: GEMINI DIRECTO (Vertex AQ. o AI Studio AIza)
         const prompt = 'Lee la etiqueta o rotulacion FTTH de esta caja (ejemplos: "17-37", "01-08", "E-17-01", "N-17"). Responde unicamente con el codigo leido o vacio si no se ve.';
         const payload = {
           contents: [{
@@ -2715,8 +3347,8 @@
       }
     }
 
-    // Respaldo automático vía Código.gs
-    if (pinActivo && base64Ocr && base64Ocr.length > 100) {
+    // Respaldo por servidor SOLO si NO es OCR.space (para no disparar bloqueo E580)
+    if (!esOcrSpace && pinActivo && base64Ocr && base64Ocr.length > 100) {
       try {
         const resp = await fetch(obtenerEndpoint(), {
           method: "POST",
@@ -2746,7 +3378,7 @@
     return { info: null, errorCorto: ultimoError, errorDetalle: ultimoDetalle };
   }
 
-  // ==================== RENDERIZADO DE TARJETAS Y MOVIMIENTO ENTRE CAJAS ====================
+  // ==================== RENDERIZADO DE TARJETAS, RULETAS MÓVIL/PC Y RELEER ====================
   function renderTarjetas() {
     const cont = document.getElementById("contenedorTarjetas");
     bloquesCajas = bloquesCajas.filter(b => b.fotos.length > 0 || (modoCompletando && bloquesCajas.length === 1));
@@ -2763,51 +3395,57 @@
       const infoNombre = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
       const menuPuebloId = `menuPueblo_${b.id}`;
       const estaRuletaAbierta = (ruletaAbiertaId === b.id);
+      const faltaPueblo = !b.pueblo || b.sinGps;
 
       const itemsTipoHtml = TIPOS_RULETA.map(t =>
-        `<div class="wheel-item ${b.tipo === t.id ? 'selected' : ''}" data-val="${t.id}" onclick="seleccionarEnRuletaClick('${b.id}', 'tipo', '${t.id}')">${t.label}</div>`
+        `<div class="wheel-item ${b.tipo === t.id ? 'selected' : ''}" data-val="${t.id}" onclick="seleccionarEnRuletaClick(event, '${b.id}', 'tipo', '${t.id}')">${t.label}</div>`
       ).join("");
 
       let itemsNodoHtml = "";
       for (let n = 1; n <= 99; n++) {
         const nPad = String(n).padStart(2, "0");
-        itemsNodoHtml += `<div class="wheel-item ${b.numNodo === n ? 'selected' : ''}" data-val="${n}" onclick="seleccionarEnRuletaClick('${b.id}', 'nodo', ${n})">N-${nPad}</div>`;
+        itemsNodoHtml += `<div class="wheel-item ${b.numNodo === n ? 'selected' : ''}" data-val="${n}" onclick="seleccionarEnRuletaClick(event, '${b.id}', 'nodo', ${n})">N-${nPad}</div>`;
       }
 
       let itemsCajaHtml = "";
       for (let c = 1; c <= 64; c++) {
         const cPad = String(c).padStart(2, "0");
-        itemsCajaHtml += `<div class="wheel-item ${b.numCaja === c ? 'selected' : ''}" data-val="${c}" onclick="seleccionarEnRuletaClick('${b.id}', 'caja', ${c})">${cPad}</div>`;
+        itemsCajaHtml += `<div class="wheel-item ${b.numCaja === c ? 'selected' : ''}" data-val="${c}" onclick="seleccionarEnRuletaClick(event, '${b.id}', 'caja', ${c})">${cPad}</div>`;
       }
 
       const alertaResumenHtml = generarAlertaCortaBloque(b, infoNombre.codigo);
       const vistasPermitidas = b.tipo === "CTO" ? ORDEN_VISTAS_CTO : ORDEN_VISTAS_NODO_EMP;
-
       const otrasCajasActivas = bloquesCajas.filter(otra => otra.id !== b.id && otra.fotos.length > 0);
-      const optsMoverAOtraCaja = otrasCajasActivas.map(otra => {
-        const infoOtra = construirCodigoYTitulo(otra.tipo, otra.numNodo, otra.numCaja, otra.pueblo);
-        return `<option value="__MOVER_A__${otra.id}">↪ Mover a ${infoOtra.tituloPlano}</option>`;
-      }).join("");
 
       const fotosHtml = b.fotos.map(f => {
         if (!vistasPermitidas.includes(f.vista)) f.vista = "Cerrada";
+        const keyVista = `${b.id}_${f.id}`;
+        const vistaAbierta = (ruletaVistaAbiertaKey === keyVista);
 
-        const optsVista = vistasPermitidas.map(v => {
-          let textoOpcion = v;
-          if (b.tipo === "CTO" && f.usarParaPotencia && (v === "Abierta" || v === "Cerrada") && f.vista === v) {
-            textoOpcion = `${v} con potencia`;
-          }
-          return `<option value="${v}" ${f.vista === v ? 'selected' : ''}>${textoOpcion}</option>`;
-        }).join("") +
-        optsMoverAOtraCaja +
-        (b.fotos.length > 1 ? `<option value="__SEPARAR__">➕ Separar en caja nueva</option>` : "");
+        const etiquetaVistaActual = (b.tipo === "CTO" && f.usarParaPotencia && (f.vista === "Abierta" || f.vista === "Cerrada"))
+          ? `${f.vista} + ⚡`
+          : f.vista;
+
+        const itemsVistaHtml = vistasPermitidas.map(v =>
+          `<div class="wheel-item ${f.vista === v ? 'selected' : ''}" data-val="${v}" onclick="seleccionarVistaRuletaClick(event, '${b.id}', '${f.id}', '${v}')">${v}</div>`
+        ).join("");
+
+        const accionesMoverHtml = (otrasCajasActivas.length > 0 || b.fotos.length > 1)
+          ? `<div class="border-t border-white/10 mt-1.5 pt-1.5 flex flex-col gap-1 px-1 pb-0.5">` +
+              otrasCajasActivas.map(otra => {
+                const infoOtra = construirCodigoYTitulo(otra.tipo, otra.numNodo, otra.numCaja, otra.pueblo);
+                return `<button type="button" class="text-[10.5px] font-semibold text-sky-300 hover:bg-sky-500/15 rounded-md py-1 px-1.5 text-left" onclick="event.stopPropagation(); moverFotoAOtraCaja('${b.id}', '${f.id}', '${otra.id}')">↪ Mover a ${infoOtra.codigo}</button>`;
+              }).join("") +
+              (b.fotos.length > 1 ? `<button type="button" class="text-[10.5px] font-semibold text-amber-300 hover:bg-amber-500/15 rounded-md py-1 px-1.5 text-left" onclick="event.stopPropagation(); separarFotoACajaNueva('${b.id}', '${f.id}')">➕ Separar a caja nueva</button>` : "") +
+            `</div>`
+          : "";
 
         let btnUsarPotenciaHtml = "";
         if (b.tipo === "CTO" && (f.vista === "Abierta" || f.vista === "Cerrada")) {
           const activo = Boolean(f.usarParaPotencia);
           btnUsarPotenciaHtml = `
-            <button type="button" class="btn-potencia-toggle ${activo ? 'active' : ''}" onclick="toggleUsarFotoParaPotencia('${b.id}', '${f.id}')">
-              ${activo ? `✓ ${f.vista} con potencia` : `⚡ Usar de foto con potencia`}
+            <button type="button" class="btn-potencia-mini ${activo ? 'active' : ''}" onclick="event.stopPropagation(); toggleUsarFotoParaPotencia('${b.id}', '${f.id}')">
+              ${activo ? `✓ Con potencia` : `⚡ + Potencia`}
             </button>`;
         }
 
@@ -2815,7 +3453,7 @@
         if (f.ocrEstado === "leyendo") badgeOcr = `<span class="ocr-badge">🔍 Leyendo...</span>`;
         else if (f.ocrError) {
           const errSafe = String(f.ocrErrorDetalle || f.ocrError).replace(/"/g, "&quot;");
-          badgeOcr = `<span class="ocr-badge err" onclick="alert(this.dataset.err)" data-err="${errSafe}">⚠️ ${f.ocrError}</span>`;
+          badgeOcr = `<span class="ocr-badge err" onclick="event.stopPropagation(); alert(this.dataset.err)" data-err="${errSafe}">⚠️ ${f.ocrError}</span>`;
         }
 
         const mostrarAvisoBorrosa = f.borrosa && (f.vista === "Abierta" || f.vista === "Potencia");
@@ -2824,7 +3462,7 @@
         let dupHtml = "";
         if (f.duplicadoInfo && f.duplicadoInfo.existe) {
           dupHtml = `
-            <div class="dup-box">
+            <div class="dup-box" onclick="event.stopPropagation()">
               <div class="text-red-300 font-semibold mb-1">Ya existe en Drive</div>
               <div class="flex gap-1.5">
                 <button class="small-btn" onclick="verFotoGuardadaEnDrive('${f.duplicadoInfo.fileId}')">👁️ Ver</button>
@@ -2838,11 +3476,27 @@
           <div class="thumb-card ${mostrarAvisoBorrosa ? 'blurry-warn' : ''}">
             ${badgeOcr}
             ${badgeBorrosa}
-            <button class="del-btn" onclick="borrarFotoDeBloque('${b.id}', '${f.id}')">✕</button>
-            <img src="${f.preview}" onclick="abrirZoom('${f.preview}')" />
-            <select onchange="cambiarVistaOMoverEntreCajas('${b.id}', '${f.id}', this.value)" class="mt-2">
-              ${optsVista}
-            </select>
+            <button class="del-btn" onclick="event.stopPropagation(); borrarFotoDeBloque('${b.id}', '${f.id}')">✕</button>
+            <img src="${f.preview}" onclick="event.stopPropagation(); abrirZoomDeBloque('${b.id}', '${f.id}')" />
+
+            <!-- Selector de vista en modo ruleta (toca fuera para confirmar) -->
+            <button type="button" id="lblVista_${keyVista}" class="vista-pill-btn ${vistaAbierta ? 'open' : ''}" onclick="event.stopPropagation(); toggleRuletaVista('${b.id}', '${f.id}')">
+              <span>${etiquetaVistaActual}</span>
+              <span class="text-[10px] text-zinc-400">${vistaAbierta ? '▴' : '▾'}</span>
+            </button>
+
+            ${vistaAbierta ? `
+              <div class="view-wheel-drawer" onclick="event.stopPropagation()">
+                <div class="wheel-drum-wrap">
+                  <div class="wheel-drum" id="drum_vista_${keyVista}" data-step="28" onscroll="alGirarTamborVista('${b.id}', '${f.id}', this)">
+                    <div class="wheel-spacer"></div>
+                    ${itemsVistaHtml}
+                    <div class="wheel-spacer"></div>
+                  </div>
+                </div>
+                ${accionesMoverHtml}
+              </div>` : ""}
+
             ${btnUsarPotenciaHtml}
             ${dupHtml}
           </div>`;
@@ -2851,25 +3505,25 @@
       cont.innerHTML += `
         <div class="element-card">
           <div class="element-header">
-            <button type="button" class="element-title-btn ${estaRuletaAbierta ? 'open' : ''}" onclick="toggleRuletaBloque('${b.id}')">
+            <button type="button" class="element-title-btn ${estaRuletaAbierta ? 'open' : ''}" onclick="event.stopPropagation(); toggleRuletaBloque('${b.id}')">
               <span id="lblTitulo_${b.id}">${infoNombre.tituloHtml}</span>
               <span class="text-[11px] text-zinc-400 ml-2">${estaRuletaAbierta ? '▴' : '▾'}</span>
             </button>
 
             <div class="relative">
-              <button type="button" class="pueblo-pill" onclick="abrirMenuPueblo(event, '${menuPuebloId}', 'BLOQUE_CAPTURA', '${b.id}')">
-                📍 ${b.pueblo || 'Elegir'} ▾
+              <button type="button" class="pueblo-pill ${faltaPueblo ? 'sin-gps' : ''}" onclick="abrirMenuPueblo(event, '${menuPuebloId}', 'BLOQUE_CAPTURA', '${b.id}')">
+                ${faltaPueblo ? '⚠️ Sin GPS · Elegir' : '📍 ' + b.pueblo} ▾
               </button>
               <div id="${menuPuebloId}" class="custom-dd-menu" onclick="event.stopPropagation()"></div>
             </div>
           </div>
 
-          <div id="drawer_${b.id}" class="wheel-drawer" style="display:${estaRuletaAbierta ? 'block' : 'none'};">
+          <div id="drawer_${b.id}" class="wheel-drawer" style="display:${estaRuletaAbierta ? 'block' : 'none'};" onclick="event.stopPropagation()">
             <div class="wheel-grid">
               <div>
                 <div class="wheel-col-label">Elemento</div>
                 <div class="wheel-drum-wrap">
-                  <div class="wheel-drum" id="drum_tipo_${b.id}" onscroll="alGirarTambor('${b.id}', 'tipo', this)">
+                  <div class="wheel-drum" id="drum_tipo_${b.id}" data-step="32" onscroll="alGirarTambor('${b.id}', 'tipo', this)">
                     <div class="wheel-spacer"></div>
                     ${itemsTipoHtml}
                     <div class="wheel-spacer"></div>
@@ -2879,7 +3533,7 @@
               <div style="opacity:${b.tipo === 'EMPALME_RA' ? '0.25' : '1'}; pointer-events:${b.tipo === 'EMPALME_RA' ? 'none' : 'auto'};">
                 <div class="wheel-col-label">Nodo</div>
                 <div class="wheel-drum-wrap">
-                  <div class="wheel-drum" id="drum_nodo_${b.id}" onscroll="alGirarTambor('${b.id}', 'nodo', this)">
+                  <div class="wheel-drum" id="drum_nodo_${b.id}" data-step="32" onscroll="alGirarTambor('${b.id}', 'nodo', this)">
                     <div class="wheel-spacer"></div>
                     ${itemsNodoHtml}
                     <div class="wheel-spacer"></div>
@@ -2889,7 +3543,7 @@
               <div style="opacity:${b.tipo === 'NODO' ? '0.25' : '1'}; pointer-events:${b.tipo === 'NODO' ? 'none' : 'auto'};">
                 <div class="wheel-col-label">Número</div>
                 <div class="wheel-drum-wrap">
-                  <div class="wheel-drum" id="drum_caja_${b.id}" onscroll="alGirarTambor('${b.id}', 'caja', this)">
+                  <div class="wheel-drum" id="drum_caja_${b.id}" data-step="32" onscroll="alGirarTambor('${b.id}', 'caja', this)">
                     <div class="wheel-spacer"></div>
                     ${itemsCajaHtml}
                     <div class="wheel-spacer"></div>
@@ -2899,12 +3553,76 @@
             </div>
           </div>
 
-          <div id="alertas_${b.id}">${alertaResumenHtml}</div>
+          <div class="status-row">
+            <div id="alertas_${b.id}">${alertaResumenHtml}</div>
+            <button type="button" class="btn-releer-mini" onclick="event.stopPropagation(); releerCodigoBloque('${b.id}')" title="Volver a leer los dígitos con OCR">
+              🔄 Releer
+            </button>
+          </div>
+
           <div class="thumbs">${fotosHtml}</div>
         </div>`;
     });
 
-    if (ruletaAbiertaId) setTimeout(() => centrarTamboresDeBloque(ruletaAbiertaId), 15);
+    setTimeout(() => {
+      if (ruletaAbiertaId) centrarTamboresDeBloque(ruletaAbiertaId);
+      if (ruletaVistaAbiertaKey) centrarTamborVista(ruletaVistaAbiertaKey);
+      activarArrastreRatonEnRuletas();
+    }, 15);
+  }
+
+  // Soporte completo de arrastre con ratón y rueda de scroll en PC para TODAS las ruletas
+  function activarArrastreRatonEnRuletas() {
+    document.querySelectorAll(".wheel-drum").forEach(drum => {
+      if (drum.dataset.pcBound) return;
+      drum.dataset.pcBound = "1";
+      const step = Number(drum.dataset.step || 32);
+
+      drum.addEventListener("wheel", e => {
+        e.preventDefault();
+        e.stopPropagation();
+        drum.scrollTop += (e.deltaY > 0 ? step : -step);
+      }, { passive: false });
+
+      let dragging = false;
+      let startY = 0;
+      let startScroll = 0;
+      let moved = false;
+
+      drum.addEventListener("mousedown", e => {
+        if (e.button !== 0) return;
+        dragging = true;
+        moved = false;
+        startY = e.clientY;
+        startScroll = drum.scrollTop;
+        drum.style.scrollSnapType = "none";
+      });
+
+      const stopDrag = () => {
+        if (!dragging) return;
+        dragging = false;
+        drum.style.scrollSnapType = "y mandatory";
+        const snapped = Math.round(drum.scrollTop / step) * step;
+        drum.scrollTo({ top: snapped, behavior: "smooth" });
+      };
+
+      drum.addEventListener("mousemove", e => {
+        if (!dragging) return;
+        const dy = e.clientY - startY;
+        if (Math.abs(dy) > 3) moved = true;
+        drum.scrollTop = startScroll - dy;
+      });
+
+      drum.addEventListener("mouseup", stopDrag);
+      drum.addEventListener("mouseleave", stopDrag);
+      drum.addEventListener("click", e => {
+        if (moved) {
+          e.stopPropagation();
+          e.preventDefault();
+          moved = false;
+        }
+      }, true);
+    });
   }
 
   function generarAlertaCortaBloque(b, codigoMostrado) {
@@ -2930,7 +3648,15 @@
   let timersScrollRuleta = {};
 
   function toggleRuletaBloque(bloqueId) {
+    ruletaVistaAbiertaKey = null;
     ruletaAbiertaId = (ruletaAbiertaId === bloqueId) ? null : bloqueId;
+    renderTarjetas();
+  }
+
+  function toggleRuletaVista(bloqueId, fotoId) {
+    ruletaAbiertaId = null;
+    const k = `${bloqueId}_${fotoId}`;
+    ruletaVistaAbiertaKey = (ruletaVistaAbiertaKey === k) ? null : k;
     renderTarjetas();
   }
 
@@ -2944,6 +3670,21 @@
     if (drumT) drumT.scrollTop = idxTipo * 32;
     if (drumN) drumN.scrollTop = (b.numNodo - 1) * 32;
     if (drumC) drumC.scrollTop = (b.numCaja - 1) * 32;
+  }
+
+  function centrarTamborVista(keyVista) {
+    const parts = keyVista.split("_f_");
+    if (parts.length < 2) return;
+    const bloqueId = parts[0];
+    const fotoId = "f_" + parts.slice(1).join("_f_");
+    const b = bloquesCajas.find(x => x.id === bloqueId);
+    if (!b) return;
+    const f = b.fotos.find(x => x.id === fotoId);
+    if (!f) return;
+    const vistasPermitidas = b.tipo === "CTO" ? ORDEN_VISTAS_CTO : ORDEN_VISTAS_NODO_EMP;
+    const idx = Math.max(0, vistasPermitidas.indexOf(f.vista));
+    const drum = document.getElementById(`drum_vista_${keyVista}`);
+    if (drum) drum.scrollTop = idx * 28;
   }
 
   function alGirarTambor(bloqueId, campo, drumEl) {
@@ -2983,7 +3724,8 @@
     }, 55);
   }
 
-  function seleccionarEnRuletaClick(bloqueId, campo, valor) {
+  function seleccionarEnRuletaClick(ev, bloqueId, campo, valor) {
+    ev.stopPropagation();
     const b = bloquesCajas.find(x => x.id === bloqueId);
     if (!b) return;
     if (campo === "tipo") b.tipo = valor;
@@ -3017,65 +3759,113 @@
     });
   }
 
-  async function cambiarVistaOMoverEntreCajas(bloqueId, fotoId, valorSeleccionado) {
+  function alGirarTamborVista(bloqueId, fotoId, drumEl) {
+    const keyTimer = `v_${bloqueId}_${fotoId}`;
+    if (timersScrollRuleta[keyTimer]) clearTimeout(timersScrollRuleta[keyTimer]);
+
+    timersScrollRuleta[keyTimer] = setTimeout(() => {
+      const b = bloquesCajas.find(x => x.id === bloqueId);
+      if (!b) return;
+      const f = b.fotos.find(x => x.id === fotoId);
+      if (!f) return;
+
+      const vistasPermitidas = b.tipo === "CTO" ? ORDEN_VISTAS_CTO : ORDEN_VISTAS_NODO_EMP;
+      const idx = Math.min(vistasPermitidas.length - 1, Math.max(0, Math.round(drumEl.scrollTop / 28)));
+      const nuevaVista = vistasPermitidas[idx];
+
+      if (f.vista !== nuevaVista) {
+        aplicarCambioVistaFoto(b, f, nuevaVista, false);
+        const keyVista = `${bloqueId}_${fotoId}`;
+        const btnLbl = document.getElementById(`lblVista_${keyVista}`);
+        if (btnLbl) btnLbl.querySelector("span").innerText = nuevaVista;
+        drumEl.querySelectorAll(".wheel-item").forEach(it => {
+          it.classList.toggle("selected", it.dataset.val === nuevaVista);
+        });
+        const infoN = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
+        const al = document.getElementById(`alertas_${b.id}`);
+        if (al) al.innerHTML = generarAlertaCortaBloque(b, infoN.codigo);
+        actualizarBotonesSuperioresVerde();
+      }
+    }, 55);
+  }
+
+  function seleccionarVistaRuletaClick(ev, bloqueId, fotoId, nuevaVista) {
+    ev.stopPropagation();
+    const b = bloquesCajas.find(x => x.id === bloqueId);
+    if (!b) return;
+    const f = b.fotos.find(x => x.id === fotoId);
+    if (!f) return;
+    aplicarCambioVistaFoto(b, f, nuevaVista, true);
+  }
+
+  function aplicarCambioVistaFoto(b, fotoActual, nuevaVista, cerrarYRedibujar) {
+    const vistaAnterior = fotoActual.vista;
+    const otraFoto = b.fotos.find(f => f.id !== fotoActual.id && f.vista === nuevaVista);
+    if (otraFoto) {
+      otraFoto.vista = vistaAnterior;
+      if (otraFoto.vista !== "Abierta" && otraFoto.vista !== "Cerrada") otraFoto.usarParaPotencia = false;
+      const keyOtra = `${b.id}_${otraFoto.id}`;
+      const lblOtra = document.getElementById(`lblVista_${keyOtra}`);
+      if (lblOtra) lblOtra.querySelector("span").innerText = otraFoto.vista;
+    }
+
+    fotoActual.vista = nuevaVista;
+    if (nuevaVista !== "Abierta" && nuevaVista !== "Cerrada") fotoActual.usarParaPotencia = false;
+
+    vibrarTick(10);
+    persistirSesionActiva();
+    verificarDuplicadosEnSegundoPlano();
+    if (cerrarYRedibujar) {
+      ruletaVistaAbiertaKey = null;
+      renderTarjetas();
+    }
+  }
+
+  async function moverFotoAOtraCaja(bloqueId, fotoId, idDestino) {
+    const b = bloquesCajas.find(x => x.id === bloqueId);
+    const cajaDestino = bloquesCajas.find(x => x.id === idDestino);
+    if (!b || !cajaDestino) return;
+    const fotoActual = b.fotos.find(f => f.id === fotoId);
+    if (!fotoActual) return;
+
+    b.fotos = b.fotos.filter(f => f.id !== fotoId);
+    const ocupadasDest = cajaDestino.fotos.map(x => x.vista);
+    if (ocupadasDest.includes(fotoActual.vista)) {
+      fotoActual.vista = ORDEN_VISTAS_CTO.find(v => !ocupadasDest.includes(v)) || "Panorámica";
+    }
+    cajaDestino.fotos.push(fotoActual);
+    ruletaVistaAbiertaKey = null;
+    vibrarTick(18);
+    renderTarjetas();
+    await persistirSesionActiva();
+    await guardarEstadoEnHistorialDB("Auto-guardado");
+    verificarDuplicadosEnSegundoPlano();
+  }
+
+  async function separarFotoACajaNueva(bloqueId, fotoId) {
     const b = bloquesCajas.find(x => x.id === bloqueId);
     if (!b) return;
     const fotoActual = b.fotos.find(f => f.id === fotoId);
     if (!fotoActual) return;
 
-    if (valorSeleccionado.startsWith("__MOVER_A__")) {
-      const idDestino = valorSeleccionado.replace("__MOVER_A__", "");
-      const cajaDestino = bloquesCajas.find(x => x.id === idDestino);
-      if (cajaDestino) {
-        b.fotos = b.fotos.filter(f => f.id !== fotoId);
-        const ocupadasDest = cajaDestino.fotos.map(x => x.vista);
-        if (ocupadasDest.includes(fotoActual.vista)) {
-          fotoActual.vista = ORDEN_VISTAS_CTO.find(v => !ocupadasDest.includes(v)) || "Panorámica";
-        }
-        cajaDestino.fotos.push(fotoActual);
-        vibrarTick(18);
-        renderTarjetas();
-        await persistirSesionActiva();
-        await guardarEstadoEnHistorialDB("Auto-guardado");
-        verificarDuplicadosEnSegundoPlano();
-      }
-      return;
-    }
-
-    if (valorSeleccionado === "__SEPARAR__") {
-      b.fotos = b.fotos.filter(f => f.id !== fotoId);
-      bloquesCajas.push({
-        id: "b_" + Date.now(),
-        provincia: b.provincia,
-        pueblo: b.pueblo,
-        tipo: b.tipo,
-        numNodo: b.numNodo,
-        numCaja: b.numCaja,
-        bloqueadoPorCompletar: false,
-        editadoManualmente: false,
-        codigoYaDetectadoPorOcr: false,
-        fotos: [fotoActual]
-      });
-      vibrarTick(18);
-      renderTarjetas();
-      await persistirSesionActiva();
-      return;
-    }
-
-    const vistaAnterior = fotoActual.vista;
-    const otraFoto = b.fotos.find(f => f.id !== fotoId && f.vista === valorSeleccionado);
-    if (otraFoto) {
-      otraFoto.vista = vistaAnterior;
-      if (otraFoto.vista !== "Abierta" && otraFoto.vista !== "Cerrada") otraFoto.usarParaPotencia = false;
-    }
-
-    fotoActual.vista = valorSeleccionado;
-    if (valorSeleccionado !== "Abierta" && valorSeleccionado !== "Cerrada") fotoActual.usarParaPotencia = false;
-
-    vibrarTick(10);
+    b.fotos = b.fotos.filter(f => f.id !== fotoId);
+    bloquesCajas.push({
+      id: "b_" + Date.now(),
+      provincia: b.provincia,
+      pueblo: b.pueblo,
+      sinGps: Boolean(b.sinGps),
+      tipo: b.tipo,
+      numNodo: b.numNodo,
+      numCaja: b.numCaja,
+      bloqueadoPorCompletar: false,
+      editadoManualmente: false,
+      codigoYaDetectadoPorOcr: false,
+      fotos: [fotoActual]
+    });
+    ruletaVistaAbiertaKey = null;
+    vibrarTick(18);
     renderTarjetas();
     await persistirSesionActiva();
-    verificarDuplicadosEnSegundoPlano();
   }
 
   async function toggleUsarFotoParaPotencia(bloqueId, fotoId) {
@@ -3098,6 +3888,7 @@
     const b = bloquesCajas.find(x => x.id === bloqueId);
     if (!b) return;
     b.fotos = b.fotos.filter(f => f.id !== fotoId);
+    ruletaVistaAbiertaKey = null;
     renderTarjetas();
     await persistirSesionActiva();
   }
@@ -3119,6 +3910,7 @@
     if (!pinActivo) return;
     const consultas = [];
     bloquesCajas.forEach(b => {
+      if (!b.pueblo) return;
       const info = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
       b.fotos.forEach(f => {
         const nombreVista = (b.tipo === "CTO" && f.usarParaPotencia && (f.vista === "Abierta" || f.vista === "Cerrada"))
@@ -3174,7 +3966,69 @@
     } catch (e) {}
   }
 
-  // ==================== SUBIDA FOTO A FOTO + BARRA PROGRESO + WAKE LOCK + COLA OFFLINE ====================
+  // ==================== CONFIRMACIÓN PREVIA + SUBIDA FOTO A FOTO + WAKE LOCK ====================
+  function abrirConfirmacionSubida() {
+    if (subiendoActualmente) return;
+    if (!pinActivo) return mostrarModalPin();
+    cerrarFlotantes();
+
+    const bloquesActivos = bloquesCajas.filter(b => b.fotos && b.fotos.length > 0);
+    if (bloquesActivos.length === 0) return;
+
+    const porPueblo = {};
+    let haySinPueblo = false;
+
+    bloquesActivos.forEach(b => {
+      const info = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
+      const pueNombre = b.pueblo ? b.pueblo : "⚠️ SIN PUEBLO ASIGNADO";
+      if (!b.pueblo) haySinPueblo = true;
+      if (!porPueblo[pueNombre]) porPueblo[pueNombre] = [];
+      porPueblo[pueNombre].push({
+        titulo: `${info.tipoTexto} ${info.codigo}`,
+        nodo: info.nodo,
+        numFotos: b.fotos.length,
+        sinPueblo: !b.pueblo
+      });
+    });
+
+    const listaEl = document.getElementById("listaConfirmarSubida");
+    listaEl.innerHTML = Object.keys(porPueblo).map(pue => {
+      const items = porPueblo[pue];
+      const alerta = items[0].sinPueblo;
+      return `
+        <div class="bg-zinc-950 border ${alerta ? 'border-amber-400/70' : 'border-white/10'} rounded-xl p-3">
+          <div class="text-[13px] font-extrabold ${alerta ? 'text-amber-300' : 'text-sky-400'} mb-1.5">📍 ${pue}</div>
+          <div class="flex flex-col gap-1">
+            ${items.map(it => `
+              <div class="flex justify-between items-center text-[12px]">
+                <span class="font-mono font-bold text-zinc-100">${it.titulo} <span class="text-zinc-500 font-sans font-normal">(${it.nodo})</span></span>
+                <span class="text-zinc-400">${it.numFotos} foto(s)</span>
+              </div>
+            `).join("")}
+          </div>
+        </div>`;
+    }).join("");
+
+    const avisoEl = document.getElementById("avisoBloqueoSubida");
+    const btnOk = document.getElementById("btnEjecutarSubidaConfirmada");
+
+    if (haySinPueblo) {
+      avisoEl.innerText = "⚠️ Hay fotos sin pueblo (archivos sin GPS). Pulsa Cancelar y elige el pueblo en la etiqueta amarilla antes de subir.";
+      avisoEl.style.display = "block";
+      btnOk.disabled = true;
+    } else {
+      avisoEl.style.display = "none";
+      btnOk.disabled = false;
+    }
+
+    document.getElementById("confirmarSubidaModal").style.display = "flex";
+  }
+
+  function ejecutarSubidaConfirmada() {
+    document.getElementById("confirmarSubidaModal").style.display = "none";
+    subirTodoADrive();
+  }
+
   async function verificarColaSubidaOffline() {
     const cola = await dbGet("cola_offline");
     const banner = document.getElementById("bannerColaOffline");
@@ -3199,11 +4053,12 @@
 
     const colaEnvio = [];
     bloquesCajas.forEach(b => {
+      if (!b.pueblo) return;
       const info = construirCodigoYTitulo(b.tipo, b.numNodo, b.numCaja, b.pueblo);
       b.fotos.forEach(f => {
         colaEnvio.push({
           blobId: f.blobId || f.id,
-          provincia: b.provincia,
+          provincia: b.provincia || obtenerProvinciaDePueblo(b.pueblo),
           pueblo: b.pueblo,
           nodo: info.nodo,
           codigo: info.codigo,
@@ -3304,6 +4159,7 @@
         } else {
           bloquesCajas = [];
           ruletaAbiertaId = null;
+          ruletaVistaAbiertaKey = null;
           modoCompletando = null;
           document.getElementById("bannerCompletandoCaja").style.display = "none";
           renderTarjetas();
@@ -3346,7 +4202,7 @@
     }
   }
 
-  // ==================== PESTAÑA 2: REGISTRO DRIVE LIMPIO POR NODOS ====================
+  // ==================== REGISTRO DRIVE (OCULTO EN ⚙️ AJUSTES) ====================
   async function precargarRegistroSilencioso(provincia, pueblo) {
     if (!pinActivo || !pueblo) return;
     const key = `${provincia}|${pueblo}`;
@@ -3505,7 +4361,7 @@
       }
       box.innerHTML = d.fotos.map(f => `
         <div class="thumb-card">
-          <img src="${f.base64}" style="height:95px;" onclick="abrirZoom('${f.base64}')" />
+          <img src="${f.base64}" style="height:95px;" onclick="event.stopPropagation(); abrirZoomSimple('${f.base64}', '${f.nombre.replace(/'/g, "")}')" />
           <button class="dots-btn" onclick="abrirMenuTresPuntos(event, '${f.fileId}')">⋮</button>
           <div id="menuDots_${f.fileId}" class="dots-menu" style="display:none;" onclick="event.stopPropagation()">
             <div onclick="abrirModalMoverDesdeEstadoRed('${f.fileId}', '${codigoActual}', '${f.vista}')">📂 Mover de carpeta</div>
@@ -3525,7 +4381,6 @@
     if (m) m.style.display = "block";
   }
 
-  // ==================== MOVER, ELIMINAR Y COMPLETAR DESDE REGISTRO DRIVE ====================
   function abrirModalMoverDesdeEstadoRed(fileId, codigoOrigen, vistaOrigen) {
     cerrarFlotantes();
     const { provincia, pueblo } = seleccionPuebloEstado;
@@ -3652,6 +4507,7 @@
       id: "b_" + Date.now(),
       provincia: provincia || "Murcia",
       pueblo: pueblo || "Águilas",
+      sinGps: false,
       tipo: desc.tipo,
       numNodo: desc.numNodo,
       numCaja: desc.numCaja,
@@ -3661,6 +4517,7 @@
       fotos: []
     }];
     ruletaAbiertaId = null;
+    ruletaVistaAbiertaKey = null;
 
     document.getElementById("tituloGrandeCompletando").innerText = `Completando ${infoTit.tituloPlano}`;
     document.getElementById("bannerCompletandoCaja").style.display = "flex";
